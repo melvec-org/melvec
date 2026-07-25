@@ -37,8 +37,8 @@ Powered by local AI models, Melvec automatically generates titles, descriptions,
 
 ## Documentation
 
-- [Installation Guide](https://www.melvec.org/getting-started/)
-- [User Guide](https://www.melvec.org/using-melvec)
+- [Installation Guide](https://www.melvec.org/documentation/getting-started/)
+- [User Guide](https://www.melvec.org/documentation/using-melvec/)
 - [Features](https://www.melvec.org/features/)
 
 ## Contributing

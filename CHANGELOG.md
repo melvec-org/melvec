@@ -9,18 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added search command flow documentation in `dev-docs/command-flows/search-control.md`
+- List of features/files added
 
 ### Changed
 
-- Expanded `dev-docs/application-architecture.md`
-- Improved `dev-docs/coding-standards.md`
+- List of changes
 
 ### Fixed
 
-- Fixed bootstrap documentation inconsistencies
+- List of fixes made
 
-## [0.1.0] - 2026-07-17
+## [0.1.0] - 2026-07-25
 
 ### Added
 
@@ -28,9 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Expanded `dev-docs/application-architecture.md`
-- Improved `dev-docs/coding-standards.md`
+NA
 
 ### Fixed
 
-- Fixed bootstrap documentation inconsistencies
+NA
