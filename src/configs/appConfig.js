@@ -1,0 +1,35 @@
+const appConfig = {
+    MAX_PLAYLISTS_PER_VIDEO: 30,
+    MAX_TAGS_PER_MEDIA: 50,
+
+    MAX_MEDIA_PER_COLLECTION: 1000,
+
+    // TODO Not implemented
+    MAX_VIDEOS_PER_TAG: 10000,
+    MAX_VIDEOS_PER_PLAYLIST: 1000,
+    // end of not implemented
+
+    // smart playlists
+    SMART_PLAYLIST_VIDEO_COUNTS: 50,
+    MAX_TAG_USED_HISTORY: 10,
+    MAX_PLAYLIST_USED_HISTORY: 10,
+    MAX_WATCH_HISTORY: 500,
+
+    MAX_TOP_TAGS_LIST_LENGTH: 10,
+
+    // search
+    MAX_SEARCH_HISTORY: 5000,
+    MAX_SEARCHED_VIDEO_COUNT: 200,
+    MAX_SEARCH_RESULTS_CACHE_COUNT: 500,
+    MAX_SEARCH_RESULTS_DISPLAY_COUNT_PER_CATEGORY: 100,
+
+    // related videos
+    MAX_RELATED_VIDEOS_PER_VIDEO: 15,
+
+    // metadata - Do not change this
+    MAX_SHORT_DESCRIPTION_LENGTH: 150,
+    MAX_DESCRIPTION_LENGTH: 2000,
+    MAX_TRANSCRIPT_LENGTH: 50000,
+};
+
+module.exports = appConfig;

@@ -1,0 +1,26 @@
+.welcomeMessage {
+    width: 450px;
+    text-align: center;
+}
+.splashlogo {
+    width: 80px;
+    height: 80px;
+    display: inline-block;
+}
+.message {
+    font-weight: 400;
+    font-size: 1rem;
+    padding: 0 40px 60px;
+}
+@media (prefers-color-scheme: light) {
+    .splashlogo {
+        background: url('../app-header/melvec.svg') no-repeat center center;
+        background-size: contain;
+    }
+}
+@media (prefers-color-scheme: dark) {
+    .splashlogo {
+        background: url('../app-header/melvec-dark.svg') no-repeat center center;
+        background-size: contain;
+    }
+}

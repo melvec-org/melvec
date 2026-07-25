@@ -1,0 +1,15 @@
+.horizontalPlaylist {
+    padding: 12px 0;
+}
+.horizontalPlaylistItemWrapper {
+    display: flex;
+    width: 100%;
+    overflow-x: scroll;
+}
+
+.playlistTitle {
+    font-size: 1.1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--section-title-border-bottom);
+    margin-bottom: 1rem;
+}

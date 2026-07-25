@@ -1,0 +1,13 @@
+.readableTagList {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.tagsEditModal {
+    width: 600px;
+}
+
+.TagEditForm {
+    max-width: 600px;
+}

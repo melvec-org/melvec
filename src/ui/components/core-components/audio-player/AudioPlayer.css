@@ -1,0 +1,16 @@
+.audioPlayer {
+    width: 100%;
+}
+.audioPlayerWrapper {
+    padding-bottom: 15px;
+}
+.nsfwMessageWrapper {
+    margin-top: -10px;
+    width: 100%;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+}
+.nsfwMessage {
+    margin: 0 auto 10px;
+}

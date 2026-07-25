@@ -1,0 +1,29 @@
+.resizer {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    height: 100%;
+    transition: width 0.1s ease;
+}
+
+.handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    cursor: ew-resize;
+    background-color: transparent;
+}
+.handle.left {
+    left: 0;
+}
+
+.handle.right {
+    right: 0;
+}
+
+.handle.active,
+.handle:hover {
+    background-color: var(--accent-bg-color);
+}

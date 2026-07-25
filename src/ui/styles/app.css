@@ -1,0 +1,114 @@
+* {
+    user-select: none;
+    box-sizing: inherit;
+    margin: 0;
+}
+
+*:before,
+*:after {
+    box-sizing: inherit;
+}
+
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+}
+
+html {
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-font-smoothing: antialiased;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--application-bg-color);
+    color: var(--main-color);
+    font-size: 13px;
+}
+/*======================    DEFAULT ELEMENTS   =========================*/
+button {
+    border: 0;
+    border-radius: var(--button-border-radius);
+}
+
+ul li {
+    list-style-type: none;
+}
+
+select,
+input[type='text'],
+input[type='search'],
+textarea {
+    color: var(--input-color);
+    padding: 3px 6px;
+    border: 1px solid var(--input-border-color);
+    border-radius: 6px;
+    background-color: var(--input-bg-color);
+    &::placeholder {
+        color: var(--secondary-copy-color);
+    }
+
+    font-family: inherit;
+}
+input[type='text'],
+input[type='search'],
+select {
+    max-height: 30px;
+    min-height: 26px;
+}
+
+option:disabled {
+    color: #777;
+}
+
+input[type='range']:focus-visible {
+    outline: var(--focus-outline);
+}
+small {
+    opacity: 0.5;
+}
+dl {
+    display: grid;
+    grid-template-columns: max-content 1fr; /* dt fixed at 100px, dd takes remaining space */
+    grid-auto-rows: auto; /* height adjusts to content */
+    width: 100%;
+    column-gap: 8px;
+    row-gap: 8px;
+}
+
+dl dd {
+    margin: 0; /* reset default dd margin */
+}
+
+dl dd::before {
+    content: ':';
+    margin-right: 8px;
+}
+
+input,
+textarea,
+select,
+button,
+img {
+    -webkit-user-drag: none;
+}
+p {
+    margin: 0.5rem 0;
+    line-height: 150%;
+}
+
+ul,
+li {
+    margin: 0;
+    padding: 0;
+}
+
+:global .app {
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+}

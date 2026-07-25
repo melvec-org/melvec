@@ -1,0 +1,27 @@
+dialog {
+    /* Styles for dialogs that carry both modal and non-modal behaviors */
+    padding: var(--gutter-spacing);
+    margin: auto;
+    background-color: var(--dialogwindow-bg-color);
+    border: 1px solid var(--app-bar-border-color);
+    backdrop-filter: blur(20px); /* this adds the blur effect */
+    -webkit-backdrop-filter: blur(20px); /* for Safari / Electron */
+
+    box-shadow: 0 0 0.8rem 0.5rem hsl(0 0% 0% / 5%);
+    & > div {
+        transition: all 0.4s;
+    }
+    min-width: 300px;
+    border-radius: 10px;
+}
+
+dialog::backdrop {
+    background-color: var(--modal-backdrop-color);
+}
+.modalActionFooter {
+    display: flex;
+    padding: var(--gutter-spacing) 0 0;
+    margin-top: var(--gutter-spacing);
+    justify-content: flex-end;
+    border-top: 1px solid var(--section-devider-border-color);
+}

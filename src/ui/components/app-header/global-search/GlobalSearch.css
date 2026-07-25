@@ -1,0 +1,237 @@
+.globalSearch {
+    position: relative;
+    flex: 0 0 33%;
+    -webkit-app-region: no-drag;
+    display: flex;
+}
+
+.searchControl {
+    padding: 2px 0 0 0;
+    /*max-width: 500px;*/
+    position: relative;
+    width: 100%;
+}
+.isAIEnabled {
+    margin: 2px 0 0 4px;
+    width: 20px;
+    height: 20px;
+    scale: 0.8;
+}
+
+.searchIcon {
+    position: absolute;
+    top: 3px;
+    left: 1px;
+    z-index: 2;
+    width: 24px;
+    padding: 6px;
+}
+input.globalSearchInput {
+    padding: 5px 4px 5px 24px;
+    border: 1px solid #999;
+    border-radius: 4px;
+    width: 100%;
+    &:focus {
+        border-color: -web-webkit-focus-ring-color;
+    }
+}
+
+.relatedSearch,
+.searchResults {
+    max-width: 900px;
+    align-self: center;
+}
+
+@media (min-width: 900px) {
+    .relatedSearch,
+    .searchResults {
+        width: 900px;
+    }
+}
+
+.searchResults {
+    padding: 5px 0;
+}
+.searchHints {
+    padding: 5px 15px 0;
+}
+
+.searchResultHeader {
+    font-size: 16px;
+    margin: 10px 0;
+}
+.searchResultHeaderMeta {
+    font-size: 12px;
+    opacity: 0.5;
+    font-weight: 400;
+    margin-bottom: 5px;
+    line-height: 19px;
+}
+
+.label {
+    line-height: 30px;
+    padding: 0 5px;
+    color: var(--secondary-copy-color);
+    font-size: 0.7rem;
+}
+
+.relatedSearch,
+.searchSuggestion {
+    padding: 5px 10px 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+.relatedSearch {
+    padding: 5px 0 10px;
+    flex-direction: row;
+}
+.removeHistoryBtn {
+    display: none;
+    position: absolute;
+    right: 3px;
+    top: 5px;
+
+    &:focus,
+    &:focus-visible {
+        display: block;
+    }
+    &[isfocused='true'] {
+        outline: 2px auto -webkit-focus-ring-color;
+        display: block;
+    }
+}
+.searchSuggestionListItem {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    transition: background-color 0.3s;
+    &:hover {
+        background-color: var(--default-hover-bg-color);
+    }
+
+    &:hover {
+        & .removeHistoryBtn {
+            display: block;
+        }
+    }
+}
+.searchSuggestionKeyword,
+.searchSuggestionVideo {
+    display: flex;
+    padding: 10px 8px;
+    border-radius: 4px;
+    width: 100%;
+    align-items: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &[isfocused='true'] {
+        background-color: var(--default-hover-bg-color);
+        + .removeHistoryBtn {
+            display: block;
+        }
+    }
+
+    &:focus-visible {
+        + .removeHistoryBtn {
+            display: block;
+        }
+    }
+}
+
+.searchSuggestionVideo {
+    padding: 6px 6px 4px;
+}
+
+.relatedKeywords {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 4px;
+    margin: 4px;
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+.suggestedKeywords:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.searchResultsPanel {
+    padding: 5px 15px 0;
+    background-color: var(--app-bar-bg-color);
+    position: fixed;
+    left: 0;
+    top: 50px;
+    width: 100%;
+    height: calc(100vh - 50px);
+    display: flex;
+    flex-direction: column;
+}
+
+.searchResultsContent {
+    max-height: calc(100vh - 260px);
+    overflow: auto;
+}
+
+.searchResultsList {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    padding: 10px 0 0;
+    column-gap: 20px;
+}
+
+@media (min-width: 900px) {
+    .searchResultsList {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.searchResultsListItem {
+    overflow: hidden;
+}
+
+.noResultsFound {
+    padding: 10px 0 30px;
+    font-weight: 600;
+    text-align: center;
+}
+.searchResultsActions {
+    padding: 10px 0;
+    display: flex;
+    border-top: 1px solid var(--devider-color);
+}
+
+.suggestionsFloatingPanel {
+    width: fit-content;
+    z-index: 999;
+    position: absolute;
+    top: 31px;
+    min-height: 40px;
+    max-height: calc(100vh - 50px);
+    overflow-y: auto;
+    box-shadow: 0px 0px 6px 1px rgba(0, 0, 0, 0.2);
+    background-color: var(--search-box-background-color);
+    border-bottom-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+
+@media (min-width: 768px) {
+    .suggestionsFloatingPanel {
+        width: 100%;
+    }
+}
+
+.aiSeachButton + .suggestionsFloatingPanel {
+    width: calc(100% - 42px);
+}
+
+.suggestionsFloatingPanelAction {
+    border-top: 1px solid var(--app-bar-border-color);
+    padding: 5px 10px;
+    text-align: center;
+}
+.suggestionsFloatingPanelSection {
+    padding: 5px 10px;
+    border-bottom: 1px solid var(--app-bar-border-color);
+}

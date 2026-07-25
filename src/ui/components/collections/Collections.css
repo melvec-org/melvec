@@ -1,0 +1,111 @@
+.collections {
+    padding: 0 0 10px;
+}
+.collectionHeader {
+    font-size: 0.7rem;
+    padding: 0px 0 0px 24px;
+    margin-bottom: 8px;
+    color: var(--secondary-copy-color);
+    position: relative;
+    line-height: 24px;
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    justify-content: space-between;
+
+    &:before {
+        display: block;
+        content: '^';
+        transform: rotate(180deg) scaleX(1.3);
+        width: 24px;
+        height: 24px;
+        font-weight: 200;
+        left: 0px;
+        top: -2px;
+        position: absolute;
+        font-size: 16px;
+        text-align: center;
+        line-height: 24px;
+        transition: transform 0.2s;
+    }
+    &[showcaret='true']:before {
+        top: 0px;
+        transform: rotate(90deg) scaleX(1.3);
+    }
+}
+
+.collectionHeaderText {
+    width: calc(100% - 60px);
+}
+
+.collectionHeaderControls {
+    font-size: 16px;
+    font-weight: 900;
+    line-height: 24px;
+    width: 30px;
+    height: 24px;
+    text-align: center;
+    color: var(--icon-button-fill-color);
+
+    &:hover {
+        color: var(--icon-button-fill-highlight-color);
+    }
+}
+
+.collectionWrapper {
+    padding: 0 0 10px 14px;
+}
+
+.singleCollectionWrapper {
+    padding: 0 10px 10px 0;
+}
+
+.collectionHeader + .collectionWrapper {
+    padding: 0 0 10px 10px;
+}
+.collectionYearLabel {
+    padding: 0px 0 4px 12px;
+    color: var(--secondary-copy-color);
+    font-weight: 500;
+    font-size: 0.8rem;
+}
+
+.collectionListItem.selectedItem {
+    background-color: var(--menu-item-selected-bg-color);
+    transition: background 0.2s;
+    border-radius: 4px;
+}
+
+.collectionListItem {
+    position: relative;
+    padding: 6px 0 6px 10px;
+    transition: color 0.2s;
+    display: flex;
+}
+.collectionlabel {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: break-all;
+    overflow: hidden;
+}
+
+@media (min-width: 1050px) {
+    .collectionListItem {
+        width: 205px;
+    }
+}
+
+.collectionListItem:hover {
+    color: var(--input-text-focus-color);
+}
+
+.collectionListItem::before {
+    position: absolute;
+    height: 100%;
+    pointer-events: none;
+}
+
+.isHidden {
+    opacity: 0.6;
+    text-decoration: wavy;
+}

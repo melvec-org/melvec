@@ -1,0 +1,44 @@
+.videoTile {
+    display: flex;
+    cursor: pointer;
+    flex: 0 1 176px;
+    flex-direction: column;
+    padding: 4px;
+}
+
+.selected {
+    outline: var(--focus-outline);
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.videoRow {
+    width: 100%;
+    display: flex;
+    cursor: pointer;
+    margin: 3px 0;
+    padding: 4px 2px;
+}
+
+.videoTileTitle {
+    padding: 8px 0 0;
+    margin-bottom: 2px;
+    word-break: break-all;
+}
+
+.videoRow .descContainer {
+    padding: 0 0 0;
+    margin-left: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+.videoRow .videoTileTitle {
+    padding: 0 0 0;
+}
+
+.videoRow .metaDataContainer {
+    font-weight: 300;
+    color: var(--secondary-copy-color);
+    font-size: small;
+    margin-top: 5px;
+}

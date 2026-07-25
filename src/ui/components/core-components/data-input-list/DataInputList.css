@@ -1,0 +1,8 @@
+.dataInputList {
+    display: inline-flex;
+    margin-right: 8px;
+    min-width: 200px;
+    input{
+        width: 100%;
+    }
+}

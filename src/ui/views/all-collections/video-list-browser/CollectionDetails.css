@@ -1,0 +1,27 @@
+.collectionDetails {
+    display: flex;
+    height: calc(100vh - 50px);
+    margin: 0 var(--gutter-spacing-negative);
+}
+
+.videoListWrapper {
+    overflow-y: auto;
+    padding: var(--gutter-spacing);
+    padding-top: 0px;
+    flex: 1;
+}
+
+.videoListAppHeader {
+    justify-content: space-between;
+    margin: var(--gutter-spacing-negative) var(--gutter-spacing-negative) var(--gutter-spacing);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 0 15px;
+    background-color: var(--main-bg-color);
+}
+
+.viewOptionsDisabled {
+    opacity: 0.4;
+    pointer-events: none;
+}

@@ -1,0 +1,35 @@
+.videoWrapper {
+    background-color: black;
+    width: 100%;
+    aspect-ratio: 1.778;
+    object-fit: contain;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: var(--gutter-spacing) 0;
+}
+.metaDataSection {
+    padding: var(--gutter-spacing) 0;
+    display: grid;
+    grid-template-columns: 90px 1fr;
+}
+.metaDataSection > div {
+    padding: 5px 0;
+}
+.metaDataLabel {
+    min-width: 60px;
+    display: inline-flex;
+    font-weight: 500;
+    margin-right: 10px;
+    min-width: 100px;
+}
+.metaData {
+    display: flex;
+    align-items: center;
+}
+.videoMetaData {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 5px;
+}

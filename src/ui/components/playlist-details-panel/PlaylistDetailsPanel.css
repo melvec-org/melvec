@@ -1,0 +1,29 @@
+.playlistDetailsPanel {
+    padding-bottom: var(--padding-default);
+    height: calc(100vh - 50px);
+}
+.playlistDetailsPanelHeader {
+    display: flex;
+    justify-content: space-between;
+    position: sticky;
+    background-color: var(--main-bg-color);
+    top: 0;
+    z-index: 1;
+    padding: var(--padding-default);
+    margin: 0 var(--gutter-spacing-negative);
+}
+
+.playlistDetailsListWrapper {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 6px;
+    column-gap: 6px;
+}
+.editable {
+    cursor: move;
+}
+.playlistItem {
+    display: flex;
+    flex: 0 1 176px;
+    flex-direction: row;
+}

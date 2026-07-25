@@ -1,0 +1,17 @@
+# Manual Testing Features by User Problem / Workflow
+
+- [library setup ](user-flow-testing/library-setup-testing.md)
+- [Collections](user-flow-testing/collection-testing.md)
+- [Tags](user-flow-testing/tags-testing.md)
+- [Playlists](user-flow-testing/playlist-testing.md)
+- [Playlists & Player](user-flow-testing/playlist-player-testing.md)
+- [Smart playlists](user-flow-testing/smartplaylist-testing.md)
+- [Metadata and AI features](user-flow-testing/metadata-ai-feature-testing.md)
+- [Video details](user-flow-testing/video-details.md)
+- [Image details](user-flow-testing/image-details.md)
+- [Watchfolders](user-flow-testing/watchfolders-testing.md)
+- [Search](user-flow-testing/search.md)
+- [Display preferences](user-flow-testing/display-preferences-testing.md)
+- [Data administration](user-flow-testing/data-administration-testing.md)
+- [AI models management](user-flow-testing/ai-models-management-testing.md)
+- [Transcoding](user-flow-testing/transcoding-testing.md)

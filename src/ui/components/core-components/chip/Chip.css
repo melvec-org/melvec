@@ -1,0 +1,31 @@
+.chip {
+    margin: 5px;
+    padding: 0 14px 0;
+    display: inline-flex;
+    border-radius: 10px;
+    max-width: 150px;
+    min-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background-color: var(--chip-bg-color);
+    transition: background-color 0.4s;
+    line-height: 24px;
+    &:hover {
+        background-color: var(--chip-hover-bg-color);
+    }
+    &[isfocused='true'] {
+        outline: 2px auto -webkit-focus-ring-color;
+        background-color: var(--chip-hover-bg-color);
+    }
+    &.selected {
+        background-color: var(--chip-selected-bg-color);
+        color: var(--chip-selected-color);
+    }
+    &.readOnly {
+        pointer-events: none;
+    }
+}
+
+.chip:first-child {
+    margin-left: 0;
+}

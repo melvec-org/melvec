@@ -1,0 +1,29 @@
+.tabs {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.tabHeaderContainer {
+    border-bottom: 1px solid var(--devider-color);
+    display: flex;
+}
+.tabHeader {
+    font-weight: 700;
+    padding: 8px 15px;
+    cursor: pointer;
+    color: var(--interactive-active-color);
+}
+.tabHeaderSelected {
+    color: var(--interactive-inactive-color);
+    cursor: auto;
+}
+
+.tabItemContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.tabItem {
+    padding: 20px 20px;
+}

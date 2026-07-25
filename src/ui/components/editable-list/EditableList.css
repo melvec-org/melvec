@@ -1,0 +1,45 @@
+.editableListActionGroup {
+    display: flex;
+    align-items: center;
+}
+
+.editableListItem {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 10px;
+    align-items: center;
+    line-height: 24px;
+    &&:hover:not([disabled]) {
+        background-color: var(--app-bar-border-color);
+
+        .editableListActionGroup {
+            display: flex;
+        }
+    }
+    &&[disabled] {
+        color: var(--disabled-text-color);
+    }
+
+    .editableListActionGroup {
+        display: none;
+    }
+}
+
+.editableListContainer {
+    width: 100%;
+    min-height: 200px;
+    max-height: calc(100vh - 400px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: var(--app-bar-bg-color);
+    border: 1px solid var(--app-bar-border-color);
+}
+
+.disabledListItem {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.editableListItem:nth-child(2n + 1) {
+    background-color: rgba(0, 0, 0, 0.07);
+}

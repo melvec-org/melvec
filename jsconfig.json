@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "__components/*": ["./src/ui/components/*"],
+            "__events/*": ["./src/events/*"],
+            "__contexts/*": ["./src/ui/contexts/*"],
+            "__configs/*": ["./src/configs/*"],
+            "__styles/*": ["./src/ui/styles/*"],
+            "__utils/*": ["./src/ui/utils/*"],
+            "__actions/*": ["./src/ui/actions/*"],
+            "__constants/*": ["./src/constants/*"]
+        }
+    }
+}

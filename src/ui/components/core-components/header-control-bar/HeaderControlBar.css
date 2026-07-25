@@ -1,0 +1,57 @@
+.headerControlBar {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    padding: 15px 0;
+    align-content: center;
+    align-items: center;
+    font-weight: 600;
+}
+/* Default: full width when alone */
+.headerControlBarLeft {
+    max-width: 100%;
+}
+
+.headerControlBarRight {
+    justify-content: right;
+    display: flex;
+    column-gap: 10px;
+}
+
+/* When right side exists, enforce 60-40 split */
+
+.headerControlBarRight + .headerControlBarLeft {
+    max-width: 60%;
+}
+
+/* Size variants */
+
+.responsiveContainerSmall {
+    container-type: inline-size;
+    container-name: header-controlbar-small;
+}
+
+/* Small variant styles */
+@container header-controlbar-small (max-width: 500px) {
+    .headerControlBar {
+        flex-direction: column;
+        align-items: flex-start;
+        row-gap: 10px;
+    }
+
+    .headerControlBarLeft,
+    .headerControlBarRight {
+        max-width: 100%;
+        flex: 1 1 100%;
+    }
+
+    .headerControlBarRight {
+        justify-content: flex-start;
+    }
+
+    .headerControlBarLeft + .headerControlBarRight,
+    .headerControlBarRight + .headerControlBarLeft {
+        max-width: 100%;
+        flex: 1 1 100%;
+    }
+}

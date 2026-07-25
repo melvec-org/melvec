@@ -1,0 +1,83 @@
+# License
+
+**Melvec License**  
+Copyright © 2026–2027 [www.melvec.org]
+
+## Summary
+
+This software is **free to use** for both personal and **commercial** purposes.  
+However, the source code is **not fully open source** and comes with restrictions on redistribution and monetization.
+
+## Permissions
+
+You are allowed to:
+
+- Use the software **freely** for personal, internal, or **commercial** purposes.
+- Integrate the library into your own projects (personal or commercial).
+- Modify the source code for your own use.
+- Share the original unmodified binary releases.
+
+## Restrictions
+
+You are **not** allowed to:
+
+- Sell, rent, or charge money for the software or any modified version of it.
+- Redistribute the source code or substantial portions of it (modified or unmodified).
+- Create and distribute a competing product based on this codebase for commercial purposes.
+- Remove or alter copyright notices.
+
+## Third-Party Dependencies & Licenses
+
+This project uses several open-source libraries. Each has its own license. Here is a summary:
+
+### Core Dependencies
+
+| Library            | License    | Notes           |
+| ------------------ | ---------- | --------------- |
+| React              | MIT        | Facebook / Meta |
+| React DOM          | MIT        | -               |
+| TypeScript         | Apache-2.0 | -               |
+| [Other major libs] | [License]  | ...             |
+
+**Full list of dependencies** and their licenses can be found in the `package.json` and `THIRD-PARTY-LICENSES.txt` file (if available).
+
+### Attribution & Credits
+
+- **React** and **React DOM** are licensed under the MIT License.  
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+- Parts of this project may contain code adapted from **OpenAI Whisper** (MIT License). Full license text is included below.
+
+---
+
+## OpenAI Whisper (MIT License)
+
+MIT License
+
+    Copyright (c) 2022 OpenAI
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+---
+
+## Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY...
+
+**All rights not expressly granted are reserved by the copyright holder.**

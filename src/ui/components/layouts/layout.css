@@ -1,0 +1,38 @@
+.mainPanel {
+    flex: 1;
+    overflow-y: auto;
+    height: calc(100vh - 50px);
+    padding: 0 15px;
+    background-color: var(--main-bg-color);
+}
+
+.sideBar {
+    flex: 0 0 420px;
+    background-color: var(--side-panel-bg-color);
+}
+
+.sidebarHeaderControl {
+    padding-left: var(--gutter-spacing);
+    padding-right: var(--gutter-spacing);
+    padding-bottom: 10px;
+    font-size: 120%;
+    line-height: 25px;
+    border-bottom: 1px solid var(--section-title-border-bottom);
+}
+
+.sideBarSmall {
+    border: 1px solid var(--devider-color);
+    border-top: none;
+}
+
+@media (min-width: 1050px) {
+    .sideBarSmall {
+        flex: 0 0 240px;
+    }
+}
+
+.sideBarContentWrapper {
+    overflow-y: auto;
+    padding: 5px;
+    height: calc(100vh - 87px);
+}

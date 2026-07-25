@@ -1,0 +1,51 @@
+.tagChip {
+    margin: 5px;
+    position: relative;
+    display: inline-flex;
+    border-radius: 9px;
+    overflow: hidden;
+    color: var(--tags-color);
+    align-content: center;
+    font-weight: 400;
+    transition: width 0.2s;
+    .content {
+        display: inline-flex;
+        background-color: var(--tags-bg-color);
+        padding: 0 14px 0;
+        transition: background-color 0.4s;
+        line-height: 24px;
+
+        &.inactive,
+        &.inactive:hover {
+            background-color: var(--tags-inactive-bg-color);
+        }
+
+        &.hightlighted {
+            background-color: var(--tags-highlighted-bg-color);
+        }
+
+        &:hover {
+            background-color: var(--tags-hover-bg-color);
+        }
+    }
+}
+.typeIcon {
+    margin-right: 4px;
+}
+.tagChip:first-child {
+    margin-left: 0;
+}
+
+.chipCloseBtn {
+    margin: 0;
+}
+
+.tagChip.active {
+    z-index: 2;
+}
+
+.tagChip.active .content {
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 0 0 0 6px;
+    width: 100%;
+}

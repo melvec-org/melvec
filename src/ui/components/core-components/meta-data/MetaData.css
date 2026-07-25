@@ -1,0 +1,44 @@
+.metaDataRow {
+    display: flex;
+    padding: 10px 0;
+    column-gap: 20px;
+    justify-content: space-between;
+    & + & {
+        border-top: 1px solid var(--devider-color);
+    }
+
+    .metaDataLabel {
+        padding: 0;
+    }
+    .metaDataValue {
+        padding: 0;
+        margin: 0;
+    }
+    h3 {
+        word-break: break-all;
+    }
+}
+.metaDataLabel {
+    color: var(--secondary-copy-color);
+    padding-bottom: 5px;
+}
+
+.metaDataRow + .metaDataLabel {
+    border-top: 1px solid var(--devider-color);
+}
+
+.metaDataHeader {
+    padding: 10px 0;
+    margin-top: 10px;
+    font-weight: 500;
+    color: var(--main-color);
+}
+
+.metaDataValue {
+    padding: 0 0 15px;
+    color: var(--main-color);
+    font-weight: 400;
+    p {
+        margin-top: 0;
+    }
+}

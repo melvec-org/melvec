@@ -1,0 +1,7 @@
+.currentPlaylist {
+    display: flex;
+    flex-wrap: wrap;
+    &:focus {
+        outline: none;
+    }
+}

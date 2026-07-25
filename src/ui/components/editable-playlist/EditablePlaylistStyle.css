@@ -1,0 +1,18 @@
+.readablePlaylist {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.playlistEditModal {
+    min-width: 400px;
+    max-width: 800px;
+}
+
+.playlistEditFrom {
+    max-width: 600px;
+}
+
+.formSeparator {
+    border-top: 1px solid var(--section-devider-border-color);
+}

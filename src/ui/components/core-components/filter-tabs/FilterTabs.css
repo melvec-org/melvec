@@ -1,0 +1,47 @@
+/* FilterTabs — mirrors the inlineTabGroup styles from GlobalSearch.css
+   so the component looks identical wherever it is used. */
+
+.inlineTabGroup {
+    border-radius: 4px;
+    border: 1px solid var(--input-border-color);
+    background-color: var(--chip-bg-color);
+    display: flex;
+    max-height: 30px;
+}
+
+.inlineTab {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    align-content: center;
+    max-height: 30px;
+
+    /* Reset native <button> styling */
+    background: none;
+    border: none;
+    color: inherit;
+    font-family: inherit;
+    line-height: inherit;
+    outline-offset: -2px; /* keeps focus ring inside the border-radius */
+}
+
+.inlineTab:first-child {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
+
+.inlineTab:last-child {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.inlineTab:focus-visible {
+    outline: 2px solid var(--chip-selected-bg-color, #4a90e2);
+    border-radius: 3px;
+}
+
+.activeTab {
+    background-color: var(--chip-selected-bg-color);
+    color: var(--chip-selected-color);
+}

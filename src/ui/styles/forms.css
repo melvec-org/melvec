@@ -1,0 +1,322 @@
+input[type='range'] {
+    height: 3px;
+    background: #aaa;
+    outline: none;
+    opacity: 0.7;
+    -webkit-appearance: none;
+    width: 100px;
+
+    &&::-webkit-slider-runnable-track {
+        height: 10px;
+        color: red;
+    }
+    &&::-webkit-slider-thumb {
+        appearance: none;
+        width: 10px;
+        height: 10px;
+        background: var(--main-color);
+        border-radius: 50%;
+        cursor: pointer;
+    }
+}
+.rangeValue {
+    margin-left: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+    input[type='range'] {
+        background-color: rgba(255, 255, 255, 0.3); /* dark mode */
+    }
+}
+.formSelectBox {
+    padding: 2px;
+    margin-right: 10px;
+}
+.formInfo {
+    font-weight: 300;
+    margin-top: 5px;
+    font-size: small;
+    color: var(--secondary-copy-color);
+}
+
+.formSection {
+    border-top: 1px solid var(--app-bar-border-color);
+    margin-top: 15px;
+    padding-top: 15px;
+}
+
+.formInputWrapper {
+    padding: 10px 0;
+}
+
+.formInputLabel {
+    display: block;
+    padding: 0 0 10px;
+}
+
+.formControlWrapper {
+    padding: 15px 0;
+}
+
+.formTextInput {
+    margin-right: 10px;
+    padding: 3px;
+    min-width: 200px;
+}
+
+.formTextInputLarge {
+    min-width: 300px;
+}
+
+.formTextInputFullWidth {
+    padding: 3px;
+    margin-right: 10px;
+    width: 90%;
+}
+
+.formTextArea {
+    padding: 10px;
+    margin-top: 10px;
+    resize: vertical;
+    width: 100%;
+    min-height: 200px;
+    border: var(--button-border-radius);
+}
+
+.editableFormList {
+    margin-top: 10px;
+    width: 100%;
+    min-height: 200px;
+    max-height: calc(100vh - 400px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: var(--app-bar-bg-color);
+    border: 1px solid var(--app-bar-border-color);
+    li {
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 10px;
+        align-items: center;
+        line-height: 24px;
+        &&:hover:not([disabled]) {
+            background-color: var(--app-bar-border-color);
+        }
+    }
+}
+.editableFormList li:nth-child(2n + 1) {
+    background-color: rgba(0, 0, 0, 0.07);
+}
+
+.formInputCheckBox {
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+input[type='checkbox'] {
+    margin-right: 8px;
+    vertical-align: middle;
+}
+input[type='checkbox'] + label {
+    vertical-align: middle;
+}
+
+.formInputHeader {
+    font-size: small;
+    font-weight: 600;
+}
+
+.formActionFooter {
+    padding: 15px 0 0;
+    border-top: 1px solid var(--app-bar-border-color);
+}
+
+.formValidationMessage {
+    padding-top: 10px;
+}
+
+.formValidationMessage > * {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+}
+
+.formValidationMessage:empty {
+    padding-top: 10px;
+}
+
+.formValidationMessage:empty::after {
+    content: '';
+    display: block;
+    opacity: 0;
+    transform: translateY(-4px);
+}
+/** this is tabbed pattern */
+.tabbedRadioGroup {
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: stretch;
+    overflow: hidden;
+    margin: 10px 0;
+
+    input[type='radio'] {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+        width: 0;
+        height: 0;
+    }
+
+    label {
+        background-color: var(--input-border-color);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5px 16px;
+        user-select: none;
+        transition:
+            background-color 0.2s ease,
+            color 0.2s ease;
+    }
+    input[type='radio']:focus-visible + label {
+        outline: var(--focus-outline);
+    }
+    input[type='radio']:checked + label {
+        background-color: var(--accent-bg-color);
+        color: white;
+    }
+}
+
+.formRadioGroup {
+    border: none;
+    padding: 0;
+    margin: 10px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+
+    input[type='radio'] {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+        width: 0;
+        height: 0;
+    }
+
+    label {
+        background-color: transparent;
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+        padding: 0;
+        user-select: none;
+        cursor: pointer;
+        color: var(--main-color);
+        transition:
+            color 0.2s ease,
+            opacity 0.2s ease;
+    }
+
+    label::before {
+        content: '';
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 1px solid var(--input-border-color);
+        background-color: #d0d0d0;
+        box-sizing: border-box;
+        transition:
+            border-color 0.18s ease,
+            box-shadow 0.18s ease,
+            background-color 0.18s ease;
+    }
+
+    input[type='radio']:hover + label::before {
+        border-color: var(--accent-bg-color);
+    }
+
+    input[type='radio']:focus-visible + label::before {
+        outline: var(--focus-outline);
+        outline-offset: 2px;
+    }
+
+    input[type='radio']:checked + label {
+        color: var(--main-color);
+    }
+
+    input[type='radio']:checked + label::before {
+        border: 5px solid var(--accent-bg-color);
+        background-color: #fff;
+    }
+
+    input[type='radio']:disabled + label {
+        opacity: 0.55;
+        cursor: default;
+    }
+}
+
+.formSwitch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.formSwitch input[type='checkbox'] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+    margin: 0;
+}
+
+.formSwitchToggle {
+    position: relative;
+    display: inline-block;
+    width: 30px;
+    height: 18px;
+    border-radius: 999px;
+    background-color: rgba(0, 0, 0, 0.18);
+    transition:
+        background-color 0.18s ease,
+        box-shadow 0.18s ease,
+        transform 0.18s ease;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.formSwitchToggle::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: #fff;
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.18),
+        0 0 0 0.5px rgba(0, 0, 0, 0.08);
+    transition: transform 0.18s ease;
+}
+
+.formSwitch input[type='checkbox']:checked + .formSwitchToggle {
+    background-color: var(--accent-bg-color);
+}
+
+.formSwitch input[type='checkbox']:checked + .formSwitchToggle::after {
+    transform: translateX(12px);
+}
+
+.formSwitch input[type='checkbox']:focus-visible + .formSwitchToggle {
+    outline: var(--focus-outline);
+    outline-offset: 2px;
+}
+
+.formSwitchText {
+    vertical-align: middle;
+}

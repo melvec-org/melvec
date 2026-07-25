@@ -1,0 +1,34 @@
+.contextualActionControl{
+    position: relative;
+    z-index: 1;
+    
+      .controlButton{
+        width: 24px;
+        height:24px;
+        line-height: 24px;
+        text-align: center;
+        padding:3px 0 0;
+      }  
+      .controlOptionsWindow{
+        position: absolute;
+        z-index: 1;
+        border-radius: 4px;
+        overflow: hidden;
+        box-shadow: 0px 0px 6px 1px  rgba(0,0,0,.2);
+        background-color: var(--main-bg-color);
+        width: 200px;
+        left: -176px;
+        
+      }
+}
+.contextualActionButton{
+  padding: 7px 20px;
+  border-bottom: 1px solid rgba(0,0,0,.1);
+  &:last-child{
+    border-bottom: 0 none;
+  }
+  &:hover{
+    background-color: var(--accent-bg-color);
+    color: var(--accent-color);
+  }
+}

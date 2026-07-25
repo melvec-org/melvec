@@ -1,0 +1,75 @@
+.button {
+    padding: 5px 20px;
+    transition: background-color 0.2s;
+    background-color: var(--button-bg-color);
+    &[isfocused='true'] {
+        outline: 2px auto -webkit-focus-ring-color;
+        background-color: var(--button-bg-hover-color);
+    }
+    &:disabled {
+        color: var(--interactive-disabled-color);
+    }
+    position: relative;
+    overflow: hidden;
+}
+.button:hover {
+    background-color: var(--button-bg-hover-color);
+}
+.button + .button {
+    margin-left: 8px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+.processHolder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+}
+.processing {
+    border: 3px solid #ddd; /* Light grey */
+    border-top: 3px solid var(--accent-bg-color); /* Blue */
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    animation: spin 1.6s linear infinite;
+    display: block;
+    margin-top: 1px;
+}
+
+.transparentBtn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    color: rgba(128, 128, 128);
+    font-weight: 400;
+    &&:hover {
+        color: var(--interactive-active-color);
+    }
+    &[isfocused='true'] {
+        color: var(--main-color);
+    }
+}
+.primaryBtn {
+    background-color: var(--accent-bg-color);
+    color: var(--accent-color);
+    &:hover {
+        background-color: var(--accent-bg-color);
+    }
+
+    &:disabled {
+        background-color: var(--interactive-inactive-color);
+    }
+}
