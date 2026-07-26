@@ -1,3 +1,6 @@
+audio::-webkit-media-controls-panel {
+    background-color: var(--audio-player-bg-color);
+}
 .audioPlayer {
     width: 100%;
 }
@@ -5,10 +8,8 @@
     padding-bottom: 15px;
 }
 .nsfwMessageWrapper {
-    margin-top: -10px;
     width: 100%;
     text-align: center;
-    background-color: rgba(0, 0, 0, 0.1);
     border-radius: 6px;
 }
 .nsfwMessage {

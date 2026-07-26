@@ -138,6 +138,14 @@ const validateTheme = (theme) => {
     return null;
 };
 
+const validateMediaDescription = (desc) => {
+    if (!isNonEmptyString(desc) || desc.length > 1000) {
+        return { status: 'error', message: 'Invalid media description provided' };
+    }
+
+    return null;
+};
+
 module.exports = {
     isNonEmptyString,
     isValidMediaType,
@@ -152,4 +160,5 @@ module.exports = {
     validateWatchFolderRemoveArgs,
     validateTheme,
     validateMediaOperationArgs,
+    validateMediaDescription,
 };

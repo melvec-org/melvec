@@ -26,12 +26,14 @@
 .audioThumbnail {
     position: relative;
 }
-.audioThumbnail::after {
-    position: absolute;
-    content: '♫';
-    z-index: 1;
-    transform: translate(-50%, -0.3rem);
-    color: var(--secondary-copy-color);
+.thumbnail:not(.hiddenNsfwThumbnail) {
+    .audioThumbnail::after {
+        position: absolute;
+        content: '♫';
+        z-index: 1;
+        transform: translate(-50%, -0.3rem);
+        color: var(--secondary-copy-color);
+    }
 }
 
 .thumbnail::after {

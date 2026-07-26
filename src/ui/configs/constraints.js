@@ -55,3 +55,4 @@ export const VIDEO_FILE_NAME_MIN_LENGTH = 1;
 
 export const VIDEO_DESCRIPTION_MAX_LENGTH = 2000; // need to be same as defined in app.config.js
 export const IMAGE_DESCRIPTION_MAX_LENGTH = 1000; // need to be same as defined in app.config.js
+export const AUDIO_DESCRIPTION_MAX_LENGTH = 1000; // need to be same as defined in app.config.js

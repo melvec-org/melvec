@@ -156,7 +156,7 @@ const PlaylistEditForm = ({ existingPlaylists = [], videoId, closePlaylistEditFo
     return (
         <div className={EditablePlaylistStyle.playListEditForm}>
             <h3>Edit playlists</h3>
-            <p className={'secondaryInfo'}>{videoTitle}</p>
+            <div className={'secondaryInfo mt5'}>{videoTitle}</div>
             <div className={'mt5'}>
                 {usedPlaylists.map((playlist) => (
                     <TagChip

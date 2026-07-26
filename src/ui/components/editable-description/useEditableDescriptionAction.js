@@ -41,12 +41,15 @@ const useEditableDescriptionAction = () => {
             window.api.setVideoDescription(mediaId, description).then(responseHander);
         } else if (mediaType === mediaTypes.IMAGE) {
             window.api.setImageDescription(mediaId, description).then(responseHander);
+        } else if (mediaType === mediaTypes.AUDIO) {
+            window.api.setAudioDescription(mediaId, description).then(responseHander);
         }
     };
 
     const listenToDescGenStatus = useCallback(
         (stream) => {
             const isRelevantEvent =
+                stream.event === mainThreadEvents.ON_AUDIO_DESCRIPTION_GENERATED ||
                 stream.event === mainThreadEvents.ON_VIDEO_DESCRIPTION_GENERATED ||
                 stream.event === mainThreadEvents.ON_IMAGE_DESCRIPTION_GENERATED;
             if (!isRelevantEvent) return;
@@ -113,6 +116,22 @@ const useEditableDescriptionAction = () => {
                     }
                 }
             });
+        } else if (mediaType === mediaTypes.AUDIO) {
+            window.api.generateAudioDescription(mediaId, shouldGenerateTitle).then((response) => {
+                if (response.status === responseStatus.SUCCESS) {
+                    const { status, accepted } = response.data;
+                    if (accepted === false && status === 'processing') {
+                        alert('Description generation is already in progress.');
+                        setIsDescGenInProgress(true);
+                    } else if (accepted === false && status === 'inQueue') {
+                        alert('This description generation is already in queue.');
+                        setIsDescGenInProgress(false);
+                    } else if (accepted === true && status === 'processing') {
+                        setIsDescGenInProgress(true);
+                        window.api.receive(ipcChannels.EVENT_STREAM, listenToDescGenStatus);
+                    }
+                }
+            });
         }
     };
 
@@ -139,11 +158,24 @@ const useEditableDescriptionAction = () => {
         });
     };
 
+    const getAudioMetaDataDetails = (audioId) => {
+        window.api.getAudioMetaDataDetails(audioId).then((response) => {
+            if (response.status === responseStatus.SUCCESS) {
+                setMetaData({
+                    transcript: null,
+                    description: response.data.description ?? null,
+                });
+            }
+        });
+    };
+
     const getMediaMetaDataDetails = (mediaType, mediaId) => {
-        if (mediaType === mediaTypes.IMAGE) {
-            getImageMetaDataDetails(mediaId);
-        } else {
+        if (mediaType === mediaTypes.VIDEO) {
             getVideoMetaDataDetails(mediaId);
+        } else if (mediaType === mediaTypes.IMAGE) {
+            getImageMetaDataDetails(mediaId);
+        } else if (mediaType === mediaTypes.AUDIO) {
+            getAudioMetaDataDetails(mediaId);
         }
     };
 
