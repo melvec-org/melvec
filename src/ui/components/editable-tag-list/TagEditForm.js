@@ -178,7 +178,7 @@ const TagEditForm = ({ existingTags = [], mediaId, closeTagEditForm, onTagsEditD
     return (
         <div className={EditableTagListStyle.TagEditForm}>
             <h3>Edit tags</h3>
-            <p className={'secondaryInfo'}>{mediaTitle}</p>
+            <div className={'secondaryInfo mt5'}>{mediaTitle}</div>
             <div className={'mt15'}>
                 {usedTags.map((tag) => (
                     <TagChip

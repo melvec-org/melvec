@@ -69,7 +69,7 @@ const AudioDetailsPanel = ({ audioDetailsObj = null, onDetailsChange }) => {
                     <EditableFileName
                         mediaId={updatedAudioDetails.id}
                         mediaFileName={updatedAudioDetails.name}
-                        mediaType={mediaTypes.IMAGE}
+                        mediaType={mediaTypes.AUDIO}
                         onFileNameChange={(mediaId, title) =>
                             onDetailsChange({ change: 'fileName', data: { mediaId: mediaId, fileName: title } })
                         }
@@ -166,7 +166,7 @@ const AudioDetailsPanel = ({ audioDetailsObj = null, onDetailsChange }) => {
                             mediaId={updatedAudioDetails.id}
                             preselectedTaglists={updatedAudioDetails.tags}
                             mediaTitle={updatedAudioDetails.name}
-                            mediaType={mediaTypes.IMAGE}
+                            mediaType={mediaTypes.AUDIO}
                             onEditComplete={refreshshAudioDetails}
                         />
                     </MetaDataValue>
@@ -177,7 +177,7 @@ const AudioDetailsPanel = ({ audioDetailsObj = null, onDetailsChange }) => {
                             mediaTitle={updatedAudioDetails.name}
                             onEditComplete={refreshshAudioDetails}
                             shortDesc={updatedAudioDetails.shortDesc}
-                            mediaType={mediaTypes.IMAGE}
+                            mediaType={mediaTypes.AUDIO}
                         />
                     </MetaDataValue>
                 </>

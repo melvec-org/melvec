@@ -25,6 +25,7 @@ html[data-theme='light'] {
     --secondary-copy-color: #666;
 
     --devider-color: #ccc;
+    --separator-color: #ccc;
 
     /* used for all buttons, links, tab headers etc */
     --interactive-active-color: #222;
@@ -102,6 +103,8 @@ html[data-theme='light'] {
     --badge-text-color: var(--main-color);
 
     --glass-window-bg-color: rgba(255, 255, 255, 0.2);
+
+    --audio-player-bg-color: #d9d9d9;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -114,7 +117,8 @@ html[data-theme='light'] {
         /* for all dimmed color */
         --secondary-copy-color: #999;
 
-        --devider-color: #777;
+        --devider-color: #666;
+        --separator-color: #444;
 
         /* used for all buttons, links, tab headers etc */
         --interactive-active-color: #eee;
@@ -166,7 +170,7 @@ html[data-theme='light'] {
         --icon-button-fill-color: #aaa;
         --icon-button-fill-highlight-color: #fff;
 
-        --menu-item-selected-bg-color: #444;
+        --menu-item-selected-bg-color: #555;
 
         --button-bg-color: #666;
         --button-bg-hover-color: #888;
@@ -186,5 +190,7 @@ html[data-theme='light'] {
         --badge-text-color: var(--main-color);
 
         --glass-window-bg-color: rgba(0, 0, 0, 0.2);
+
+        --audio-player-bg-color: #404040;
     }
 }

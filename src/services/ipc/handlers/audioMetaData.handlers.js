@@ -1,3 +1,4 @@
+const { validateMediaDescription } = require('../../service-utils/ipcValidation');
 const serviceMethods = require('../../../constants/serviceMethods');
 const {
     setAudioDescriptionService,
@@ -9,7 +10,16 @@ const {
 } = require('../../audio-metadata/audioMetaData.service');
 
 const audioMetaDataServiceHandlers = [
-    [serviceMethods.AUDIO_META_DATA_SET_DESCRIPTION, async (audioId, desc) => setAudioDescriptionService(audioId, desc)],
+    [
+        serviceMethods.AUDIO_META_DATA_SET_DESCRIPTION,
+        async (audioId, desc) => {
+            const validationError = validateMediaDescription(desc);
+            if (validationError) {
+                return validationError;
+            }
+            return setAudioDescriptionService(audioId, desc);
+        },
+    ],
     [serviceMethods.AUDIO_META_DATA_GET_DETAILS, async (audioId) => getAudioMetaDataDetailsService(audioId)],
     [
         serviceMethods.AUDIO_META_DATA_GENERATE_DESCRIPTION,

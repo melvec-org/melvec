@@ -48,9 +48,9 @@ const AudioPlayer = forwardRef(({ src, isNsfw = false, hideNsfwContent = false, 
                 </audio>
             )}
             {shouldHideContent && (
-                <div className={style.nsfwMessageWrapper}>
-                    <div className={style.nsfwMessage}>Sensitive content: playing disabled</div>
-                    <Button type="button" className={style.enableButton} onClick={handleReveal}>
+                <div className={AudioPlayerStyles.nsfwMessageWrapper}>
+                    <div className={AudioPlayerStyles.nsfwMessage}>Sensitive content: playing disabled</div>
+                    <Button type="button" className={AudioPlayerStyles.enableButton} onClick={handleReveal}>
                         Play Audio
                     </Button>
                 </div>

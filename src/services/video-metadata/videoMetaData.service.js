@@ -93,9 +93,6 @@ const videoDescriptionJobQueue = createJobQueue({
 
 // user dirven video description
 const setVideoMetaDataDescriptionService = async (videoId, description) => {
-    // TODO
-    // Update the database with the new description.
-    // setVideoMetaDataDetails(videoId, description);
     try {
         setDescription(videoId, description, 'user');
         notifyIntegrityChange(videoId);

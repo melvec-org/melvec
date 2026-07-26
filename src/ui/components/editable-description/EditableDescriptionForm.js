@@ -50,7 +50,8 @@ const EditableDescriptionForm = ({ mediaId, mediaTitle = '', onDescriptionEditDo
 
     return (
         <div>
-            <h3>Description details : {mediaTitle}</h3>
+            <h3>Description details</h3>
+            <div className="secondaryInfo mt5">{mediaTitle}</div>
             {metaData.description !== null && (
                 <div className={formStyles.formSection}>
                     <h4>Description</h4>

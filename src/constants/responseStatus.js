@@ -4,4 +4,4 @@ const responseStatus = {
     ERROR: 'error',
 };
 
-export default responseStatus;
+module.exports = responseStatus;

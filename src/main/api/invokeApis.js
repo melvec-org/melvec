@@ -14,6 +14,8 @@ const { aiModelsApi } = require('./aiModelsApi');
 const { smartPlaylistApi } = require('./smartPlaylistsApi');
 const { videoMetaDataApi } = require('./videoMetaDataApi');
 const { imageLibraryApi } = require('./imageLibraryApi');
+const { audioLibraryApi } = require('./audioLibraryApi');
+const { audioMetaDataApi } = require('./audioMetaDataApi');
 
 const invokeApis = (ipcRenderer) => ({
     ...systemApi(ipcRenderer),
@@ -32,6 +34,8 @@ const invokeApis = (ipcRenderer) => ({
     ...smartPlaylistApi(ipcRenderer),
     ...videoMetaDataApi(ipcRenderer),
     ...imageLibraryApi(ipcRenderer),
+    ...audioLibraryApi(ipcRenderer),
+    ...audioMetaDataApi(ipcRenderer),
 });
 
 module.exports = {

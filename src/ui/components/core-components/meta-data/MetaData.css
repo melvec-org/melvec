@@ -4,7 +4,7 @@
     column-gap: 20px;
     justify-content: space-between;
     & + & {
-        border-top: 1px solid var(--devider-color);
+        border-top: 1px solid var(--separator-color);
     }
 
     .metaDataLabel {
