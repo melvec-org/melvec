@@ -19,6 +19,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - List of fixes made
 
+## [0.2.0] - 2026-07-26
+
+### Added
+
+- Companion audio file support
+
+### Changed
+
+- service files related to audio files
+- created audio to text transcription
+
+### Fixed
+
+- Issue with response back from main process is fixed.
+
 ## [0.1.0] - 2026-07-25
 
 ### Added
