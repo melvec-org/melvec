@@ -5,9 +5,13 @@ const {
     getImagesByTitleDbSearch,
     getImagesByFileNameSearch,
 } = require('../database/imageLibraryDbService');
+const { getAudiosByFileNameSearch, getAudiosByTitleDbSearch } = require('../database/audioLibraryDbService');
+
 const LRUCache = require('../service-utils/LRUCache');
 const serviceEventBus = require('../service-utils/serviceEventBus');
 const interServiceEvents = require('../../events/interServiceEvents');
+const mediaTypes = require('../../constants/mediaTypes');
+const indexingEvents = require('../../events/indexingEvents');
 
 const { getTags } = require('../tags/tags');
 const { getVideoIdsByTag } = require('../tags/tags');
@@ -20,9 +24,8 @@ const {
     invalidateTypoCorrectionIndex,
 } = require('./typoCorrection');
 const { getImageIdsByTag } = require('../database/tagsDbService');
-const mediaTypes = require('../../constants/mediaTypes');
 const { getImagesByMetaData } = require('./getImagesByMetaData');
-const indexingEvents = require('../../events/indexingEvents');
+const { getAudiosByMetaData } = require('./getAudiosByMetaData');
 
 const noSearchData = {
     byTags: [],
@@ -43,6 +46,7 @@ const getMediaByTagSearch = (keyword) => {
     const tagMatchedImages = tagMatches.map((item) => getImageIdsByTag(item.id));
     const allVideos = tagMatchedVideos.reduce((acc, videos) => acc.concat(videos), []);
     const allImages = tagMatchedImages.reduce((acc, images) => acc.concat(images), []);
+    const allAudios = tagMatchedImages.reduce((acc, audios) => acc.concat(audios), []);
 
     const uniqueVideos = [...new Set(allVideos)].map((id) => ({
         id,
@@ -54,7 +58,12 @@ const getMediaByTagSearch = (keyword) => {
         mediaType: mediaTypes.IMAGE,
     }));
 
-    return [...uniqueVideos, ...uniqueImages];
+    const uniqueAudios = [...new Set(allAudios)].map((id) => ({
+        id,
+        mediaType: mediaTypes.AUDIO,
+    }));
+
+    return [...uniqueVideos, ...uniqueImages, ...uniqueAudios];
 };
 
 const normalizeResultsByMediaType = (items, mediaType) => {
@@ -66,22 +75,26 @@ const normalizeResultsByMediaType = (items, mediaType) => {
 
 const mediaByTitleSearch = (keyword) => {
     const videoMatches = normalizeResultsByMediaType(getVideoByTitleSearch(keyword), mediaTypes.VIDEO);
-
     const imageMatches = normalizeResultsByMediaType(getImagesByTitleDbSearch(keyword), mediaTypes.IMAGE);
-    return [...videoMatches, ...imageMatches];
+    const audioMatches = normalizeResultsByMediaType(getAudiosByTitleDbSearch(keyword), mediaTypes.AUDIO);
+
+    return [...videoMatches, ...imageMatches, ...audioMatches];
 };
 
 const getMediaByFileNameSearch = (keyword) => {
     const videoMatches = normalizeResultsByMediaType(getVideoByFileNameDbSearch(keyword), mediaTypes.VIDEO);
     const imageMatches = normalizeResultsByMediaType(getImagesByFileNameSearch(keyword), mediaTypes.IMAGE);
+    const audioMatches = normalizeResultsByMediaType(getAudiosByFileNameSearch(keyword), mediaTypes.AUDIO);
 
-    return [...videoMatches, ...imageMatches];
+    return [...videoMatches, ...imageMatches, ...audioMatches];
 };
 
 const getMediaByMetaDataSearch = async (searchText, isQuickSearch) => {
     const videoMatches = normalizeResultsByMediaType(await getVideosByMetaData(searchText, isQuickSearch), mediaTypes.VIDEO);
     const imageMatches = normalizeResultsByMediaType(await getImagesByMetaData(searchText, isQuickSearch), mediaTypes.IMAGE);
-    return [...videoMatches, ...imageMatches];
+    const audioMatches = normalizeResultsByMediaType(await getAudiosByMetaData(searchText, isQuickSearch), mediaTypes.AUDIO);
+
+    return [...videoMatches, ...imageMatches, ...audioMatches];
 };
 
 const getCorrectedSearchText = (searchText) => {

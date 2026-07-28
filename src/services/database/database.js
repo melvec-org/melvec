@@ -5,6 +5,7 @@ const interServiceEvents = require('../../events/interServiceEvents');
 const { doesDirectoryExist } = require('../service-utils/fileUtils');
 const path = require('path');
 const fs = require('fs');
+const { respondSuccess, respondError } = require('../service-utils/sendToUI');
 
 let videoLibraryDbPath = '';
 let db = null;
@@ -689,15 +690,10 @@ const importDatabase = (backupPath) => {
 
         fs.copyFileSync(backupPath, targetPath);
         initializeDatabase();
-        return {
-            status: 'success',
-            message: 'Database imported successfully',
-        };
+
+        return respondSuccess('Database imported successfully');
     } catch (err) {
-        return {
-            status: 'failure',
-            message: `Error importing database: ${err.message}`,
-        };
+        return respondError(`Error importing database: ${err.message}`);
     }
 };
 

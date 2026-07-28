@@ -1,5 +1,6 @@
 const path = require('path');
 const { getLibDir } = require('../servicePathConfig');
+const { DEFAULT_COLLECTION_NAME, DEFAULT_COLLECTION_YEAR } = require('../../configs/systemConfig');
 
 /**
  * Builds the library-relative storage path for a video file.
@@ -10,7 +11,13 @@ const { getLibDir } = require('../servicePathConfig');
  * @param {string} id - Video identifier.
  * @returns {string} Relative library path.
  */
-const getRelativeMediaPath = (year, collecionName, filename, id) => path.join('' + year, collecionName, `_${id}_` + filename);
+const getRelativeMediaPath = (year, collecionName, filename, id) => {
+    if (collecionName !== DEFAULT_COLLECTION_NAME) {
+        return path.join('' + year, collecionName, `_${id}_` + filename);
+    } else {
+        return path.join(DEFAULT_COLLECTION_YEAR.toString(), collecionName, `_${id}_` + filename);
+    }
+};
 
 /**
  * Resolves a library-relative video path to an absolute filesystem path.

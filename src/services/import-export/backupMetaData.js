@@ -7,6 +7,7 @@ const { getVideoMetricsByVideoId, updateContentQuality, updateContentRating, upd
 const { addNewPlaylist } = require('../playlists/playlists');
 const { addNewTag } = require('../tags/tags');
 const { udpateVideoTitle } = require('../video-library/videoLibrary');
+const { respondFailure, respondSuccess } = require('../service-utils/sendToUI');
 
 const exportAllMetaData = async (config) => {
     const allMetaData = {
@@ -60,17 +61,9 @@ const exportAllMetaData = async (config) => {
     allMetaData.videos = videosMetaData;
 
     if (videosMetaData.length > 0 || allMetaData.tags.length > 0 || allMetaData.playlists.length > 0) {
-        return {
-            status: 'success',
-            data: allMetaData,
-            message: ``,
-        };
+        return respondSuccess('', allMetaData);
     } else {
-        return {
-            status: 'failure',
-            data: {},
-            message: `No video metadata found for the videos`,
-        };
+        return respondFailure('No video metadata found for the videos');
     }
 };
 
@@ -144,10 +137,7 @@ const importAllMetaData = async (data) => {
         });
     }
 
-    return {
-        status: 'success',
-        message: `Backup completed successfully.`,
-    };
+    return respondSuccess('All metadata imported successfully');
 };
 
 module.exports = {

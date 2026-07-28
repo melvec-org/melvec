@@ -40,9 +40,9 @@ const removePlaylistService = (playlist) => {
         const updatedPlaylist = removePlaylist(playlist);
         removeFromLastUsedPlaylists(playlist.id);
 
-        return respond('success', `Playlist "${playlist.label}" removed successfully.`, updatedPlaylist);
+        return respondSuccess(`Playlist "${playlist.label}" removed successfully.`, updatedPlaylist);
     } catch (error) {
-        return respond('error', `Failed to remove playlist: ${error.message}`);
+        return respondError(`Failed to remove playlist: ${error.message}`);
     }
 };
 
@@ -130,13 +130,12 @@ const removeVideoFromPlaylistService = (playlistId, videoId) => {
 const getPlaylistDetails = (playlistId) => {
     try {
         const videoIdsByPlaylist = getVideoIdsByPlaylist(playlistId);
-        return respond(
-            'success',
+        return respondSuccess(
             'Playlist found',
             videoIdsByPlaylist.map((id) => getBasicVideoDetailsById(id)),
         );
     } catch (error) {
-        return respond('error', `Failed to get playlist details: ${error.message}`);
+        return respondError(`Failed to get playlist details: ${error.message}`);
     }
 };
 

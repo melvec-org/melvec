@@ -138,13 +138,13 @@ const useCollectionDetailsAction = (currentCollection, currentVideoId = null) =>
                     if (response.status === responseStatus.SUCCESS) {
                         showGlobalNotification(responseStatus.SUCCESS, `Deleted ${mediaType}`);
                     } else {
-                        showGlobalNotification('error', `Failed to delete ${mediaType}, try again later`);
+                        showGlobalNotification(`Failed to delete ${mediaType}. ${response.message}`);
                     }
                 });
             } else {
                 window.api.removeMediaFromLibrary(mediaType, mediaId, initiator).then((response) => {
                     if (response.status === responseStatus.SUCCESS) {
-                        showGlobalNotification(`Success: Deleted ${mediaType}`);
+                        showGlobalNotification(`File deleted successfully.`);
                     } else {
                         showGlobalError(`Error: Failed to delete ${mediaType}, try again later`);
                     }
@@ -248,7 +248,9 @@ const useCollectionDetailsAction = (currentCollection, currentVideoId = null) =>
         });
         setMediaList({ listName: currentCollection.label, list: updatedMediaArr });
 
-        // Now listen for import complete actioin from server
+        if (!currentCollection.isExternal) return;
+
+        // Now listen for import complete actioin from server - valid only for external collections
         window.api.receiveOnce(ipcChannels.IMPORTED_FROM_WATCH_FOLDER_ACTION, (data) => {
             if (data.status === responseStatus.SUCCESS && data.mediaId === mediaId) {
                 const currentVideoIndex = mediaList.list.findIndex((item) => item.id === mediaId);
@@ -270,16 +272,16 @@ const useCollectionDetailsAction = (currentCollection, currentVideoId = null) =>
     const onAnyVideoDetailsChange = ({ change, data }) => {
         switch (change) {
             case 'isNsfw':
-                onNsfwStatusChange(data.videoId, data.isNsfw);
+                onNsfwStatusChange(data.mediaId, data.isNsfw);
                 break;
             case 'fileName':
                 onFileNameChange(data.videoId, data.fileName);
                 break;
             case 'importToCollectionStart':
-                onImportFileStart(data.videoId);
+                onImportFileStart(data.mediaId);
                 break;
             case 'deleteVideoFromLibrary':
-                onMediaDelete(mediaTypes.VIDEO, data.videoId, data.initiator);
+                onMediaDelete(mediaTypes.VIDEO, data.mediaId, data.initiator);
                 break;
             default:
         }
@@ -295,6 +297,9 @@ const useCollectionDetailsAction = (currentCollection, currentVideoId = null) =>
                 break;
             case 'deleteImageFromLibrary':
                 onMediaDelete(mediaTypes.IMAGE, data.mediaId, data.initiator);
+                break;
+            case 'importToCollectionStart':
+                onImportFileStart(data.mediaId);
                 break;
             default:
         }
@@ -313,6 +318,7 @@ const useCollectionDetailsAction = (currentCollection, currentVideoId = null) =>
                 break;
             case 'importToCollectionStart':
                 onImportFileStart(data.mediaId);
+
                 break;
             default:
         }
@@ -463,7 +469,6 @@ const useCollectionDetailsAction = (currentCollection, currentVideoId = null) =>
      */
     const bulkImportToCollection = (selectedItems, newCollection) => {
         window.api.receive(ipcChannels.EVENT_STREAM, handleBulkImportProgress);
-
         window.api.bulkImportToCollection(selectedItems, newCollection).then((response) => {
             if (response.status === responseStatus.SUCCESS) {
                 showGlobalNotification(`Import process started. It may take some time to complete.`);

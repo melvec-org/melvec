@@ -50,6 +50,10 @@ const useVideoDetailsAction = (videoDetails, onDetailsChange) => {
                 newCollection: newCollection,
             });
             alert('Your video is moved to the new collection. You will temporary see the video in this collection.');
+            onDetailsChange({
+                change: 'importToCollectionStart',
+                data: { mediaId: mediaId },
+            });
         } else {
             dispatchContext({
                 type: applicationEvents.APP_STATUS_UPDATE,
@@ -61,7 +65,7 @@ const useVideoDetailsAction = (videoDetails, onDetailsChange) => {
             });
             onDetailsChange({
                 change: 'importToCollectionStart',
-                data: { videoId: mediaId },
+                data: { mediaId: mediaId },
             });
 
             window.api.send(ipcChannels.NOTIFY_MAIN_PROCESS, {
@@ -98,14 +102,14 @@ const useVideoDetailsAction = (videoDetails, onDetailsChange) => {
         });
     };
 
-    const updateNsfwStatus = (videoId, isNsfw) => {
-        window.api.updateMediaNsfwStatus('video', videoId, isNsfw).then((response) => {
+    const updateNsfwStatus = (mediaId, isNsfw) => {
+        window.api.updateMediaNsfwStatus('video', mediaId, isNsfw).then((response) => {
             if (response && response.status === responseStatus.SUCCESS) {
                 setUpdatedVideoDetails({ ...updatedVideoDetails, isNsfw: isNsfw });
                 onDetailsChange({
                     change: 'isNsfw',
                     data: {
-                        videoId,
+                        mediaId: mediaId,
                         isNsfw: Boolean(isNsfw),
                     },
                 });
@@ -115,15 +119,15 @@ const useVideoDetailsAction = (videoDetails, onDetailsChange) => {
         });
     };
 
-    const updateCategory = (videoId, categoryId) => {
-        window.api.updateVideoCategory(videoId, categoryId).then((response) => {
+    const updateCategory = (mediaId, categoryId) => {
+        window.api.updateVideoCategory(mediaId, categoryId).then((response) => {
             if (response && response.status === responseStatus.SUCCESS) {
                 setUpdatedVideoDetails({ ...updatedVideoDetails, categoryId: categoryId });
 
                 onDetailsChange({
                     change: 'categoryId',
                     data: {
-                        videoId,
+                        mediaId,
                         categoryId,
                     },
                 });
@@ -166,6 +170,7 @@ const useVideoDetailsAction = (videoDetails, onDetailsChange) => {
                     stateContext.collections,
                     stateContext.hideHiddenCollections,
                 );
+
                 setUpdatedVideoDetails(data);
             }
         });

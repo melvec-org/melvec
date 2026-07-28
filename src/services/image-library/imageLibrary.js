@@ -13,7 +13,7 @@ const {
     getAllImageIds: getAllImageIdsFromDb,
     getImageDetailsById,
     updateImageDetails,
-    deleteImage,
+    deleteImageFromDb,
     updateDescriptionAndEmbedding,
     getImageDescriptionById,
     resetImagesMetaData,
@@ -79,23 +79,49 @@ const moveImage = async (imageId = '', newCollection = {}) => {
 
 const deleteImageDetails = async (imageId = '', initiator = 'user') => {
     if (!imageId) {
-        return false;
+        return {
+            status: responseStatus.ERROR,
+            message: 'imageId not found',
+        };
+    }
+    const imageData = getImageDetailsById(imageId);
+
+    if (imageData === null) {
+        return {
+            status: responseStatus.FAILURE,
+            message: 'Image details not found',
+        };
     }
 
-    const imageData = getImageDetailsById(imageId);
-    const deleteDbStatus = deleteImage(imageId);
+    if (initiator !== 'ENOENT') {
+        // User intentionally deleted the image — remove the physical file (moved to trash)
+        // and DB record, then signal the rest of the app that this image no longer exists.
+        const removeFileAction = await removeFile(getImageFullPath(imageData.path), getTrashBinPath());
+        if (removeFileAction.code && removeFileAction.code !== 'ENOENT') {
+            throw new Error(`Error removing file for image: ${imageId}, error: ${removeFileAction.message}`);
+        }
+        serviceEventBus.publish(interServiceEvents.DELETE_IMAGE, { imageId });
 
-    if (deleteDbStatus && initiator === 'user') {
-        try {
-            const deleteFileStatus = await removeFile(getImageFullPath(imageData.path), getTrashBinPath());
-            return deleteFileStatus.status === responseStatus.SUCCESS;
-        } catch (err) {
-            console.error(`Error deleting file for image: ${imageId}, error: ${err}`);
-            return false;
+        const deleteDbStatus = deleteImageFromDb(imageId);
+
+        if (!deleteDbStatus) {
+            throw new Error(`Error deleting image from DB: ${imageId}`);
         }
     } else {
-        return true;
+        serviceEventBus.publish(interServiceEvents.DELETE_IMAGE, { imageId });
+
+        // ENOENT — this image was deleted from disk by another process,
+        // so we just remove the DB record and trigger reindexing.
+        const isDeleteSuccess = deleteImageFromDb(imageId);
+
+        if (!isDeleteSuccess) {
+            return { status: responseStatus.FAILURE, imageId };
+        }
     }
+
+    serviceEventBus.publish(interServiceEvents.INDEX_DATA_CHANGED, { change: indexingEvents.IMAGE_DELETE, imageId });
+
+    return { status: responseStatus.SUCCESS, imageId };
 };
 
 const importImageFromWatchedDirectory = async (mediaDetails, destinationCollection) => {
@@ -127,8 +153,6 @@ const importImageFromWatchedDirectory = async (mediaDetails, destinationCollecti
             mediaType: mediaTypes.IMAGE,
         };
 
-        addImage(newImageStats);
-
         serviceEventBus.publish(interServiceEvents.IMPORT_FILE_SUCCESS, {
             completedMediaStats: newImageStats,
             mediaType: mediaTypes.IMAGE,
@@ -148,7 +172,7 @@ const importImageFromWatchedDirectory = async (mediaDetails, destinationCollecti
         });
 
         throw {
-            status: 'error',
+            status: responseStatus.ERROR,
             data: {
                 imageDetails: mediaDetails,
                 error: err,
@@ -160,7 +184,7 @@ const importImageFromWatchedDirectory = async (mediaDetails, destinationCollecti
 const renameImageFile = async (imageId = '', oldFileName = '', newFileName = '') => {
     if (imageId === '' || oldFileName === '' || newFileName === '') {
         return {
-            status: 'error',
+            status: responseStatus.ERROR,
             message: 'imageId, oldFileName and newFileName are required',
         };
     }
@@ -169,14 +193,14 @@ const renameImageFile = async (imageId = '', oldFileName = '', newFileName = '')
 
     if (imageData === null) {
         return {
-            status: 'error',
+            status: responseStatus.ERROR,
             message: `Image not found for id: ${imageId}`,
         };
     }
 
     if (imageData.name !== oldFileName) {
         return {
-            status: 'error',
+            status: responseStatus.ERROR,
             message: `Image rename rejected because stored file name does not match ${oldFileName}`,
         };
     }
@@ -218,7 +242,7 @@ const updateImageNsfwStatus = (imageId = '', isNsfw = false) => {
         };
     } catch (error) {
         return {
-            status: 'error',
+            status: responseStatus.ERROR,
             message: `System error while updating. ${error.message}`,
         };
     }

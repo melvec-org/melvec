@@ -12,6 +12,7 @@ const { getSearchedVideoHistory } = require('../history/actionHistory');
 const { respondFailure, respondSuccess } = require('../service-utils/sendToUI');
 const mediaTypes = require('../../constants/mediaTypes');
 const { getBasicImageDetailsById } = require('../image-library/imageLibrary');
+const { getBasicAudioDetailsById } = require('../audio-library/audioLibrary');
 const fillDetailsForSearchResults = (arr) => {
     return arr.map((item, index) => {
         let fleshedItem = null;
@@ -19,7 +20,10 @@ const fillDetailsForSearchResults = (arr) => {
             fleshedItem = getFullVideoDetailsById(item.id);
         } else if (item.mediaType === mediaTypes.IMAGE) {
             fleshedItem = getBasicImageDetailsById(item.id);
+        } else if (item.mediaType === mediaTypes.AUDIO) {
+            fleshedItem = getBasicAudioDetailsById(item.id);
         }
+
         if (fleshedItem) {
             fleshedItem['relevance'] = index;
         }

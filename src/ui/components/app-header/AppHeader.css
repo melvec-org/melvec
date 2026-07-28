@@ -29,7 +29,12 @@ html {
     width: 60px;
     height: 24px;
     margin: 5px 8px 5px 80px;
+    transition: margin 0.1s ease-in-out;
     background-color: black;
+}
+
+:global(html.fullscreen) .logo {
+    margin: 5px 8px 5px 0px;
 }
 
 @media (prefers-color-scheme: light) {

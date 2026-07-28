@@ -15,12 +15,12 @@ const { getMediaByWatchFolder } = require('../watch-folders/watchFolders.service
 const { getBasicVideoDetailsById, moveVideo, checkForDuplicate } = require('../video-library/videoLibrary.service');
 serviceEventBus = require('../service-utils/serviceEventBus');
 const interServiceEvents = require('../../events/interServiceEvents');
-const { respond } = require('../service-utils/sendToUI');
+const { respondSuccess, respondError, respondFailure } = require('../service-utils/sendToUI');
 const { getCollectionDetailsById } = require('../database/collectionsDbService');
 const { deleteVideoDetails } = require('../video-library/videoLibrary');
 const { deleteImageDetails } = require('../image-library/imageLibrary');
 const { getBasicImageDetailsById, moveImage } = require('../image-library/imageLibrary');
-const { getBasicAudioDetailsById, moveAudio } = require('../audio-library/audioLibrary');
+const { getBasicAudioDetailsById, moveAudio, deleteAudioDetails } = require('../audio-library/audioLibrary');
 
 const indexingEvents = require('../../events/indexingEvents');
 const mediaTypes = require('../../constants/mediaTypes');
@@ -110,9 +110,9 @@ const addNewCollectionService = (year, label, isHidden) => {
         addNewCollection(year, label, isHidden);
         const newCollections = getCollectionsList();
 
-        return respond('success', `New collection "${label}" created"`, newCollections);
+        return respondSuccess(`New collection "${label}" created"`, newCollections);
     } catch (error) {
-        return respond('error', `${error}`);
+        return respondError('error', `${error}`);
     }
 };
 
@@ -130,16 +130,9 @@ const renameCollectionService = async (collectionId, newName) => {
     try {
         await renameCollection(collectionId, newName);
         const newCollections = getCollectionsList();
-        return {
-            status: 'success',
-            data: newCollections,
-            message: `Collection ${collectionId} renamed to ${newName}`,
-        };
+        return respondSuccess(`Collection "${collectionId}" renamed to ${newName}`, newCollections);
     } catch (error) {
-        return {
-            status: 'error',
-            message: `${error}`,
-        };
+        return respondError('error', `${error}`);
     }
 };
 
@@ -153,10 +146,12 @@ const removeCollectionService = async (collectionId) => {
             const { mediaItems = [] } = getCollectionDetailsById(collectionId) || {};
 
             for (const item of mediaItems) {
-                if (item.mediaType === 'video') {
+                if (item.mediaType === mediaTypes.VIDEO) {
                     await deleteVideoDetails(item.id);
-                } else if (item.mediaType === 'image') {
+                } else if (item.mediaType === mediaTypes.IMAGE) {
                     await deleteImageDetails(item.id);
+                } else if (item.mediaType === mediaTypes.AUDIO) {
+                    await deleteAudioDetails(item.id, 'user');
                 }
             }
 
@@ -164,23 +159,13 @@ const removeCollectionService = async (collectionId) => {
             if (isRemovalComplete) {
                 serviceEventBus.publish(interServiceEvents.INDEX_DATA_CHANGED, { change: indexingEvents.COLLECTION_REMOVE });
 
-                return {
-                    status: 'success',
-                    data: getCollectionsList(),
-                    message: `Collection ${collectionId} removed successfully`,
-                };
+                return respondSuccess(`Collection ${collectionId} removed successfully`, getCollectionsList());
             }
         } else {
-            return {
-                status: 'error',
-                message: 'Invalid collectionId',
-            };
+            return respondFailure('error', 'Invalid collectionId');
         }
     } catch (error) {
-        return {
-            status: 'error',
-            message: `${error}`,
-        };
+        return respondError('error', `${error}`);
     }
 };
 
@@ -189,45 +174,24 @@ const hideCollectionService = (collectionId) => {
         if (collectionId) {
             hideCollection(collectionId);
 
-            return {
-                status: 'success',
-                data: getCollectionsList(),
-                message: `Collection ${collectionId} hidden successfully`,
-            };
+            return respondSuccess(`Collection ${collectionId} hidden successfully`, getCollectionsList());
         } else {
-            return {
-                status: 'error',
-                message: 'Invalid collectionId',
-            };
+            return respondFailure('error', 'Invalid collectionId');
         }
     } catch (error) {
-        return {
-            status: 'error',
-            message: `${error}`,
-        };
+        return respondError('error', `${error}`);
     }
 };
 const unhideCollectionService = (collectionId) => {
     try {
         if (collectionId) {
             unhideCollection(collectionId);
-
-            return {
-                status: 'success',
-                data: getCollectionsList(),
-                message: `Collection ${collectionId} unhidden successfully`,
-            };
+            return respondSuccess(`Collection ${collectionId} unhidden successfully`, getCollectionsList());
         } else {
-            return {
-                status: 'error',
-                message: 'Invalid collectionId',
-            };
+            return respondFailure('error', 'Invalid collectionId');
         }
     } catch (error) {
-        return {
-            status: 'error',
-            message: `${error}`,
-        };
+        return respondError('error', `${error}`);
     }
 };
 

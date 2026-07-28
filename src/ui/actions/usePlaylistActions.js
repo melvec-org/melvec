@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { useApplicationContext } from '__contexts/app.context';
 import mainThreadEvents from '__events/mainThreadEvents';
+import responseStatus from '__constants/responseStatus';
 
 const usePlaylistActions = () => {
     const [stateContext, dispatchContext] = useApplicationContext();
@@ -15,7 +16,7 @@ const usePlaylistActions = () => {
      */
     const addNewPlaylist = (playlist) => {
         window.api.addNewPlaylist(playlist).then((response) => {
-            if (response?.status == 'success') {
+            if (response?.status === responseStatus.SUCCESS) {
                 dispatchContext({ type: mainThreadEvents.ON_PLAYLIST_UPDATE, payload: { playlists: response.data } });
             } else {
                 alert('Failed to add playlist', response.message);
@@ -29,7 +30,7 @@ const usePlaylistActions = () => {
      */
     const removePlaylist = (playlist) => {
         window.api.removePlaylist(playlist).then((response) => {
-            if (response?.status == 'success') {
+            if (response?.status === responseStatus.SUCCESS) {
                 dispatchContext({ type: mainThreadEvents.ON_PLAYLIST_UPDATE, payload: { playlists: response.data } });
             } else {
                 alert('Failed to remove playlist.', response.message);
@@ -44,7 +45,7 @@ const usePlaylistActions = () => {
      */
     const renamePlaylist = (playlistId, newName) => {
         window.api.renamePlaylist(playlistId, newName).then((response) => {
-            if (response?.status == 'success') {
+            if (response?.status === responseStatus.SUCCESS) {
                 dispatchContext({ type: mainThreadEvents.ON_PLAYLIST_UPDATE, payload: { playlists: response.data } });
             } else {
                 alert('Failed to rename playlist.', response.message);

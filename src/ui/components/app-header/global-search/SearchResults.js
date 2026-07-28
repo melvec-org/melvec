@@ -16,6 +16,7 @@ const filterLabels = {
 const mediaTypeFilterTabs = [
     { value: mediaTypes.VIDEO, label: 'Video' },
     { value: mediaTypes.IMAGE, label: 'Image' },
+    { value: mediaTypes.AUDIO, label: 'Audio' },
 ];
 
 const SearchResults = ({ searchResults, onSearchResultItemClick, createPlaylist, searchText, closeSearchResult }) => {

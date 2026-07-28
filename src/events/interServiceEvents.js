@@ -7,6 +7,7 @@ const interServiceEvents = {
     VIDEO_IMPORT_PROGRESS: 'interServiceEvents/videoImportProgress',
     DELETE_VIDEO: 'interServiceEvents/deleteVideo',
     DELETE_IMAGE: 'interServiceEvents/deleteImage',
+    DELETE_AUDIO: 'interServiceEvents/deleteImage',
     REFRESH_VIDEO_LIBRARY: 'interServiceEvents/refresh_video_library',
     IMPORT_FILE_SUCCESS: 'interServiceEvents/importFileSuccess',
     VIDEO_COLLECTION_CHANGE: 'interServiceEvents/videoCollectionChange',

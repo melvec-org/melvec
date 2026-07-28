@@ -310,7 +310,7 @@ const updateImageDetails = (image) => {
     }
 };
 
-const deleteImage = async (id) => {
+const deleteImageFromDb = (id) => {
     ensureDbInitialized();
     const stmt = db.prepare('DELETE FROM images WHERE id = ?');
 
@@ -752,7 +752,7 @@ module.exports = {
     checkForDuplicateImage,
     addImage,
     updateImageDetails,
-    deleteImage,
+    deleteImageFromDb,
     checkImageExists,
     updateImageSource,
     updateImageDescription,

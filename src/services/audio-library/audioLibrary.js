@@ -13,10 +13,10 @@ const {
     getAllAudioIds: getAllAudioIdsFromDb,
     getAudioDetailsById,
     updateAudioDetails,
-    deleteAudio,
     updateDescriptionAndEmbedding,
     getAudioDescriptionById,
     resetAudiosMetaData,
+    deleteAudioFromDb,
 } = require('../database/audioLibraryDbService');
 const { getHiddenCollectionIds } = require('../collections/collections');
 const mediaTypes = require('../../constants/mediaTypes');
@@ -78,23 +78,49 @@ const moveAudio = async (audioId = '', newCollection = {}) => {
 
 const deleteAudioDetails = async (audioId = '', initiator = 'user') => {
     if (!audioId) {
-        return false;
+        return {
+            status: responseStatus.ERROR,
+            message: 'AudioId missing',
+        };
     }
 
     const audioData = getAudioDetailsById(audioId);
-    const deleteDbStatus = deleteAudio(audioId);
+    if (audioData === null) {
+        return {
+            status: responseStatus.ERROR,
+            message: 'Audio details not found',
+        };
+    }
 
-    if (deleteDbStatus && initiator === 'user') {
-        try {
-            const deleteFileStatus = await removeFile(getAudioFullPath(audioData.path), getTrashBinPath());
-            return deleteFileStatus.status === responseStatus.SUCCESS;
-        } catch (err) {
-            console.error(`Error deleting file for audio: ${audioId}, error: ${err}`);
-            return false;
+    if (initiator !== 'ENOENT') {
+        const removeFileAction = await removeFile(getAudioFullPath(audioData.path), getTrashBinPath());
+
+        if (removeFileAction.code && removeFileAction.code !== 'ENOENT') {
+            throw new Error(`Error removing audio file: ${audioId}, error: ${removeFileAction.message}`);
+        }
+
+        serviceEventBus.publish(interServiceEvents.DELETE_AUDIO, { audioId });
+
+        const deleteDbStatus = deleteAudioFromDb(audioId);
+
+        if (!deleteDbStatus) {
+            throw new Error(`Error deleting audio from DB: ${audioId}`);
         }
     } else {
-        return true;
+        serviceEventBus.publish(interServiceEvents.DELETE_AUDIO, { audioId });
+
+        // ENOENT — this audio was deleted from disk by another process,
+        // so we just remove the DB record and trigger reindexing.
+        const isDeleteSuccess = deleteAudioFromDb(audioId);
+
+        if (!isDeleteSuccess) {
+            return { status: responseStatus.FAILURE, audioId };
+        }
     }
+
+    serviceEventBus.publish(interServiceEvents.INDEX_DATA_CHANGED, { change: indexingEvents.AUDIO_DELETE, audioId });
+
+    return { status: responseStatus.SUCCESS, audioId };
 };
 
 const importAudioFromWatchedDirectory = async (mediaDetails, destinationCollection) => {
@@ -127,8 +153,6 @@ const importAudioFromWatchedDirectory = async (mediaDetails, destinationCollecti
             mediaType: mediaTypes.AUDIO,
         };
 
-        addAudio(newAudioStats);
-
         serviceEventBus.publish(interServiceEvents.IMPORT_FILE_SUCCESS, {
             completedMediaStats: newAudioStats,
             mediaType: mediaTypes.AUDIO,
@@ -148,7 +172,7 @@ const importAudioFromWatchedDirectory = async (mediaDetails, destinationCollecti
         });
 
         throw {
-            status: 'error',
+            status: responseStatus.ERROR,
             data: {
                 audioDetails: mediaDetails,
                 error: err,
@@ -160,7 +184,7 @@ const importAudioFromWatchedDirectory = async (mediaDetails, destinationCollecti
 const renameAudioFile = async (audioId = '', oldFileName = '', newFileName = '') => {
     if (audioId === '' || oldFileName === '' || newFileName === '') {
         return {
-            status: 'error',
+            status: responseStatus.ERROR,
             message: 'audioId, oldFileName and newFileName are required',
         };
     }
@@ -169,14 +193,14 @@ const renameAudioFile = async (audioId = '', oldFileName = '', newFileName = '')
 
     if (audioData === null) {
         return {
-            status: 'error',
+            status: responseStatus.ERROR,
             message: `Audio not found for id: ${audioId}`,
         };
     }
 
     if (audioData.name !== oldFileName) {
         return {
-            status: 'error',
+            status: responseStatus.ERROR,
             message: `Audio rename rejected because stored file name does not match ${oldFileName}`,
         };
     }
@@ -197,7 +221,7 @@ const renameAudioFile = async (audioId = '', oldFileName = '', newFileName = '')
     } catch (error) {
         console.error(`Error renaming file for audioId: ${audioId}, error: ${error}`);
         return {
-            status: 'error',
+            status: responseStatus.ERROR,
             message: `Failed to rename audio file for ${audioId}`,
         };
     }
@@ -217,7 +241,7 @@ const updateAudioNsfwStatus = (audioId = '', isNsfw = false) => {
         };
     } catch (error) {
         return {
-            status: 'error',
+            status: responseStatus.ERROR,
             message: `Error updating NSFW status for audio: ${audioId}, error: ${error.message}`,
         };
     }

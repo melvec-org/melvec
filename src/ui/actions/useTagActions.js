@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { useApplicationContext } from '__contexts/app.context';
 import mainThreadEvents from '__events/mainThreadEvents';
+import responseStatus from '__constants/responseStatus';
 
 const useTagActions = () => {
     const [stateContext, dispatchContext] = useApplicationContext();
@@ -15,7 +16,7 @@ const useTagActions = () => {
      */
     const addTag = (tag) => {
         window.api.addNewTag(tag).then((response) => {
-            if (response?.status == 'success') {
+            if (response?.status === responseStatus.SUCCESS) {
                 dispatchContext({ type: mainThreadEvents.ON_TAGS_UPDATE, payload: { tags: response.data } });
             } else {
                 alert('Failed to add tag', response.message);
@@ -30,7 +31,7 @@ const useTagActions = () => {
     const removeTag = (tagId) => {
         window.confirm('Are you sure you want to remove this tag?') &&
             window.api.removeTag(tagId).then((response) => {
-                if (response?.status == 'success') {
+                if (response?.status === responseStatus.SUCCESS) {
                     dispatchContext({ type: mainThreadEvents.ON_TAGS_UPDATE, payload: { tags: response.data } });
                 } else {
                     alert('Failed to remove tag', response.message);
@@ -45,7 +46,7 @@ const useTagActions = () => {
      */
     const renameTag = (tagId, newName) => {
         window.api.renameTag(tagId, newName).then((response) => {
-            if (response?.status == 'success') {
+            if (response?.status === responseStatus.SUCCESS) {
                 dispatchContext({ type: mainThreadEvents.ON_TAGS_UPDATE, payload: { tags: response.data } });
             } else {
                 alert('Failed to rename tag', response.message);

@@ -22,9 +22,10 @@ const serviceEventBus = require('../service-utils/serviceEventBus');
 const interServiceEvents = require('../../events/interServiceEvents');
 
 const { respondSuccess, respondError, respondFailure } = require('../service-utils/sendToUI');
-const { updateSource } = require('../database/videoLibraryDbService');
+const { updateSource, deleteVideo } = require('../database/videoLibraryDbService');
 const mediaTypes = require('../../constants/mediaTypes');
 const indexingEvents = require('../../events/indexingEvents');
+const responseStatus = require('../../constants/responseStatus');
 
 const _getBasicVideoDetailsById = (videoId) => {
     if (videoId === undefined) {
@@ -94,7 +95,7 @@ const removeVideoFromLibrary = async (videoId, initiator) => {
                 videoId: videoId,
             });
             return {
-                status: 'success',
+                status: responseStatus.SUCCESS,
                 videoId,
             };
         } else {
@@ -108,10 +109,13 @@ const removeVideoFromLibrary = async (videoId, initiator) => {
             change: indexingEvents.VIDEO_DELETE,
             videoId: videoId,
         });
-        return {
-            status: 'success',
-            videoId,
-        };
+        const isDeleteSuccess = deleteVideo(videoId);
+        if (isDeleteSuccess) {
+            return {
+                status: responseStatus.SUCCESS,
+                videoId,
+            };
+        }
     }
 };
 

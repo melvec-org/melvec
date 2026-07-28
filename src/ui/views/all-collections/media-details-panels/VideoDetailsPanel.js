@@ -85,7 +85,7 @@ const VideoDetailsPanel = ({ videoDetailsObj = null, onDetailsChange, playPrevie
                     onLoadError={() =>
                         onDetailsChange({
                             change: 'deleteVideoFromLibrary',
-                            data: { videoId: updatedVideoDetails.id, initiator: 'ENOENT' },
+                            data: { mediaId: updatedVideoDetails.id, initiator: 'ENOENT' },
                         })
                     }
                 />
@@ -95,7 +95,7 @@ const VideoDetailsPanel = ({ videoDetailsObj = null, onDetailsChange, playPrevie
                     <EditableFileName
                         mediaId={updatedVideoDetails.id}
                         mediaFileName={updatedVideoDetails.name}
-                        onFileNameChange={(videoId, title) => onDetailsChange({ change: 'fileName', data: { videoId, fileName: title } })}
+                        onFileNameChange={(mediaId, title) => onDetailsChange({ change: 'fileName', data: { mediaId, fileName: title } })}
                     />
                 </MetaDataRow>
             ) : (

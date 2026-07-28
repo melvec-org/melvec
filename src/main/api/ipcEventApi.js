@@ -11,6 +11,7 @@ const sendChannels = [
     ipcChannels.IMPORT_FILE_REQUEST,
     ipcChannels.OPEN_FOLDERS_REQUEST,
     ipcChannels.OPEN_HELP_WINDOW,
+    ipcChannels.APP_WINDOWS_ACTION,
 ];
 
 const receiveChannels = [
@@ -22,6 +23,7 @@ const receiveChannels = [
     ipcChannels.ZOOM_FACTOR_CHANGE_ACTION,
     ipcChannels.EVENT_STREAM,
     ipcChannels.THEME_CHANGE_ACTION,
+    ipcChannels.APP_WINDOWS_ACTION,
 ];
 
 const receiveOnceChannels = [

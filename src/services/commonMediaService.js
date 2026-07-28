@@ -3,7 +3,6 @@ const {
     updateVideoTitleService,
     updateNsfwStatusService: updateVideoNsfwStatusService,
     renameVideoFile,
-    removeVideoFromLibrary,
     removeVideoFromLibraryService,
 } = require('./video-library/videoLibrary.service');
 const { updateNsfwStatus: updateVideoNsfwStatus, updateVideoCategory, resetVideosMetaData } = require('./video-library/videoLibrary');
@@ -11,7 +10,7 @@ const {
     updateImageTitleService,
     updateImageNsfwStatusService,
     renameImageFileService,
-    removeImageFromLibrary,
+    removeImageFromLibraryService,
     updateImageNsfwStatus,
     resetImagesMetaData,
 } = require('./image-library/imageLibrary.service');
@@ -42,9 +41,9 @@ const {
     updateAudioTitleService,
     updateAudioNsfwStatusService,
     renameAudioFileService,
-    removeAudioFromLibrary,
     updateAudioNsfwStatus,
     resetAudiosMetaData,
+    removeAudioFromLibraryService,
 } = require('./audio-library/audioLibrary.service');
 const responseStatus = require('../constants/responseStatus');
 
@@ -53,7 +52,7 @@ const validateMediaServiceArgs = (mediaType, mediaId) => {
         return respondError('Invalid media id provided');
     }
 
-    if (![mediaTypes.VIDEO, mediaTypes.IMAGE].includes(mediaType)) {
+    if (![mediaTypes.VIDEO, mediaTypes.IMAGE, mediaTypes.AUDIO].includes(mediaType)) {
         return respondError(`Unsupported media type: ${mediaType}`);
     }
 
@@ -226,23 +225,10 @@ const removeMediaService = async (mediaType, mediaId, initiator) => {
             return removeVideoFromLibraryService(mediaId, initiator);
 
         case mediaTypes.IMAGE:
-            try {
-                const result = await removeImageFromLibrary(mediaId, initiator);
-                return result.status === responseStatus.SUCCESS
-                    ? respondSuccess(`Image ${mediaId} deleted`)
-                    : respondError(`Failed to delete image ${mediaId}`);
-            } catch (error) {
-                return respondError(`Failed to delete image ${mediaId}: ${error}`);
-            }
+            return removeImageFromLibraryService(mediaId, initiator);
+
         case mediaTypes.AUDIO:
-            try {
-                const result = await removeAudioFromLibrary(mediaId, initiator);
-                return result.status === responseStatus.SUCCESS
-                    ? respondSuccess(`Image ${mediaId} deleted`)
-                    : respondError(`Failed to delete image ${mediaId}`);
-            } catch (error) {
-                return respondError(`Failed to delete image ${mediaId}: ${error}`);
-            }
+            return removeAudioFromLibraryService(mediaId, initiator);
 
         default:
             return respondError('Media type mismatch in deleting the media');
@@ -330,25 +316,15 @@ const _deleteSingleLibraryMediaService = async (media) => {
     const { mediaType, id: mediaId } = media;
 
     if (mediaType === mediaTypes.IMAGE) {
-        const result = await removeImageFromLibrary(mediaId, 'user');
-        return result.status === responseStatus.SUCCESS
-            ? { status: responseStatus.SUCCESS, message: `Image ${mediaId} deleted` }
-            : { status: 'error', message: `Failed to delete image ${mediaId}` };
+        return await removeImageFromLibraryService(mediaId, 'user');
     }
 
     if (mediaType === mediaTypes.VIDEO) {
-        const result = await removeVideoFromLibrary(mediaId, 'user');
-
-        return result.status === responseStatus.SUCCESS
-            ? { status: responseStatus.SUCCESS, message: `Video ${mediaId} deleted` }
-            : { status: 'error', message: `Video ${mediaId} cound not be deleted` };
+        return await removeVideoFromLibraryService(mediaId, 'user');
     }
 
     if (mediaType === mediaTypes.AUDIO) {
-        const result = await removeAudioFromLibrary(mediaId, 'user');
-        return result.status === responseStatus.SUCCESS
-            ? { status: responseStatus.SUCCESS, message: `Audio ${mediaId} deleted` }
-            : { status: 'error', message: `Failed to delete audio ${mediaId}` };
+        return await removeAudioFromLibraryService(mediaId, 'user');
     }
 
     return { status: 'error', message: `Unsupported media type: ${mediaType}` };
@@ -423,7 +399,7 @@ const bulkRemoveMediaService = async (mediaList, collectionId, isExternal = fals
                 ? await _deleteSingleExternalMediaService(item, collectionId, 'user')
                 : await _deleteSingleLibraryMediaService(item, 'user');
 
-            if (itemResult.status === 'error') {
+            if (itemResult.status === responseStatus.ERROR || itemResult.status === responseStatus.FAILURE) {
                 result.mediaFailed.push(item.id);
                 result.errorDetails.push({ mediaId: item.id, reason: itemResult.message });
             } else {

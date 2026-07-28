@@ -348,88 +348,6 @@ const getAllCollectionNames = () => {
     }
 };
 
-// Add a video to an existing collection
-const addVideoToCollection = (collectionId, videoId) => {
-    ensureDbInitialized();
-
-    if (!collectionId || typeof collectionId !== 'string' || collectionId.trim() === '') {
-        throw new Error('Field collectionId must be a non-empty string');
-    }
-
-    if (!videoId || typeof videoId !== 'string' || videoId.trim() === '') {
-        throw new Error('Field videoId must be a non-empty string');
-    }
-
-    try {
-        const result = db.transaction(() => {
-            // Check if collection exists
-            const collStmt = db.prepare('SELECT id, label, year, isHidden FROM collections WHERE id = ?');
-            const collection = collStmt.get(collectionId);
-            if (!collection) {
-                throw new Error(`Collection ${collectionId} does not exist`);
-            }
-
-            // 2. Check if video exists
-            const videoStmt = db.prepare('SELECT id, collection_id FROM videos WHERE id = ?');
-            const video = videoStmt.get(videoId);
-            if (!video) {
-                throw new Error(`Video ${videoId} does not exist`);
-            }
-
-            // 3. Check if video is already in this collection
-            if (video.collection_id === collectionId) {
-                return { changes: 0 };
-            }
-
-            // 4. Move video to the new collection (this is now just one UPDATE!)
-            const updateVideoStmt = db.prepare(`
-                UPDATE videos 
-                SET collection_id = ? 
-                WHERE id = ?
-            `);
-            const updateInfo = updateVideoStmt.run(collectionId, videoId);
-
-            if (updateInfo.changes === 0) {
-                return { changes: 0 };
-            }
-
-            // 5. Update cache (no JSON, no parsing!)
-            const updatedCollectionInCache = {
-                id: collectionId,
-                label: collection.label,
-                year: collection.year,
-                isHidden: collection.isHidden,
-                // No videos array needed here — load on demand
-            };
-            collectionsCache.set(collectionId, updatedCollectionInCache);
-            collectionsCache.delete(CACHE_ALL_NAMES_KEY); // invalidate full list
-
-            // invalidate old collection cache if needed
-            if (video.collection_id) {
-                collectionsCache.delete(video.collection_id);
-            }
-
-            return { changes: 1 };
-        })();
-
-        return result && result.changes > 0;
-    } catch (err) {
-        throw new Error(`Failed to add video ${videoId} to collection ${collectionId}: ${err.message}`);
-    }
-};
-
-const addImageToCollection = (collectionId, imageId) => {};
-
-const addMediaToCollection = (collectionId, mediaId, mediaType = 'video') => {
-    if (mediaType === 'video') {
-        return addVideoToCollection(collectionId, mediaId);
-    } else if (mediaType === 'image') {
-        return addImageToCollection(collectionId, mediaId);
-    } else {
-        return false;
-    }
-};
-
 const hideCollection = (collectionId) => {
     ensureDbInitialized();
     if (!collectionId || typeof collectionId !== 'string' || collectionId.trim() === '') {
@@ -486,8 +404,6 @@ module.exports = {
     hideCollection,
     unhideCollection,
     doesCollectionExists,
-    addMediaToCollection,
-    addVideoToCollection,
     getCollectionByYearAndLabel,
     clearCollectionCache,
 };

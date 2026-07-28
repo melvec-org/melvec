@@ -61,20 +61,15 @@ const ImageDetailsPanel = ({ imageDetailsObj = null, onDetailsChange }) => {
         }
     };
 
-    useEffect(() => {
-        setImageDimensions('');
-    }, [updatedImageDetails?.id]);
-
     if (!imageDetailsObj) {
         return null;
     }
-    const imagePath = getImagePath(imageDetailsObj);
 
     return (
         <div className={mediaDetailsStyles.mediaDetailsPanel} ref={containerRef}>
             <ImagePreview
                 ref={imageRef}
-                src={imagePath}
+                src={getImagePath(updatedImageDetails)}
                 alt={updatedImageDetails.title || updatedImageDetails.name || 'Image preview'}
                 onContextMenu={(e) => onContextMenuClick(e, imagePath)}
                 onLoad={onImageLoad}
