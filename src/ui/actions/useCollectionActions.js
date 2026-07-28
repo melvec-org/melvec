@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useApplicationContext } from '__contexts/app.context';
 import applicationEvents from '__events/applicationEvents';
 import { showGlobalNotification } from '__contexts/AppNotificationContext';
+import responseStatus from '__constants/responseStatus';
 
 const useCollectionActions = () => {
     const [stateContext, dispatchEvent] = useApplicationContext();
@@ -19,7 +20,7 @@ const useCollectionActions = () => {
         setAddCollectionResponse('');
 
         window.api.addNewCollection(year, label, isHidden).then((response) => {
-            if (response?.status == 'success') {
+            if (response?.status === responseStatus.SUCCESS) {
                 dispatchEvent({
                     type: applicationEvents.COLLECTIONS_UPDATE,
                     payload: { collections: response.data },
@@ -38,7 +39,7 @@ const useCollectionActions = () => {
      */
     const removeCollection = (collectionId) => {
         window.api.removeCollection(collectionId).then((response) => {
-            if (response?.status == 'success') {
+            if (response?.status === responseStatus.SUCCESS) {
                 dispatchEvent({
                     type: applicationEvents.COLLECTIONS_UPDATE,
                     payload: { collections: response.data },
@@ -56,7 +57,7 @@ const useCollectionActions = () => {
      */
     const renameCollection = (collectionId, newName) => {
         window.api.renameCollection(collectionId, newName).then((response) => {
-            if (response?.status == 'success') {
+            if (response?.status === responseStatus.SUCCESS) {
                 dispatchEvent({
                     type: applicationEvents.COLLECTIONS_UPDATE,
                     payload: { collections: response.data },
@@ -69,7 +70,7 @@ const useCollectionActions = () => {
 
     const hideCollection = (collectionId) => {
         window.api.hideCollection(collectionId).then((response) => {
-            if (response?.status == 'success') {
+            if (response?.status === responseStatus.SUCCESS) {
                 dispatchEvent({
                     type: applicationEvents.COLLECTIONS_UPDATE,
                     payload: { collections: response.data },
@@ -82,7 +83,7 @@ const useCollectionActions = () => {
 
     const unhideCollection = (collectionId) => {
         window.api.unhideCollection(collectionId).then((response) => {
-            if (response?.status == 'success') {
+            if (response?.status === responseStatus.SUCCESS) {
                 dispatchEvent({
                     type: applicationEvents.COLLECTIONS_UPDATE,
                     payload: { collections: response.data },

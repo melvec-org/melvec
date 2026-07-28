@@ -1,5 +1,5 @@
-const interServiceEvents = require('../../events/interServiceEvents');
-const { respond, respondSuccess } = require('../service-utils/sendToUI');
+const responseStatus = require('../../constants/responseStatus');
+const { respond, respondSuccess, respondError } = require('../service-utils/sendToUI');
 const {
     initAudioLibraryService,
     getFullAudioDetailsById,
@@ -12,8 +12,6 @@ const {
     renameAudioFile,
     resetAudiosMetaData,
 } = require('./audioLibrary');
-const serviceEventBus = require('../service-utils/serviceEventBus');
-const indexingEvents = require('../../events/indexingEvents');
 
 const getAudioDetailsService = (audioId) => {
     const audioDetails = getAudioDetailsById(audioId);
@@ -57,19 +55,18 @@ const getFullAudioDetailsService = (audioId) => {
     }
 };
 
-const removeAudioFromLibrary = async (audioId, initiator) => {
-    if (initiator !== 'ENOENT') {
-        const isDeleteSuccess = await deleteAudioDetails(audioId);
+const removeAudioFromLibraryService = async (audioId, initiator) => {
+    try {
+        const deleteAction = await deleteAudioDetails(audioId, initiator);
 
-        if (!isDeleteSuccess) {
-            return { status: 'failed', audioId };
+        if (deleteAction.status === responseStatus.SUCCESS) {
+            return respondSuccess('Audio file deleted successfully', deleteAction.audioId);
+        } else {
+            return respondFailure('Failed to delete audio file', deleteAction.message);
         }
+    } catch (error) {
+        return respondError(`Error: ${error.message}`);
     }
-
-    serviceEventBus.publish(interServiceEvents.DELETE_AUDIO, { audioId });
-    serviceEventBus.publish(interServiceEvents.INDEX_DATA_CHANGED, { change: indexingEvents.AUDIO_DELETE, audioId });
-
-    return { status: 'success', audioId };
 };
 
 module.exports = {
@@ -78,7 +75,7 @@ module.exports = {
     getAudioDetailsService,
     getAllAudioIdsService,
     deleteAudioDetails,
-    removeAudioFromLibrary,
+    removeAudioFromLibraryService,
     moveAudio,
     importAudioFromWatchedDirectory,
     updateAudioTitleService,

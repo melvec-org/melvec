@@ -3,6 +3,7 @@ const path = require('node:path');
 const { bootstrap } = require('./bootstrap');
 const { injectSystemTheme } = require('./theme');
 const userPreferenceStore = require('./userPreferenceStore');
+const ipcChannels = require('../constants/ipcChannels');
 
 function createWindow({ app, isDev, onWindowCreated }) {
     const win = new BrowserWindow({
@@ -43,6 +44,7 @@ function createWindow({ app, isDev, onWindowCreated }) {
 
     win.webContents.on('dom-ready', () => {
         injectSystemTheme(win.webContents);
+        win.webContents.send(ipcChannels.APP_WINDOWS_ACTION, win.isFullScreen());
     });
 
     win.webContents.on('did-finish-load', () => {
@@ -50,9 +52,21 @@ function createWindow({ app, isDev, onWindowCreated }) {
         bootstrap(win.webContents);
     });
 
+    win.on('closed', () => {
+        if (global.webContents === win.webContents) {
+            global.webContents = null;
+        }
+    });
+
     win.webContents.on('zoom-changed', () => {});
-    win.on('enter-full-screen', () => {});
-    win.on('leave-full-screen', () => {});
+
+    win.on('enter-full-screen', () => {
+        win.webContents.send(ipcChannels.APP_WINDOWS_ACTION, true);
+    });
+
+    win.on('leave-full-screen', () => {
+        win.webContents.send(ipcChannels.APP_WINDOWS_ACTION, false);
+    });
 
     return win;
 }
@@ -71,6 +85,8 @@ function createHelpWindow({ app, isDev, getHelpWindow, setHelpWindow }) {
         webPreferences: {
             preload: path.join(__dirname, '../../help-docs/preload.js'),
             contextIsolation: true,
+            nodeIntegration: false,
+            sandbox: true,
         },
     });
 

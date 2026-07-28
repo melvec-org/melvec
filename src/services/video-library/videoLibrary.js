@@ -27,9 +27,11 @@ const { addCollection, doesCollectionExists } = require('../database/collections
 const { getRelativeMediaPath, getAbsoluteMediaPath } = require('../service-utils/mediaPath');
 
 const { resetMetaData } = require('../database/metaDataDbService');
+const responseStatus = require('../../constants/responseStatus');
+const mediaTypes = require('../../constants/mediaTypes');
 
 const onImportFileSuccess = (data) => {
-    if (data.mediaType !== 'video') return;
+    if (data.mediaType !== mediaTypes.VIDEO) return;
     const videoStats = Object.assign({}, data.completedMediaStats);
 
     const collectionExists = doesCollectionExists(videoStats.collection_id);
@@ -95,24 +97,17 @@ const updateNsfwStatus = (id = '', isNsfw = false) => {
  * rename the video file name and updates the video details in the library.
  */
 const renameVideoFile = async (videoId = '', oldFileName = '', newFileName = '') => {
-    if (videoId === '' || oldFileName === '' || newFileName === '') {
-        return {
-            status: 'error',
-            message: 'videoId, oldFileName and newFileName are required',
-        };
-    }
-
     const videoData = getVideoDetailsById(videoId);
     if (videoData === null) {
         return {
-            status: 'error',
+            status: responseStatus.ERROR,
             message: `Video not found for id: ${videoId}`,
         };
     }
 
     if (videoData.name !== oldFileName) {
         return {
-            status: 'error',
+            status: responseStatus.ERROR,
             message: `Video rename rejected because stored file name does not match ${oldFileName}`,
         };
     }
@@ -127,13 +122,12 @@ const renameVideoFile = async (videoId = '', oldFileName = '', newFileName = '')
         await fse.move(absoluteExistingVideoFilePath, absoluteNewVideoFilePath);
         ((videoData.name = newFileName), (videoData.path = newPath), updateVideoDetails(videoData));
         return {
-            status: 'success',
+            status: responseStatus.SUCCESS,
             message: 'File name updated successfully',
         };
     } catch (error) {
-        console.error(`Error renaming file for videoId: ${videoId}, error: ${error}`);
         return {
-            status: 'error',
+            status: responseStatus.ERROR,
             message: `Failed to rename video file for ${videoId}`,
         };
     }
@@ -154,7 +148,7 @@ const deleteVideoDetails = async (videoId = '') => {
     const deleteDbStatus = deleteVideo(videoId);
     if (deleteDbStatus) {
         const deleteFileStatus = await removeFile(getVideoFullPath(videoData.path), getTrashBinPath());
-        return deleteFileStatus.status === 'success';
+        return deleteFileStatus.status === responseStatus.SUCCESS;
     }
 };
 
@@ -236,7 +230,7 @@ const importVideoFromWatchedDirectory = async (videoDetails, destinationCollecti
             }
 
             return Promise.resolve({
-                status: 'success',
+                status: responseStatus.SUCCESS,
                 data: {
                     videoDetails: newMediaStats,
                 },
@@ -248,7 +242,7 @@ const importVideoFromWatchedDirectory = async (videoDetails, destinationCollecti
                 error: err,
             });
             return Promise.reject({
-                status: 'error',
+                status: responseStatus.ERROR,
                 data: {
                     videoDetails: videoDetails,
                     error: err,

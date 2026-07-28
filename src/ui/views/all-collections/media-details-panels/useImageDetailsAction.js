@@ -62,6 +62,10 @@ const useImageDetailsAction = (imageDetails, onDetailsChange) => {
             alert(
                 'Your image is moved to the new collection. You will temporary see the image in this collection till you are in this collection.',
             );
+            onDetailsChange({
+                change: 'importToCollectionStart',
+                data: { mediaId: mediaId },
+            });
         } else {
             dispatchContext({
                 type: applicationEvents.APP_STATUS_UPDATE,
@@ -73,7 +77,7 @@ const useImageDetailsAction = (imageDetails, onDetailsChange) => {
             });
             onDetailsChange({
                 change: 'importToCollectionStart',
-                data: { videoId: videoId },
+                data: { mediaId: mediaId },
             });
             window.api.send(ipcChannels.NOTIFY_MAIN_PROCESS, {
                 event: rendererEvents.IMPORT_MEDIA_TO_COLLECTION,
@@ -101,7 +105,7 @@ const useImageDetailsAction = (imageDetails, onDetailsChange) => {
                 setUpdatedImageDetails(imageDetails);
             }
         }
-    }, [imageDetails.id]);
+    }, [imageDetails.id, stateContext.collections]);
 
     const refreshshImageDetails = (eventSource = '') => {
         window.api.getFullImageDetails(imageDetails.id).then((response) => {

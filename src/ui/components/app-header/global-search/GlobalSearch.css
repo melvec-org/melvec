@@ -38,14 +38,14 @@ input.globalSearchInput {
 
 .relatedSearch,
 .searchResults {
-    max-width: 900px;
+    max-width: 1000px;
     align-self: center;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1000px) {
     .relatedSearch,
     .searchResults {
-        width: 900px;
+        width: 1000px;
     }
 }
 
@@ -73,6 +73,7 @@ input.globalSearchInput {
     padding: 0 5px;
     color: var(--secondary-copy-color);
     font-size: 0.7rem;
+    white-space: nowrap;
 }
 
 .relatedSearch,
@@ -234,4 +235,14 @@ input.globalSearchInput {
 .suggestionsFloatingPanelSection {
     padding: 5px 10px;
     border-bottom: 1px solid var(--app-bar-border-color);
+}
+
+.headerControlBarSearchResults {
+    flex-wrap: wrap !important;
+}
+
+@media (min-width: 1000px) {
+    .headerControlBarSearchResults {
+        flex-wrap: nowrap;
+    }
 }

@@ -88,6 +88,11 @@ const ipcChannels = {
     ZOOM_FACTOR_CHANGE_ACTION: 'zoomFactorChanged',
 
     THEME_CHANGE_ACTION: 'themeChangeAction',
+
+    /**
+     * This helps in moving logo on frullscreen
+     */
+    APP_WINDOWS_ACTION: 'applicationWindowsAction',
 };
 
 module.exports = ipcChannels;

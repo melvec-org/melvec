@@ -22,7 +22,7 @@ const CollectionEditForm = ({ collections, onCancel, onCollectionSelect, presele
 
     return (
         <div>
-            <h3>Change collection"</h3>
+            <h3>Change collection</h3>
             <div className="mt15">
                 {selectedCollection && (
                     <select onChange={onSelectionChange} spellCheck={false} value={selectedCollection.id}>

@@ -454,8 +454,19 @@ const useGlobalSearchAction = () => {
                     });
                 }
             });
-        } else {
-            // ignore
+        } else if (item.mediaType === mediaTypes.AUDIO) {
+            window.api.getFullAudioDetails(item.id).then((response) => {
+                if (response.status === responseStatus.SUCCESS && response.data) {
+                    const collectionToJump = applicationContext.collections.find((item) => item.id === response.data.collectionId);
+                    dispatchContext({
+                        type: applicationEvents.GOTO_COLLECTION,
+                        payload: {
+                            selectedCollection: collectionToJump,
+                            selectedVideoId: response.data.id,
+                        },
+                    });
+                }
+            });
         }
     };
 

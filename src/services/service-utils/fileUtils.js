@@ -175,10 +175,10 @@ const removeFile = async (filePath = '', trashbinPath = '') => {
             to: destinationPath,
         };
     } catch (err) {
-        console.error(`Error removing file: ${err.message}`);
         return {
             status: 'failure',
             message: err.message,
+            code: err.code,
             from: filePath,
             to: trashbinPath || '',
         };

@@ -5,6 +5,7 @@ import Thumbnail from '../thumbnail/Thumbnail';
 import onMissingThumbnailFound from '../../../utils/thumbnailCreationService';
 import { useApplicationContext } from '__contexts/app.context';
 import { formatTime } from '../../../utils/timeUtils';
+import mediaTypes from '__constants/mediaTypes';
 
 const VideoTile = ({
     thumbnailURL = '',
@@ -16,6 +17,7 @@ const VideoTile = ({
     tabIndex,
     isfocused = 'false',
     selected = false,
+    mediaType = mediaTypes.VIDEO,
     duration = null,
 }) => {
     const [stateContext] = useApplicationContext();
@@ -43,6 +45,7 @@ const VideoTile = ({
                 isNsfw={item.isNsfw}
                 hideNsfwContent={Boolean(stateContext?.userPreferences?.hideNsfwContent)}
                 previewPath={item?.previewPath}
+                mediaType={mediaType}
                 showVideoPreviewOnHover={Boolean(stateContext?.userPreferences?.showVideoPreviewOnHover)}
             />
             <div className={style.descContainer}>

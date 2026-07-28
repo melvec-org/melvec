@@ -7,7 +7,6 @@ const {
     getAllCollectionNames,
     getCollectionDetailsById,
     addCollection,
-    addMediaToCollection,
     renameCollectionLabel,
     deleteCollection,
     clearCollectionCache,
@@ -40,22 +39,6 @@ const getVideosByCollections = (collectionIds = []) => {
     });
 
     return videos;
-};
-
-/**
- * Move media from one collection to another collection.
- * Note that this only updates collection membership here.
- * Physical file movement is handled elsewhere.
- * @param {string} mediaId
- * @param {string} sourceCollId
- * @param {string} destinationCollId
- */
-const moveMediaFromOneCollectionToAnother = (mediaId = '', sourceCollId = '', destinationCollId = '') => {
-    addMediaToCollection(destinationCollId, mediaId);
-};
-
-const moveVideoFromOneCollectionToAnother = (videoId = '', sourceCollId = '', destinationCollId = '') => {
-    moveMediaFromOneCollectionToAnother(videoId, sourceCollId, destinationCollId);
 };
 
 // when you create a collection without any media inside it.
@@ -177,11 +160,8 @@ module.exports = {
     getVideosByCollection,
 
     getVideosByCollections,
-    addMediaToCollection,
 
     addNewCollection,
-    moveMediaFromOneCollectionToAnother,
-    moveVideoFromOneCollectionToAnother,
     renameCollectionLabel,
     renameCollection,
     removeCollection,

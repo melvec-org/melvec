@@ -5,6 +5,7 @@ const serviceEventBus = require('../service-utils/serviceEventBus');
 const interServiceEvents = require('../../events/interServiceEvents');
 const debounce = require('../service-utils/debounce');
 const sortByOccurenceAndIndex = require('../search/sortByOccurenceAndIndex');
+const { respondSuccess } = require('../service-utils/sendToUI');
 
 let actionHistory = {};
 let actionHistoryDbPath = '';
@@ -99,10 +100,7 @@ const clearAllActionHistory = () => {
     actionHistory = defaultActionHistoryData;
 
     saveActionHistory();
-    return {
-        status: 'success',
-        message: 'Action history cleared successfully',
-    };
+    return respondSuccess('All action history cleared successfully');
 };
 
 // ====================== Playlists =========================

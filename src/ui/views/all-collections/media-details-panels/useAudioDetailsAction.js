@@ -63,6 +63,10 @@ const useAudioDetailsAction = (audioDetails, onDetailsChange) => {
             alert(
                 'Your audio is moved to the new collection. You will temporary see the audio in this collection till you are in this collection.',
             );
+            onDetailsChange({
+                change: 'importToCollectionStart',
+                data: { mediaId: mediaId },
+            });
         } else {
             dispatchContext({
                 type: applicationEvents.APP_STATUS_UPDATE,
@@ -102,7 +106,7 @@ const useAudioDetailsAction = (audioDetails, onDetailsChange) => {
                 setUpdatedAudioDetails(audioDetails);
             }
         }
-    }, [audioDetails.id]);
+    }, [audioDetails.id, stateContext.collections]);
 
     const refreshshAudioDetails = (eventSource = '') => {
         window.api.getFullAudioDetails(audioDetails.id).then((response) => {

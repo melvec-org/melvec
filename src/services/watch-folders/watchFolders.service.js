@@ -184,6 +184,8 @@ const _runBulkImport = async (mediaList, newCollection) => {
                         data = await importImageFromWatchedDirectory(mediaDetails, newCollection);
                     } else if (mediaDetails.mediaType === mediaTypes.VIDEO) {
                         data = await importVideoFromWatchedDirectory(mediaDetails, newCollection);
+                    } else if (mediaDetails.mediaType === mediaTypes.AUDIO) {
+                        data = await importAudioFromWatchedDirectory(mediaDetails, newCollection);
                     }
 
                     if (data?.status === responseStatus.SUCCESS) {

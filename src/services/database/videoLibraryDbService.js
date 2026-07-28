@@ -29,7 +29,6 @@ const getAllVideos = () => {
 
         return stmt.all().map((video) => {
             const relPath = getRelativeMediaPath(video.year, video.coll, video.name, video.id);
-
             video.path = relPath;
             return video;
         });
@@ -188,12 +187,13 @@ const updateVideoDetails = (video) => {
 
     try {
         const info = db.transaction(() => {
-            const result = stmt.run(name, birthtimeMs, collection_id, year, title, size, duration, source, is_nsfw, id);
+            const result = stmt.run(name, birthtimeMs, collection_id, year, title, size, duration, source, is_nsfw, path, id);
             return result;
         })();
 
         if (info.changes > 0) {
             const video = getVideoDetailsById(id, true);
+
             videoCache.set(id, video);
             return video;
         }

@@ -16,6 +16,7 @@ const {
 } = require('../service-utils/registerDownloadsHandlers');
 const { logSystemError } = require('../logs/logService');
 const aiModelsErrors = require('./aiModels.errors');
+const responseStatus = require('../../constants/responseStatus');
 
 /**
  * Returns the list of configured AI model tiers from the application config.
@@ -345,7 +346,7 @@ const downloadModels = async (modelTier, onProgress) => {
 
     if (pendingItems.length === 0) {
         lastDownloadProgress = {
-            status: 'success',
+            status: responseStatus.SUCCESS,
             overall: { receivedBytes: 0, totalBytes: 0, percent: 100 },
             currentItem: null,
             error: null,

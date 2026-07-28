@@ -12,6 +12,7 @@ const ResultTiles = ({ resultList, onSearchResultItemClick }) => {
                             thumbnailURL={item.thumbnailURL}
                             title={item.name}
                             variant="row"
+                            mediaType={item.mediaType}
                             onClick={() => {
                                 onSearchResultItemClick(item);
                             }}

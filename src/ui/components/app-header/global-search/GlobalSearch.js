@@ -352,7 +352,7 @@ const GlobalSearch = () => {
                                                 className={style.searchSuggestionVideo}
                                                 isfocused={currentFocusPointer.target === item.id ? 'true' : 'false'}
                                             >
-                                                <Thumbnail url={item.thumbnailURL} variant="xs" />
+                                                <Thumbnail url={item.thumbnailURL} variant="xs" mediaType={item.mediaType} />
                                                 <span className="ml10">{item.name}</span>
                                             </span>
                                         </li>
@@ -422,6 +422,7 @@ const GlobalSearch = () => {
                                                         url={item.thumbnailURL}
                                                         variant="xs"
                                                         isNsfw={item.isNsfw}
+                                                        mediaType={item.mediaType}
                                                         hideNsfwContent={Boolean(stateContext?.userPreferences?.hideNsfwContent)}
                                                     />
                                                     <span className="ml10">{item.name}</span>

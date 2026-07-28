@@ -1,5 +1,4 @@
-const interServiceEvents = require('../../events/interServiceEvents');
-const { respond, respondSuccess } = require('../service-utils/sendToUI');
+const { respond, respondSuccess, respondError } = require('../service-utils/sendToUI');
 const {
     initImageLibraryService,
     getFullImageDetailsById,
@@ -12,8 +11,8 @@ const {
     renameImageFile,
     resetImagesMetaData,
 } = require('./imageLibrary');
-const serviceEventBus = require('../service-utils/serviceEventBus');
-const indexingEvents = require('../../events/indexingEvents');
+
+const responseStatus = require('../../constants/responseStatus');
 
 const getImageDetailsService = (imageId) => {
     const imageDetails = getImageDetailsById(imageId);
@@ -58,37 +57,22 @@ const getFullImageDetailsService = (imageId) => {
 };
 
 /**
- * Deletes a single library image.
- *   - 'user' initiator: removes the physical file (moved to trash) and DB record,
- *     then publishes DELETE_IMAGE (thumbnail cleanup) and INDEX_DATA_CHANGED (search index update).
- *   - 'ENOENT' initiator: file is already gone from disk — skips physical deletion,
- *     removes only the DB record and triggers reindexing.
- *
- * Returns a plain { status, imageId } — no respond* wrapping — so it can be consumed
- * directly by removeMediaService (single) and _deleteSingleLibraryMediaService (bulk).
- * The looping responsibility belongs to the caller in commonMediaService.
- *
  * @param {string} imageId   - ID of the image to delete
  * @param {string} initiator - 'user' | 'ENOENT'
  * @returns {Promise<{ status: 'success'|'failed', imageId: string }>}
  */
-const removeImageFromLibrary = async (imageId, initiator) => {
-    if (initiator !== 'ENOENT') {
-        // User intentionally deleted the image — remove the physical file (moved to trash)
-        // and DB record, then signal the rest of the app that this image no longer exists.
-        const isDeleteSuccess = await deleteImageDetails(imageId);
+const removeImageFromLibraryService = async (imageId, initiator) => {
+    try {
+        const deleteAction = await deleteImageDetails(imageId, initiator);
 
-        if (!isDeleteSuccess) {
-            return { status: 'failed', imageId };
+        if (deleteAction.status === responseStatus.SUCCESS) {
+            return respondSuccess('Image deleted successfully', deleteAction.imageId);
+        } else {
+            return respondFailure('Failed to delete image', deleteAction.message);
         }
+    } catch (error) {
+        return respondError(`Error: ${error.message}`);
     }
-
-    // File already gone from disk (ENOENT), or user delete succeeded —
-    // publish events so thumbnail and search index are cleaned up.
-    serviceEventBus.publish(interServiceEvents.DELETE_IMAGE, { imageId });
-    serviceEventBus.publish(interServiceEvents.INDEX_DATA_CHANGED, { change: indexingEvents.IMAGE_DELETE, imageId });
-
-    return { status: 'success', imageId };
 };
 
 module.exports = {
@@ -97,7 +81,7 @@ module.exports = {
     getImageDetailsService,
     getAllImageIdsService,
     deleteImageDetails,
-    removeImageFromLibrary,
+    removeImageFromLibraryService,
     moveImage,
     importImageFromWatchedDirectory,
     updateImageTitleService,

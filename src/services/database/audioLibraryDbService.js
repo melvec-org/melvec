@@ -317,7 +317,7 @@ const updateAudioDetails = (audio) => {
     }
 };
 
-const deleteAudio = async (id) => {
+const deleteAudioFromDb = async (id) => {
     ensureDbInitialized();
     const stmt = db.prepare('DELETE FROM audios WHERE id = ?');
 
@@ -722,7 +722,7 @@ module.exports = {
     checkForDuplicateAudio,
     addAudio,
     updateAudioDetails,
-    deleteAudio,
+    deleteAudioFromDb,
     checkAudioExists,
     updateAudioSource,
     updateAudioDescription,

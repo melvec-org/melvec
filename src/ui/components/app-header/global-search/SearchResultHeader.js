@@ -43,7 +43,7 @@ const SearchResultHeader = ({
     }));
 
     return (
-        <HeaderControlBar>
+        <HeaderControlBar overrideClass={style.headerControlBarSearchResults}>
             <HeaderControlBarLeft>
                 <h2 className={style.searchResultHeader}>
                     Top Results <span className={style.searchResultHeaderMeta}>({totalCount} matches)</span>

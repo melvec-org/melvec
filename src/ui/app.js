@@ -178,12 +178,24 @@ const App = () => {
             document.documentElement.style.setProperty('--zoom-factor', zoomFactor);
         };
 
+        const windowFullScreenHandler = (isFullscreen) => {
+            const html = document.documentElement;
+
+            if (isFullscreen) {
+                html.classList.add('fullscreen');
+            } else {
+                html.classList.remove('fullscreen');
+            }
+        };
+
         window.api.receive(ipcChannels.NOTIFY_RENDERER_PROCESS, notifyRendererHandler);
         window.api.receive(ipcChannels.ZOOM_FACTOR_CHANGE_ACTION, zoomFactorChangeHandler);
+        window.api.receive(ipcChannels.APP_WINDOWS_ACTION, windowFullScreenHandler);
 
         return () => {
             window.api.stop(ipcChannels.NOTIFY_RENDERER_PROCESS, notifyRendererHandler);
             window.api.stop(ipcChannels.ZOOM_FACTOR_CHANGE_ACTION, zoomFactorChangeHandler);
+            window.api.stop(ipcChannels.APP_WINDOWS_ACTION, windowFullScreenHandler);
         };
     }, []);
 
