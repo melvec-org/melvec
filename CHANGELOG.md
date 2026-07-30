@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+No udpates here.
+--
+
+## [0.2.2] - 2026-07-30
+
+### Changed
+
+- Updated help docs
+
+### Added
+
+- Server side utility for checking if AI is active.
+
+### Fixed
+
+- Fixed the error that user see when the close the app.
+- Saving description taking long when AI is disabled.
+
 ## [0.2.1] - 2026-07-28
 
 ### Added

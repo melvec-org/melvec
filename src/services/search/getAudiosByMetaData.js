@@ -3,6 +3,7 @@ const userPreferenceStore = require('../../main/userPreferenceStore');
 const { cleanSearchTerms } = require('../service-utils/cleanSearchQuery');
 const cosineSimilarityVector = require('../related-videos/cosineSimilarityVector');
 const { generateEmbeddingFromKeywords } = require('../service-utils/generateEmbedding');
+const { isAIActive } = require('../service-utils/ai');
 
 const dedupeCandidates = (...candidateLists) => {
     const uniqueCandidates = new Map();
@@ -73,7 +74,7 @@ const getAudiosByMetaData = async (keywords, isQuickSearch = true) => {
 
     const strictCandidates = searchAudiosByDescription(normalizedKeywords);
 
-    if (!isAIEnabled) {
+    if (!isAIActive()) {
         return normalizeMatches(strictCandidates);
     }
 

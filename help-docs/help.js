@@ -13,12 +13,11 @@ window.helpApi.on('helpGotoSection', (event, sectionId) => {
 
 const contentMap = {
     'getting-started': 'getting-started.html',
-    'how-to-use': 'how-to-use.html',
-    'trouble-shooting': 'usage.html',
-    'trouble-shooting': 'trouble-shooting.html',
-    faqs: 'faq.html',
-    about: 'about.html',
-    'release-notes': 'release-notes.html',
+    'organizing-your-media': 'organize-your-media.html',
+    'ai-features': 'ai-features.html',
+    searching: 'search.html',
+    tips: 'tip-shortcuts.html',
+    'support-about': 'about.html',
     license: 'license.html',
 };
 // load section from help-docs folder and replace content within #main

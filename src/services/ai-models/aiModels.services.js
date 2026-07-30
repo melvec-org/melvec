@@ -1,3 +1,4 @@
+const userPreferenceStore = require('../../main/userPreferenceStore');
 const responseStatus = require('../../constants/responseStatus');
 const mainThreadEvents = require('../../events/mainThreadEvents');
 const { respondSuccess, respondError, streamToUI } = require('../service-utils/sendToUI');
@@ -74,6 +75,17 @@ const downloadAIModelsService = (modelTier) => {
 const checkForModelFilesService = (modelTier) => {
     try {
         const modelsFileStatus = checkForModels(modelTier);
+        if (modelsFileStatus.status === 'OK') {
+            userPreferenceStore.set('ai', {
+                modelTier: modelTier,
+                isDownloaded: true,
+            });
+        } else {
+            userPreferenceStore.set('ai', {
+                modelTier: modelTier,
+                isDownloaded: false,
+            });
+        }
         return respondSuccess('', modelsFileStatus);
     } catch (e) {
         return respondError('Some problem with checking models');

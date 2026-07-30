@@ -8,7 +8,8 @@ const { getModelTier } = require('../ai-models/models');
 const { createJobQueue } = require('../service-utils/jobQueue');
 const mainThreadEvents = require('../../events/mainThreadEvents');
 const path = require('path');
-const userPreferenceStore = require('../../main/userPreferenceStore');
+
+const { isAIActive } = require('../service-utils/ai');
 
 const audioDescriptionJobQueue = createJobQueue({
     processJob: async (config) => {
@@ -123,8 +124,7 @@ const stopBatchAudioMetaDataGenerationService = () => {
 const setAudioDescriptionService = async (audioId, description) => {
     try {
         // use embedding if ai is enabled and description is not empty
-        const isAiEnabled = userPreferenceStore.get('isAIEnabled');
-        if (isAiEnabled) {
+        if (isAIActive()) {
             const embedding = await getEmbedding(audioId, description);
             updateAudioMetaData(audioId, description, embedding);
         } else {

@@ -1,7 +1,7 @@
 const { searchFromMetaData, searchLooseFromMetaData } = require('../database/metaDataDbService');
-const userPreferenceStore = require('../../main/userPreferenceStore');
 const { getSemanticMatches } = require('./getSemanticMatches');
 const { cleanSearchTerms } = require('../service-utils/cleanSearchQuery');
+const { isAIActive } = require('../service-utils/ai');
 
 const dedupeCandidates = (...candidateLists) => {
     const uniqueCandidates = new Map();
@@ -63,13 +63,12 @@ const getVideosByMetaData = async (keywords, isQuickSearch = true) => {
     const normalizedKeywords = String(keywords || '').trim();
     const effectiveTerms = cleanSearchTerms(normalizedKeywords) || [];
     const keywordCount = effectiveTerms.length;
-    const isAIEnabled = userPreferenceStore.get('isAIEnabled');
 
     if (keywordCount === 0) return [];
 
     const strictCandidates = searchFromMetaData(normalizedKeywords);
 
-    if (!isAIEnabled) {
+    if (!isAIActive()) {
         return normalizeMatches(strictCandidates);
     }
 
