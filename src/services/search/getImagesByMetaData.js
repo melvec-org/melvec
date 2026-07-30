@@ -3,6 +3,7 @@ const userPreferenceStore = require('../../main/userPreferenceStore');
 const { cleanSearchTerms } = require('../service-utils/cleanSearchQuery');
 const cosineSimilarityVector = require('../related-videos/cosineSimilarityVector');
 const { generateEmbeddingFromKeywords } = require('../service-utils/generateEmbedding');
+const { isAIActive } = require('../service-utils/ai');
 
 const dedupeCandidates = (...candidateLists) => {
     const uniqueCandidates = new Map();
@@ -67,13 +68,12 @@ const getImagesByMetaData = async (keywords, isQuickSearch = true) => {
     const normalizedKeywords = String(keywords || '').trim();
     const effectiveTerms = cleanSearchTerms(normalizedKeywords) || [];
     const keywordCount = effectiveTerms.length;
-    const isAIEnabled = userPreferenceStore.get('isAIEnabled');
 
     if (keywordCount === 0) return [];
 
     const strictCandidates = searchImagesByDescription(normalizedKeywords);
 
-    if (!isAIEnabled) {
+    if (!isAIActive()) {
         return normalizeMatches(strictCandidates);
     }
 

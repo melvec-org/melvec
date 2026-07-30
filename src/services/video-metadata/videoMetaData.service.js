@@ -1,5 +1,4 @@
-const { generateTranscriptAsync, getAudioTranscript } = require('./generateTranscript');
-
+const { generateTranscriptAsync } = require('./generateTranscript');
 const {
     initializeMetadataDbService,
     getShortVideoDescriptionById,
@@ -22,6 +21,7 @@ const { createJobQueue } = require('../service-utils/jobQueue');
 const mainThreadEvents = require('../../events/mainThreadEvents');
 const { getBasicVideoDetailsById } = require('../video-library/videoLibrary.service');
 const indexingEvents = require('../../events/indexingEvents');
+const { isAIActive } = require('../service-utils/ai');
 
 const notifyIntegrityChange = (videoId) => {
     serviceEventBus.publish(interServiceEvents.INDEX_DATA_CHANGED, {
@@ -96,9 +96,13 @@ const setVideoMetaDataDescriptionService = async (videoId, description) => {
     try {
         setDescription(videoId, description, 'user');
         notifyIntegrityChange(videoId);
-        // extract normalized description and embedding based on the new description.
-        const embeddingData = await generateEmbeddingsFromDescription(videoId, description);
-        setEmbeddingData(videoId, embeddingData);
+
+        if (isAIActive()) {
+            // extract normalized description and embedding based on the new description.
+            const embeddingData = await generateEmbeddingsFromDescription(videoId, description);
+            setEmbeddingData(videoId, embeddingData);
+        }
+
         return respondSuccess('Video metadata description updated successfully', description);
     } catch (error) {
         return respondError(error);

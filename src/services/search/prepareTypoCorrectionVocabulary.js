@@ -4,7 +4,7 @@ const { getMetaDataById } = require('../database/metaDataDbService');
 const { getTags } = require('../database/tagsDbService');
 const { getPlaylists } = require('../database/playlistsDbService');
 const { saveVocabulary, getVocabulary } = require('../database/vocabularyDbServices');
-const { getAllImageIds, getFullImageDetailsById } = require('../image-library/imageLibrary');
+const { getAllImageIds } = require('../image-library/imageLibrary');
 const { getImageDetailsById, getImageDescriptionById, getImageTitlesAndDescriptionsByIds } = require('../database/imageLibraryDbService');
 
 const VOCABULARY_BATCH_SIZE = 200;

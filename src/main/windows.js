@@ -52,12 +52,6 @@ function createWindow({ app, isDev, onWindowCreated }) {
         bootstrap(win.webContents);
     });
 
-    win.on('closed', () => {
-        if (global.webContents === win.webContents) {
-            global.webContents = null;
-        }
-    });
-
     win.webContents.on('zoom-changed', () => {});
 
     win.on('enter-full-screen', () => {

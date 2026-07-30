@@ -1,7 +1,7 @@
 {
     "name": "Melvec",
-    "version": "0.2.1",
-    "description": "Your personal media library management tool",
+    "version": "0.2.2",
+    "description": "Your personal media library management tool.",
     "author": {
         "name": "Pradyumna Ghose",
         "email": "hello@melvec.org",

@@ -8,6 +8,7 @@ const { getModelTier } = require('../ai-models/models');
 const { createJobQueue } = require('../service-utils/jobQueue');
 const mainThreadEvents = require('../../events/mainThreadEvents');
 const path = require('path');
+const { isAIActive } = require('../service-utils/ai');
 
 const imageDescriptionJobQueue = createJobQueue({
     processJob: async (config) => {
@@ -121,8 +122,13 @@ const stopBatchImageMetaDataGenerationService = () => {
 
 const setImageDescriptionService = async (imageId, description) => {
     try {
-        const embedding = await getEmbedding(imageId, description);
-        updateImageMetaData(imageId, description, embedding);
+        if (isAIActive()) {
+            const embedding = await getEmbedding(imageId, description);
+            updateImageMetaData(imageId, description, embedding);
+        } else {
+            updateImageMetaData(imageId, description, '');
+        }
+
         return respondSuccess('Image description updated successfully', description);
     } catch (error) {
         return respondError(`Failed to set image description: ${error.message}`);
