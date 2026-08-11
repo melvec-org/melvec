@@ -26,6 +26,7 @@ const { updateSource, deleteVideo } = require('../database/videoLibraryDbService
 const mediaTypes = require('../../constants/mediaTypes');
 const indexingEvents = require('../../events/indexingEvents');
 const responseStatus = require('../../constants/responseStatus');
+const { getLocationNameByMediaId } = require('../location/location');
 
 const _getBasicVideoDetailsById = (videoId) => {
     if (videoId === undefined) {
@@ -78,6 +79,7 @@ const _getFullVideoDetailsById = (videoId) => {
         videoDetails.rating = metaData.rating;
         videoDetails.playlists = getPlaylistsByVideoId(videoId);
         videoDetails.tags = getTagsByVideoId(videoId);
+        videoDetails.locationName = getLocationNameByMediaId(mediaTypes.VIDEO, videoId);
 
         return videoDetails;
     }

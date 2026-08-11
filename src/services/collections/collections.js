@@ -17,6 +17,7 @@ const { getVideoDetailsById } = require('../video-library/videoLibrary');
 const { getLibDir } = require('../servicePathConfig');
 const { renameDirectory, removeEmptyDirectories } = require('../service-utils/fileUtils');
 const indexingEvents = require('../../events/indexingEvents');
+const mediaTypes = require('../../constants/mediaTypes');
 
 const getMediaByCollection = (collectionId) => {
     const collection = getCollectionDetailsById(collectionId);
@@ -27,7 +28,7 @@ const getMediaByCollection = (collectionId) => {
 const getVideosByCollection = (collectionId) => {
     const media = getMediaByCollection(collectionId);
 
-    return media.filter((item) => item.mediaType === 'video').map((item) => item.id);
+    return media.filter((item) => item.mediaType === mediaTypes.VIDEO).map((item) => item.id);
 };
 
 const getVideosByCollections = (collectionIds = []) => {

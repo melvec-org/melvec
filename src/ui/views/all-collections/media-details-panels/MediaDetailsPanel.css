@@ -1,7 +1,7 @@
 .mediaDetailsPanel {
     flex: 1;
     padding: 15px;
-    border-left: 1px solid var(--devider-color);
+    border-left: 1px solid var(--panel-devider-color);
     height: calc(100vh - 50px);
     overflow-y: auto;
 }
@@ -9,7 +9,7 @@
 .mediaDetailsPanelFooter {
     margin-top: 10px;
     padding: 10px;
-    border-top: 1px solid var(--devider-color);
+    border-top: 1px solid var(--panel-devider-color);
     display: flex;
     align-items: center;
     justify-content: center;

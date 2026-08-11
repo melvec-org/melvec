@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### added
+
+- Ground work for understanding search intent- added search planner which will drill down the content to search
+- Location service and showing location in image and video details panel.
+
+### Fixed
+
+- Enhancement to build job
+- Theme regresssion of colors fixed.
+
 No udpates here.
 --
 

@@ -22,6 +22,7 @@ const {
     removeWatchFolderMediaByWatchFolderId,
 } = require('../database/watchFoldersDbService');
 const responseStatus = require('../../constants/responseStatus');
+const mediaTypes = require('../../constants/mediaTypes');
 
 const searchMediaByWatchFolder = (watchFolder) => {
     const excludeDirList = [];
@@ -48,7 +49,7 @@ const addMediaMetricsToScannedItem = async (scannedItemData) => {
     scannedItemData.id = await generateMediaId(scannedItemData.path);
     scannedItemData.mediaType = getMediaTypeFromPath(scannedItemData.path);
 
-    if (scannedItemData.mediaType === 'video') {
+    if (scannedItemData.mediaType === mediaTypes.VIDEO) {
         scannedItemData.duration = await getVideoDuration(scannedItemData.path);
     } else {
         scannedItemData.duration = null;

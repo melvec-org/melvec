@@ -21,7 +21,7 @@
 }
 
 .sideBarSmall {
-    border: 1px solid var(--devider-color);
+    border: 1px solid var(--panel-devider-color);
     border-top: none;
 }
 

@@ -17,6 +17,7 @@ const Collections = ({
     headerControls = null,
     isCollapsed = false,
     onToggleCollapse = null,
+    onCollectionDoubleClick = null,
 }) => {
     let collectionWrapperClass = isSingleCollection ? style.singleCollectionWrapper : style.collectionWrapper;
     const [collectionWithYear, setCollectionWithYear] = useState([]);
@@ -86,6 +87,7 @@ const Collections = ({
                                                 key={item.id}
                                                 title={`${item.year}/${item.label}`}
                                                 onClick={() => onCollectionItemClick(item, collectionsName)}
+                                                onDoubleClick={(e) => onCollectionDoubleClick(item)}
                                                 tabIndex={0}
                                                 onKeyDown={(e) => {
                                                     if (e.key === 'Enter') {

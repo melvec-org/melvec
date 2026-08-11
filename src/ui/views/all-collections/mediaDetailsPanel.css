@@ -1,7 +1,7 @@
 .mediaDetailsPanel {
     flex: 1;
     padding: 15px;
-    border-left: 1px solid var(--devider-color);
+    border-left: 1px solid var(--panel-devider-color);
     height: calc(100vh - 50px);
     overflow-y: auto;
 }

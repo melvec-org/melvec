@@ -1,4 +1,5 @@
 const fse = require('fs-extra');
+const exifr = require('exifr');
 const serviceEventBus = require('../service-utils/serviceEventBus');
 const systemConfig = require('../../configs/systemConfig');
 const path = require('path');
@@ -26,6 +27,7 @@ const { generateImageThumbnail } = require('../service-utils/generateImageThumbn
 
 const mediaTypes = require('../../constants/mediaTypes');
 const responseStatus = require('../../constants/responseStatus');
+const { extractGPSData } = require('../service-utils/extractGPSData');
 
 /**
  * Minimum gap in ms between consecutive file imports.
@@ -490,14 +492,6 @@ const importMedia = async (mediaList, libraryPath = '') => {
                         thumbnailFolder: getThumbnailsDir(),
                         videoId: operationData.newMediaStats?.id,
                     });
-                    /* const previewPath = await generateVideoPreview({
-                        videoPath: operationData?.fullPath,
-                        previewFolder: getPreviewsDir(),
-                        videoId: operationData.newMediaStats?.id,
-                    });
-                    if (previewPath) {
-                        operationData.newMediaStats.has_preview = true;
-                    }*/
                 } catch (e) {}
             }
 
@@ -511,6 +505,19 @@ const importMedia = async (mediaList, libraryPath = '') => {
                 } catch (e) {}
             }
 
+            let gpsData = null;
+            if (operationData.mediaType === mediaTypes.VIDEO) {
+                gpsData = await extractGPSData(operationData?.fullPath, operationData.mediaType);
+            } else if (operationData.mediaType === mediaTypes.IMAGE) {
+                gpsData = await exifr.parse(operationData?.fullPath, ['GPSLatitude', 'GPSLongitude']);
+            }
+
+            if (gpsData) {
+                if (gpsData.latitude && gpsData.longitude) {
+                    operationData.newMediaStats.latitude = gpsData.latitude;
+                    operationData.newMediaStats.longitude = gpsData.longitude;
+                }
+            }
             mediaList[i].imported = true;
             importedMediaCount++;
             filesSinceLastFlush++;

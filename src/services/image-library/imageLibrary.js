@@ -24,6 +24,7 @@ const { getTagsByImageId } = require('../database/tagsDbService');
 const { MAX_SHORT_DESCRIPTION_LENGTH } = require('../../configs/appConfig');
 const indexingEvents = require('../../events/indexingEvents');
 const responseStatus = require('../../constants/responseStatus');
+const { addMediaLocation, getLocationNameByMediaId } = require('../location/location');
 
 const updateImageDetailsById = (id = '', udpatedDetails = {}) => {
     if (id !== '') {
@@ -285,6 +286,9 @@ const onImportFileSuccess = (data) => {
 
     try {
         addImage(mediaStats);
+        if (mediaStats.latitude && mediaStats.longitude) {
+            addMediaLocation(mediaTypes.IMAGE, mediaStats.id, mediaStats.latitude, mediaStats.longitude);
+        }
     } catch (err) {
         // Treat duplicates as a non-fatal skip — any other error is logged for investigation.
         if (err.message?.includes('Duplicate ID')) {
@@ -336,6 +340,7 @@ const getFullImageDetailsById = (imageId = '') => {
 
     const tags = getTagsByImageId(imageId);
     const description = getImageDescriptionById(imageId);
+    const locationName = getLocationNameByMediaId(mediaTypes.IMAGE, imageId);
 
     const shortDesc = description ? description.slice(0, MAX_SHORT_DESCRIPTION_LENGTH) : '';
 
@@ -343,6 +348,7 @@ const getFullImageDetailsById = (imageId = '') => {
         ...imageDetails,
         tags,
         shortDesc,
+        locationName,
     };
 };
 

@@ -200,7 +200,7 @@ input.globalSearchInput {
 .searchResultsActions {
     padding: 10px 0;
     display: flex;
-    border-top: 1px solid var(--devider-color);
+    border-top: 1px solid var(--section-separator-color);
 }
 
 .suggestionsFloatingPanel {

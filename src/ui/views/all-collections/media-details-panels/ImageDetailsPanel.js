@@ -15,6 +15,7 @@ import mediaDetailsStyles from './MediaDetailsPanel.css';
 import useImageDetailsAction from './useImageDetailsAction';
 import EditableTagList from '__components/editable-tag-list/EditableTagList';
 import EditableDescription from '__components/editable-description/EditableDescription';
+import EditableLocation from '__components/editable-location/EditableLocation';
 
 const ImageDetailsPanel = ({ imageDetailsObj = null, onDetailsChange }) => {
     const [stateContext] = useApplicationContext();
@@ -123,6 +124,20 @@ const ImageDetailsPanel = ({ imageDetailsObj = null, onDetailsChange }) => {
                 <MetaDataLabel>Dimensions</MetaDataLabel>
                 <MetaDataValue>{imageDimensions || '-'}</MetaDataValue>
             </MetaDataRow>
+
+            {!updatedImageDetails.isExternal && updatedImageDetails.locationName !== null && (
+                <MetaDataRow>
+                    <MetaDataLabel>Location</MetaDataLabel>
+                    <MetaDataValue>
+                        <EditableLocation
+                            mediaId={updatedImageDetails.id}
+                            mediaType={mediaTypes.IMAGE}
+                            locationName={updatedImageDetails.locationName || ''}
+                            onEditComplete={refreshshImageDetails}
+                        />
+                    </MetaDataValue>
+                </MetaDataRow>
+            )}
 
             {updatedImageDetails.isExternal &&
                 !updatedImageDetails.isDuplicate &&

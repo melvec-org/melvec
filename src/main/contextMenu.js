@@ -1,6 +1,7 @@
 const contextMenuEvents = require('../events/contextMenuEvents');
 const ipcChannels = require('../constants/ipcChannels');
 const { isNonEmptyString } = require('../services/service-utils/ipcValidation');
+const mediaTypes = require('../constants/mediaTypes');
 
 /**
  * Builds and shows a context menu based on the renderer-provided source.
@@ -74,7 +75,7 @@ function showContextMenu({ event, arg, BrowserWindow, Menu, shell }) {
         return;
     }
 
-    if (arg.source === 'video') {
+    if (arg.source === mediaTypes.VIDEO) {
         const fullVideoPath = arg?.data?.path;
         if (!isNonEmptyString(fullVideoPath)) {
             console.error('Rejected invalid video path for context menu reveal action');

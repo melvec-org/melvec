@@ -5,7 +5,7 @@
 }
 
 .tabHeaderContainer {
-    border-bottom: 1px solid var(--devider-color);
+    border-bottom: 1px solid var(--section-separator-color);
     display: flex;
 }
 .tabHeader {

@@ -49,7 +49,9 @@ const getImageDetailsById = (id, skipCache = false) => {
                 i.birthtimeMs,
                 i.size,
                 i.source,
-                i.is_nsfw
+                i.is_nsfw,
+                i.latitude,
+                i.longitude
             FROM images i
             LEFT JOIN collections c ON c.id = i.collection_id
             WHERE i.id = ?
@@ -144,6 +146,8 @@ const addImage = (image) => {
         description = '',
         source = 'local',
         is_nsfw = 0,
+        latitude = 0,
+        longitude = 0,
     } = image;
 
     const requiredFields = { id, name, role, path, collection_id, birthtimeMs, size, description, source, is_nsfw };
@@ -208,14 +212,30 @@ const addImage = (image) => {
             size,
             description,
             source,
-            is_nsfw
+            is_nsfw,
+            latitude,
+            longitude
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     try {
         db.transaction(() => {
-            stmt.run(id, name, title, role, path, collection_id, birthtimeMs, size, normalisedDescription, source, is_nsfw);
+            stmt.run(
+                id,
+                name,
+                title,
+                role,
+                path,
+                collection_id,
+                birthtimeMs,
+                size,
+                normalisedDescription,
+                source,
+                is_nsfw,
+                latitude,
+                longitude,
+            );
         })();
 
         const imageDetails = getImageDetailsById(id);

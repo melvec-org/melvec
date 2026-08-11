@@ -20,6 +20,7 @@ import ipcChannels from '__constants/ipcChannels';
 import EditableCategory from '__components/editable-category/EditableCategory';
 import { MetaDataRow, MetaDataHeader, MetaDataLabel, MetaDataValue } from '__components/core-components/meta-data/MetaData';
 import mediaTypes from '__constants/mediaTypes';
+import EditableLocation from '__components/editable-location/EditableLocation';
 
 const VideoDetailsPanel = ({ videoDetailsObj = null, onDetailsChange, playPreview }) => {
     const [stateContext] = useApplicationContext();
@@ -51,7 +52,7 @@ const VideoDetailsPanel = ({ videoDetailsObj = null, onDetailsChange, playPrevie
     const onContextMenuClick = (event, path) => {
         event.preventDefault();
         window.api.send(ipcChannels.CONTEXT_MENU_REQUEST, {
-            source: 'video',
+            source: mediaTypes.VIDEO,
             data: {
                 path: path,
             },
@@ -128,6 +129,19 @@ const VideoDetailsPanel = ({ videoDetailsObj = null, onDetailsChange, playPrevie
                 <MetaDataLabel>Video Quality</MetaDataLabel>
                 <MetaDataValue>{videoWidthHeight}</MetaDataValue>
             </MetaDataRow>
+            {!updatedVideoDetails.isExternal && updatedVideoDetails.locationName !== null && (
+                <MetaDataRow>
+                    <MetaDataLabel>Location</MetaDataLabel>
+                    <MetaDataValue>
+                        <EditableLocation
+                            mediaId={updatedVideoDetails.id}
+                            mediaType={mediaTypes.VIDEO}
+                            locationName={updatedVideoDetails.locationName || ''}
+                            onEditComplete={refreshshVideoDetails}
+                        />
+                    </MetaDataValue>
+                </MetaDataRow>
+            )}
             {!updatedVideoDetails.isExternal && (
                 <MetaDataRow>
                     <MetaDataLabel>Views</MetaDataLabel>

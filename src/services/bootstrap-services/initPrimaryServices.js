@@ -9,11 +9,13 @@ const { initAudioLibraryService } = require('../audio-library/audioLibrary.servi
 const { initVideoLibraryService } = require('../video-library/videoLibrary.service');
 const { initCollectionsService } = require('../collections/collections.service');
 const { initWatchFolderService } = require('../watch-folders/watchFolders.service');
+const { initLocationService } = require('../location/location.service');
 
 const initPrimaryServices = () => {
     initLibraryLogService();
     initApplicationSettings();
     initializeDatabase();
+    initLocationService();
     initVideoMetricsService();
     initTagService();
     initVideoCategoriesService();

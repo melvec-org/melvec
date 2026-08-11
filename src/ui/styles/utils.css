@@ -93,7 +93,8 @@
 
 :global hr {
     margin: 20px 0;
-    border-color: grey;
+    border-color: var(--section-separator-color);
+    border-width: 0.5px;
 }
 
 :global .freezedComponent {
