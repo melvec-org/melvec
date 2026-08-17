@@ -15,7 +15,7 @@ const locationIndexes = {
     tokens: new Map(),
 };
 
-const { getAllLocationNames } = require('src/services/location/location');
+const { getAllLocationNames } = require('../../location/location');
 const { STOP_WORDS } = require('../../../constants/stopWords');
 
 /**
@@ -24,7 +24,11 @@ const { STOP_WORDS } = require('../../../constants/stopWords');
  * @param {string} [query=''] Raw user query.
  * @returns {string[]} Ordered query words.
  */
-const normalizeWords = (query = '') => query.trim().split(/\s+/).filter(Boolean);
+const normalizeWords = (query = '') =>
+    query
+        .trim()
+        .split(/\s|\,\s+/)
+        .filter(Boolean);
 
 /**
  * Normalizes a phrase for case-insensitive lookups.

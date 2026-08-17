@@ -366,8 +366,8 @@ const getMediaIdsByClusterId = (clusterId) => {
     `);
 
     return [
-        ...imageStmt.all(clusterId).map(({ mediaId }) => ({ mediaType: mediaTypes.IMAGE, mediaId })),
-        ...videoStmt.all(clusterId).map(({ mediaId }) => ({ mediaType: mediaTypes.VIDEO, mediaId })),
+        ...imageStmt.all(clusterId).map(({ mediaId }) => ({ mediaType: mediaTypes.IMAGE, id: mediaId })),
+        ...videoStmt.all(clusterId).map(({ mediaId }) => ({ mediaType: mediaTypes.VIDEO, id: mediaId })),
     ];
 };
 

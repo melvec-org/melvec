@@ -1,4 +1,4 @@
-const { getFullVideoDetailsById, getBasicVideoDetailsById } = require('../video-library/videoLibrary.service');
+const { getBasicVideoDetailsById } = require('../video-library/videoLibrary.service');
 const { search, initSearch } = require('./search');
 const {
     initSearchHistoryService,
@@ -13,40 +13,23 @@ const { respondFailure, respondSuccess } = require('../service-utils/sendToUI');
 const mediaTypes = require('../../constants/mediaTypes');
 const { getBasicImageDetailsById } = require('../image-library/imageLibrary');
 const { getBasicAudioDetailsById } = require('../audio-library/audioLibrary');
-const fillDetailsForSearchResults = (arr) => {
-    return arr.map((item, index) => {
-        let fleshedItem = null;
-        if (item.mediaType === mediaTypes.VIDEO) {
-            fleshedItem = getFullVideoDetailsById(item.id);
-        } else if (item.mediaType === mediaTypes.IMAGE) {
-            fleshedItem = getBasicImageDetailsById(item.id);
-        } else if (item.mediaType === mediaTypes.AUDIO) {
-            fleshedItem = getBasicAudioDetailsById(item.id);
-        }
-
-        if (fleshedItem) {
-            fleshedItem['relevance'] = index;
-        }
-
-        return fleshedItem;
-    });
-};
+const { populateMediaDetails } = require('./helpers/populateMediaDetails');
 
 const getSearchResults = async (searchString, isQuickSearch, filters) => {
     const searchResults = await search(searchString, isQuickSearch, filters);
 
     if (!searchResults.isCached) {
         if (searchResults.byTags.length > 0) {
-            searchResults.byTags = fillDetailsForSearchResults(searchResults.byTags);
+            searchResults.byTags = populateMediaDetails(searchResults.byTags);
         }
         if (searchResults.byTitles.length > 0) {
-            searchResults.byTitles = fillDetailsForSearchResults(searchResults.byTitles);
+            searchResults.byTitles = populateMediaDetails(searchResults.byTitles);
         }
         if (searchResults.byFileNames.length > 0) {
-            searchResults.byFileNames = fillDetailsForSearchResults(searchResults.byFileNames);
+            searchResults.byFileNames = populateMediaDetails(searchResults.byFileNames);
         }
-        if (searchResults.byMetaData.length > 0) {
-            searchResults.byMetaData = fillDetailsForSearchResults(searchResults.byMetaData);
+        if (searchResults.byContent.length > 0) {
+            searchResults.byContent = populateMediaDetails(searchResults.byContent);
         }
     }
 

@@ -251,17 +251,17 @@ Melvec uses several event namespaces to keep different types of events separated
 Important event groups include:
 
 1. `interServiceEvents`
-   - service-to-service events inside the backend/service layer
+    - service-to-service events inside the backend/service layer
 2. `mainThreadEvents`
-   - events emitted from main/service layers back to the UI
+    - events emitted from main/service layers back to the UI
 3. `applicationEvents`
-   - renderer-side application state transitions
+    - renderer-side application state transitions
 4. `contextMenuEvents`
-   - context-menu related actions
+    - context-menu related actions
 5. `rendererEvents`
-   - renderer-originated events listened to by the main process
+    - renderer-originated events listened to by the main process
 6. `applicationMenuEvents`
-   - application-menu initiated actions
+    - application-menu initiated actions
 
 These event constants live under `src/events` and are part of the communication contract across layers.
 
@@ -327,3 +327,10 @@ For more implementation detail, see:
 - `dev-docs/coding-standards.md`
 - `dev-docs/naming-conventions.md`
 - `dev-docs/command-flows.md`
+
+### Architecture details
+
+- `dev-docs/location-architecture.md`
+- `dev-docs/search/content-search.md`
+- `dev-docs/search/search-response-mechanism.md`
+- `dev-docs/command-flows/search-control.md`

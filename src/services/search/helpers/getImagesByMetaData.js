@@ -1,9 +1,13 @@
-const { searchAudiosByDescription, searchAudiosLooseByDescription, getEmbeddingByAudioId } = require('../database/audioLibraryDbService');
-const userPreferenceStore = require('../../main/userPreferenceStore');
-const { cleanSearchTerms } = require('../service-utils/cleanSearchQuery');
-const cosineSimilarityVector = require('../related-videos/cosineSimilarityVector');
-const { generateEmbeddingFromKeywords } = require('../service-utils/generateEmbedding');
-const { isAIActive } = require('../service-utils/ai');
+const {
+    searchImagesByDescription,
+    searchImagesLooseByDescription,
+    getEmbeddingByImageId,
+} = require('../../database/imageLibraryDbService');
+const userPreferenceStore = require('../../../main/userPreferenceStore');
+const { cleanSearchTerms } = require('../../service-utils/cleanSearchQuery');
+const cosineSimilarityVector = require('../../related-videos/cosineSimilarityVector');
+const { generateEmbeddingFromKeywords } = require('../../service-utils/generateEmbedding');
+const { isAIActive } = require('../../service-utils/ai');
 
 const dedupeCandidates = (...candidateLists) => {
     const uniqueCandidates = new Map();
@@ -25,7 +29,7 @@ const rerankWithSemantic = async (keywords, searchCandidates) => {
     const keywordsEmbedding = await generateEmbeddingFromKeywords(keywords);
     const reranked = searchCandidates
         .map((item) => {
-            const embedding = getEmbeddingByAudioId(item.id);
+            const embedding = getEmbeddingByImageId(item.id);
             return {
                 ...item,
                 score: embedding.length ? cosineSimilarityVector(keywordsEmbedding, embedding) : 0,
@@ -48,7 +52,7 @@ const normalizeMatches = (items) => {
 };
 
 /**
- * Audio description search strategy
+ * Image description search strategy
  *
  * AI disabled:
  * - Use strict FTS description search only.
@@ -64,15 +68,14 @@ const normalizeMatches = (items) => {
  *   - 2+ meaningful terms: use strict FTS candidates first; if too few results
  *     are found, expand with loose FTS candidates.
  */
-const getAudiosByMetaData = async (keywords, isQuickSearch = true) => {
+const getImagesByMetaData = async (keywords, isQuickSearch = true) => {
     const normalizedKeywords = String(keywords || '').trim();
     const effectiveTerms = cleanSearchTerms(normalizedKeywords) || [];
     const keywordCount = effectiveTerms.length;
-    const isAIEnabled = userPreferenceStore.get('isAIEnabled');
 
     if (keywordCount === 0) return [];
 
-    const strictCandidates = searchAudiosByDescription(normalizedKeywords);
+    const strictCandidates = searchImagesByDescription(normalizedKeywords);
 
     if (!isAIActive()) {
         return normalizeMatches(strictCandidates);
@@ -87,7 +90,7 @@ const getAudiosByMetaData = async (keywords, isQuickSearch = true) => {
         let searchCandidates = strictCandidates;
 
         if (searchCandidates.length < MIN_QUICK_SEARCH_CANDIDATES) {
-            const looseCandidates = searchAudiosLooseByDescription(normalizedKeywords);
+            const looseCandidates = searchImagesLooseByDescription(normalizedKeywords);
             searchCandidates = dedupeCandidates(strictCandidates, looseCandidates);
         }
 
@@ -103,7 +106,7 @@ const getAudiosByMetaData = async (keywords, isQuickSearch = true) => {
     let searchCandidates = strictCandidates;
 
     if (searchCandidates.length < MIN_FULL_SEARCH_CANDIDATES) {
-        const looseCandidates = searchAudiosLooseByDescription(normalizedKeywords);
+        const looseCandidates = searchImagesLooseByDescription(normalizedKeywords);
         searchCandidates = dedupeCandidates(strictCandidates, looseCandidates);
     }
 
@@ -112,5 +115,5 @@ const getAudiosByMetaData = async (keywords, isQuickSearch = true) => {
 };
 
 module.exports = {
-    getAudiosByMetaData,
+    getImagesByMetaData,
 };
