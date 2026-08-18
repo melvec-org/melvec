@@ -25,6 +25,7 @@ const { MAX_SHORT_DESCRIPTION_LENGTH } = require('../../configs/appConfig');
 const indexingEvents = require('../../events/indexingEvents');
 const responseStatus = require('../../constants/responseStatus');
 const { addMediaLocation, getLocationNameByMediaId } = require('../location/location');
+const { extractGPSData } = require('../service-utils/extractGPSData');
 
 const updateImageDetailsById = (id = '', udpatedDetails = {}) => {
     if (id !== '') {
@@ -153,6 +154,15 @@ const importImageFromWatchedDirectory = async (mediaDetails, destinationCollecti
             watchFolderId: mediaDetails.watchFolderId,
             mediaType: mediaTypes.IMAGE,
         };
+
+        let gpsData = await extractGPSData(destinationImagePath, mediaTypes.IMAGE);
+
+        if (gpsData) {
+            if (gpsData.latitude && gpsData.longitude) {
+                newImageStats.latitude = gpsData.latitude;
+                newImageStats.longitude = gpsData.longitude;
+            }
+        }
 
         serviceEventBus.publish(interServiceEvents.IMPORT_FILE_SUCCESS, {
             completedMediaStats: newImageStats,

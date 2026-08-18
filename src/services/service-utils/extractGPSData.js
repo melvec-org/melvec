@@ -1,6 +1,7 @@
 const { runCmdCapture } = require('./process');
 const { getFfprobePath } = require('./binaryPaths');
 const mediaTypes = require('../../constants/mediaTypes');
+const exifr = require('exifr');
 
 const parseCoordinate = (value) => {
     if (typeof value === 'number' && Number.isFinite(value)) {
@@ -62,10 +63,7 @@ const parseExifCoordinate = (value, ref) => {
 };
 
 const extractCoordsFromTags = (tags = {}) => {
-    const iso6709 =
-        tags.comapplequicktimelocationiso6709 ||
-        tags['com.apple.quicktime.location.ISO6709'] ||
-        tags.location;
+    const iso6709 = tags.comapplequicktimelocationiso6709 || tags['com.apple.quicktime.location.ISO6709'] || tags.location;
 
     if (typeof iso6709 === 'string') {
         const match = iso6709.match(/([+-]\d+(?:\.\d+)?)([+-]\d+(?:\.\d+)?)/);
@@ -105,37 +103,34 @@ const extractGPSData = async (mediaPath, mediaType) => {
         return null;
     }
 
-    const ffProbePath = getFfprobePath();
+    if (mediaType === mediaTypes.VIDEO) {
+        const ffProbePath = getFfprobePath();
 
-    const args = [
-        '-v',
-        'error',
-        '-show_entries',
-        'format_tags:stream_tags',
-        '-of',
-        'json',
-        mediaPath,
-    ];
+        const args = ['-v', 'error', '-show_entries', 'format_tags:stream_tags', '-of', 'json', mediaPath];
 
-    const { stdout } = await runCmdCapture(ffProbePath, args);
+        const { stdout } = await runCmdCapture(ffProbePath, args);
 
-    if (!stdout) {
+        if (!stdout) {
+            return null;
+        }
+
+        const probeData = JSON.parse(stdout);
+
+        const sources = [probeData?.format?.tags, ...(probeData?.streams || []).map((stream) => stream?.tags)].filter(Boolean);
+
+        for (const tags of sources) {
+            const coords = extractCoordsFromTags(tags);
+
+            if (coords) {
+                return coords;
+            }
+        }
         return null;
     }
-
-    const probeData = JSON.parse(stdout);
-
-    const sources = [probeData?.format?.tags, ...(probeData?.streams || []).map((stream) => stream?.tags)].filter(Boolean);
-
-    for (const tags of sources) {
-        const coords = extractCoordsFromTags(tags);
-
-        if (coords) {
-            return coords;
-        }
+    if (mediaType === mediaTypes.IMAGE) {
+        const gpsData = await exifr.parse(mediaPath, ['GPSLatitude', 'GPSLongitude']);
+        return gpsData;
     }
-
-    return null;
 };
 
 module.exports = {

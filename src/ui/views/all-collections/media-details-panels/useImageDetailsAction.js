@@ -2,6 +2,7 @@ import systemConfig from '__configs/systemConfig';
 import ipcChannels from '__constants/ipcChannels';
 import mediaTypes from '__constants/mediaTypes';
 import responseStatus from '__constants/responseStatus';
+import applicationEvents from '__events/applicationEvents';
 import rendererEvents from '__events/rendererEvents';
 
 const { useApplicationContext } = require('__contexts/app.context');
@@ -9,7 +10,7 @@ const { useState, useEffect } = require('react');
 import getEligibleCollections from '__utils/getEligibleCollections';
 
 const useImageDetailsAction = (imageDetails, onDetailsChange) => {
-    const [stateContext] = useApplicationContext();
+    const [stateContext, dispatchContext] = useApplicationContext();
     const [updatedImageDetails, setUpdatedImageDetails] = useState(imageDetails);
 
     /**

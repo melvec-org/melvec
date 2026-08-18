@@ -36,13 +36,6 @@ const getLocationNameByMediaId = (mediaType, mediaId) => {
     }
 };
 
-/** Placeholder for future manual cluster creation flow. */
-const createCluster = ({ label, aliases, centerLat, centerLon, radius }) => {
-    const clusterId = '';
-
-    return clusterId;
-};
-
 /** Placeholder for future cluster rename support. */
 const renameCluster = (clusterId, label) => {};
 

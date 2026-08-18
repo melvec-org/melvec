@@ -9,6 +9,7 @@ Here is the list of features that are planned to be done.
 - Improvement of accessibility
 - Drag & Drop of files
 - Timeline view
+- Improve curated Place of Interest for India, US for phase 1
 
 ### search planner
 
@@ -16,7 +17,6 @@ This is to help find the constraints in search query to finetune results
 This raises need two other features to be available to make it stand out as an enhancement.
 
     - Face tagging // finding the subjects in media
-    - Geo tagging // finding location
 
 We will have phase by phase implementation.
 

@@ -3,6 +3,8 @@ const LRUCache = require('../service-utils/LRUCache');
 const serviceEventBus = require('../service-utils/serviceEventBus');
 const interServiceEvents = require('../../events/interServiceEvents');
 const { buildNearQuery, cleanSearchTerms } = require('../service-utils/cleanSearchQuery');
+const { getRelativeMediaPath } = require('../service-utils/mediaPath');
+const { getYearFromTime } = require('../service-utils/timeUtils');
 
 const CACHE_SIZE = 2000;
 const imageDbCache = new LRUCache(CACHE_SIZE);
@@ -61,6 +63,12 @@ const getImageDetailsById = (id, skipCache = false) => {
         const imageDetails = stmt.get(normalizedId) || null;
 
         if (imageDetails) {
+            imageDetails.path = getRelativeMediaPath(
+                getYearFromTime(imageDetails.birthtimeMs),
+                imageDetails.coll,
+                imageDetails.name,
+                imageDetails.id,
+            );
             imageDbCache.set(normalizedId, imageDetails);
         }
 

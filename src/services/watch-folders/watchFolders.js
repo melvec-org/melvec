@@ -9,6 +9,7 @@ const { getFileYear } = require('../service-utils/timeUtils');
 const systemConfig = require('../../configs/systemConfig');
 const { deleteThumbnail } = require('../thumbnail/thumbnail');
 const { getVideoDuration } = require('../service-utils/getVideoDuration');
+const { getContentCreationTime } = require('../service-utils/getContentCreationTime');
 const getMediaTypeFromPath = require('../service-utils/getMediaTypeFromPath');
 const {
     initializeDb,
@@ -23,6 +24,7 @@ const {
 } = require('../database/watchFoldersDbService');
 const responseStatus = require('../../constants/responseStatus');
 const mediaTypes = require('../../constants/mediaTypes');
+const { logLibraryError } = require('../logs/logService');
 
 const searchMediaByWatchFolder = (watchFolder) => {
     const excludeDirList = [];
@@ -45,11 +47,14 @@ const searchMediaByWatchFolder = (watchFolder) => {
  * @returns
  */
 const addMediaMetricsToScannedItem = async (scannedItemData) => {
-    scannedItemData.year = getFileYear(scannedItemData.birthtimeMs);
     scannedItemData.id = await generateMediaId(scannedItemData.path);
     scannedItemData.mediaType = getMediaTypeFromPath(scannedItemData.path);
 
-    if (scannedItemData.mediaType === mediaTypes.VIDEO) {
+    const contentCreationTime = await getContentCreationTime(scannedItemData.path, scannedItemData.mediaType);
+    scannedItemData.birthtimeMs = contentCreationTime ? contentCreationTime * 1000 : parseInt(scannedItemData.birthtimeMs);
+    scannedItemData.year = getFileYear(scannedItemData.birthtimeMs);
+
+    if (scannedItemData.mediaType === mediaTypes.VIDEO || scannedItemData.mediaType === mediaTypes.AUDIO) {
         scannedItemData.duration = await getVideoDuration(scannedItemData.path);
     } else {
         scannedItemData.duration = null;
@@ -212,10 +217,10 @@ const removeWatchFolderMedia = async (mediaId, watchFolderId, initiator = 'user'
                         removeWatchFolderMediaFromDb(mediaId);
                         return true;
                     }
-                    console.error(`Error removing media file for ${mediaId}: ${removalStatus.message}`);
+                    logLibraryError(`Error removing media file for ${mediaId}: ${removalStatus.message}`);
                     return false;
                 } catch (err) {
-                    console.error(`Error removing media file: ${err}`);
+                    logLibraryError(`Error removing media file: ${err}`);
                     return false;
                 }
             } else {

@@ -30,6 +30,7 @@ const { resetMetaData } = require('../database/metaDataDbService');
 const responseStatus = require('../../constants/responseStatus');
 const mediaTypes = require('../../constants/mediaTypes');
 const { addMediaLocation } = require('../location/location');
+const { extractGPSData } = require('../service-utils/extractGPSData');
 
 const onImportFileSuccess = (data) => {
     if (data.mediaType !== mediaTypes.VIDEO) return;
@@ -212,6 +213,15 @@ const importVideoFromWatchedDirectory = async (videoDetails, destinationCollecti
                 duration: videoDetails.duration || 0,
                 watchFolderId: videoDetails.watchFolderId,
             };
+
+            let gpsData = await extractGPSData(destinationVideoPath, mediaTypes.VIDEO);
+
+            if (gpsData) {
+                if (gpsData.latitude && gpsData.longitude) {
+                    newMediaStats.latitude = gpsData.latitude;
+                    newMediaStats.longitude = gpsData.longitude;
+                }
+            }
 
             serviceEventBus.publish(interServiceEvents.IMPORT_FILE_SUCCESS, {
                 completedMediaStats: newMediaStats,
