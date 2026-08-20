@@ -45,7 +45,6 @@ const getImageDetailsById = (id, skipCache = false) => {
                 i.name,
                 i.title,
                 i.role,
-                i.path,
                 c.label AS coll,
                 i.collection_id,
                 i.birthtimeMs,
@@ -147,7 +146,6 @@ const addImage = (image) => {
         name,
         title = '',
         role = 'image',
-        path,
         collection_id,
         birthtimeMs,
         size,
@@ -158,14 +156,14 @@ const addImage = (image) => {
         longitude = 0,
     } = image;
 
-    const requiredFields = { id, name, role, path, collection_id, birthtimeMs, size, description, source, is_nsfw };
+    const requiredFields = { id, name, role, collection_id, birthtimeMs, size, description, source, is_nsfw };
     for (const [key, value] of Object.entries(requiredFields)) {
         if (value === null || value === undefined) {
             throw new Error(`Field ${key} cannot be null or undefined`);
         }
     }
 
-    const textFields = { id, name, role, path, collection_id, source };
+    const textFields = { id, name, role, collection_id, source };
     for (const [key, value] of Object.entries(textFields)) {
         if (typeof value !== 'string' || value.trim() === '') {
             throw new Error(`Field ${key} must be a non-empty string`);
@@ -214,7 +212,6 @@ const addImage = (image) => {
             name,
             title,
             role,
-            path,
             collection_id,
             birthtimeMs,
             size,
@@ -224,7 +221,7 @@ const addImage = (image) => {
             latitude,
             longitude
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     try {
@@ -234,7 +231,6 @@ const addImage = (image) => {
                 name,
                 title,
                 role,
-                path,
                 collection_id,
                 birthtimeMs,
                 size,
@@ -260,14 +256,13 @@ const addImage = (image) => {
 const updateImageDetails = (image) => {
     ensureDbInitialized();
 
-    const { id, name, title, role, path, collection_id, birthtimeMs, size, source, is_nsfw } = image;
+    const { id, name, title, role, collection_id, birthtimeMs, size, source, is_nsfw } = image;
 
     const requiredFields = {
         id,
         name,
         title,
         role,
-        path,
         collection_id,
         birthtimeMs,
         size,
@@ -281,14 +276,14 @@ const updateImageDetails = (image) => {
         }
     }
 
-    const textFields = { id, name, title, role, path, collection_id, source };
+    const textFields = { id, name, title, role, collection_id, source };
     for (const [key, value] of Object.entries(textFields)) {
         if (typeof value !== 'string') {
             throw new Error(`Field ${key} must be a string`);
         }
     }
 
-    const nonEmptyTextFields = { id, name, role, path, collection_id, source };
+    const nonEmptyTextFields = { id, name, role, collection_id, source };
     for (const [key, value] of Object.entries(nonEmptyTextFields)) {
         if (value.trim() === '') {
             throw new Error(`Field ${key} must be a non-empty string`);
@@ -312,7 +307,6 @@ const updateImageDetails = (image) => {
             name = ?,
             title = ?,
             role = ?,
-            path = ?,
             collection_id = ?,
             birthtimeMs = ?,
             size = ?,
@@ -324,7 +318,7 @@ const updateImageDetails = (image) => {
 
     try {
         const info = db.transaction(() => {
-            const result = stmt.run(name, title, role, path, collection_id, birthtimeMs, size, source, is_nsfw, id);
+            const result = stmt.run(name, title, role, collection_id, birthtimeMs, size, source, is_nsfw, id);
             return result;
         })();
 

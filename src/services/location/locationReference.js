@@ -3,7 +3,8 @@ const { getCustomLocationClusters } = require('../database/locationDbService');
 const BUCKET_SIZE = 0.25;
 const EARTH_RADIUS_METERS = 6371000;
 
-let geoSpatialReferenceData = null;
+let citiesGeoSpatialReferenceData = null;
+let poiGeoSpatialReferenceData = null;
 
 /**
  * Loads the city geo-spatial reference data into memory.
@@ -14,8 +15,11 @@ let geoSpatialReferenceData = null;
  * @returns {void}
  */
 const loadReferenceData = () => {
-    if (geoSpatialReferenceData) return null;
-    geoSpatialReferenceData = require('../../../resources/locations/cities/geoSpatialReference.json');
+    if (citiesGeoSpatialReferenceData) return null;
+    citiesGeoSpatialReferenceData = require('../../../resources/locations/cities/geoSpatialReference.json');
+
+    if (poiGeoSpatialReferenceData) return null;
+    poiGeoSpatialReferenceData = require('../../../resources/locations/poi/geoSpatialReference.json');
 };
 
 /**
@@ -27,7 +31,8 @@ const loadReferenceData = () => {
  * @returns {void}
  */
 const unloadReferenceData = () => {
-    geoSpatialReferenceData = null;
+    citiesGeoSpatialReferenceData = null;
+    poiGeoSpatialReferenceData = null;
 };
 
 /**
@@ -93,30 +98,15 @@ const findNearbyCustomLocationCluster = (latitude, longitude) => {
 /**
  * Looks up a nearby point-of-interest cluster.
  *
- * This is currently a placeholder and always returns null.
  *
  * @param {number} latitude Latitude to match.
  * @param {number} longitude Longitude to match.
  * @returns {null} Always null until POI lookup is implemented.
  */
 const findNearbyPOILocationCluster = (latitude, longitude) => {
-    return null;
-};
+    if (poiGeoSpatialReferenceData === null) loadReferenceData();
 
-/**
- * Finds the nearest city reference cluster that contains the coordinate.
- *
- * The geo-spatial reference data is loaded on demand and searched through the
- * bucket index before exact distance checks are performed.
- *
- * @param {number} latitude Latitude to match.
- * @param {number} longitude Longitude to match.
- * @returns {Object|null} Normalized city cluster data, or null if no city contains the coordinate.
- */
-const findNearbyCityLocationCluster = (latitude, longitude) => {
-    if (geoSpatialReferenceData === null) loadReferenceData();
-
-    const candidates = findCandidateLocations(latitude, longitude);
+    const candidates = findCandidateLocations(latitude, longitude, poiGeoSpatialReferenceData);
 
     const bestLocation = findNearestContainingLocation(
         latitude,
@@ -145,19 +135,63 @@ const findNearbyCityLocationCluster = (latitude, longitude) => {
 };
 
 /**
- * Resolves a location by checking custom clusters, POI clusters, then city clusters.
+ * Finds the nearest city reference cluster that contains the coordinate.
  *
- * Search order matters: the first non-null match is returned.
+ * The geo-spatial reference data is loaded on demand and searched through the
+ * bucket index before exact distance checks are performed.
  *
  * @param {number} latitude Latitude to match.
  * @param {number} longitude Longitude to match.
- * @returns {Object|null} The first matching location record, or null if nothing matches.
+ * @returns {Object|null} Normalized city cluster data, or null if no city contains the coordinate.
+ */
+const findNearbyCityLocationCluster = (latitude, longitude) => {
+    if (citiesGeoSpatialReferenceData === null) loadReferenceData();
+
+    const candidates = findCandidateLocations(latitude, longitude, citiesGeoSpatialReferenceData);
+
+    const bestLocation = findNearestContainingLocation(
+        latitude,
+        longitude,
+        candidates,
+        (location) => location.lat,
+        (location) => location.lng,
+        (location) => location.radius,
+    );
+
+    if (!bestLocation) {
+        return null;
+    }
+
+    return {
+        referenceId: bestLocation.id,
+        name: bestLocation.name || '',
+        city: bestLocation.city,
+        state: bestLocation.state || '',
+        admin: bestLocation.admin,
+        country: bestLocation.country,
+        centerLat: bestLocation.lat,
+        centerLng: bestLocation.lng,
+        radius: bestLocation.radius,
+    };
+};
+
+/**
+ * Resolves a location by preferring named custom clusters, then POI, then city,
+ * and finally falling back to an unnamed custom cluster.
+ *
+ * @param {number} latitude Latitude to match.
+ * @param {number} longitude Longitude to match.
+ * @returns {Object|null} The best matching location record, or null if nothing matches.
  */
 const findLocation = (latitude, longitude) => {
+    const customLocation = findNearbyCustomLocationCluster(latitude, longitude);
+
+    if (customLocation?.name) {
+        return customLocation;
+    }
+
     return (
-        findNearbyCustomLocationCluster(latitude, longitude) ||
-        findNearbyPOILocationCluster(latitude, longitude) ||
-        findNearbyCityLocationCluster(latitude, longitude)
+        findNearbyPOILocationCluster(latitude, longitude) || findNearbyCityLocationCluster(latitude, longitude) || customLocation || null
     );
 };
 
@@ -170,10 +204,11 @@ const findLocation = (latitude, longitude) => {
  *
  * @param {number} latitude
  * @param {number} longitude
+ * @param {Object} geoSpatialReferenceData Reference dataset whose buckets should be searched.
  *
  * @returns {Array<Object>}
  */
-const findCandidateLocations = (latitude, longitude) => {
+const findCandidateLocations = (latitude, longitude, geoSpatialReferenceData) => {
     const latBucket = Math.floor(latitude / BUCKET_SIZE);
     const lngBucket = Math.floor(longitude / BUCKET_SIZE);
 
@@ -183,7 +218,7 @@ const findCandidateLocations = (latitude, longitude) => {
         for (let lngOffset = -1; lngOffset <= 1; lngOffset++) {
             const key = `${latBucket + latOffset}_${lngBucket + lngOffset}`;
 
-            const bucket = geoSpatialReferenceData.buckets[key];
+            const bucket = geoSpatialReferenceData?.buckets?.[key];
 
             if (bucket) {
                 candidates.push(...bucket);

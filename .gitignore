@@ -28,4 +28,5 @@ certificate.p12
 ./discard
 
 
-resources/locations/worldcities.csv
+resources/locations/cities/worldcities.csv
+resources/locations/poi/world-poi.json
