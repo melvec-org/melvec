@@ -7,8 +7,9 @@ import { VIDEO_FILE_NAME_MAX_LENGTH, VIDEO_FILE_NAME_MIN_LENGTH, VIDEO_FILE_NAME
 import { registerAccKeyListener, unregisterAccKeyListener } from '__utils/acceleratorKeysListenerRegistry';
 import applicationMenuEvents from '__events/applicationMenuEvents';
 import responseStatus from '__constants/responseStatus';
+import mediaTypes from '__constants/mediaTypes';
 
-const FileNameEditForm = ({ mediaId, mediaFileName, mediaType = 'video', onNameEditDone, onCancel }) => {
+const FileNameEditForm = ({ mediaId, mediaFileName, mediaType = mediaTypes.VIDEO, onNameEditDone, onCancel }) => {
     const [fileNameWithoutExtn, setFileNameWithoutExtn] = useState(mediaFileName);
     const [extn, setExtn] = useState('');
 
@@ -91,7 +92,7 @@ const FileNameEditForm = ({ mediaId, mediaFileName, mediaType = 'video', onNameE
         </div>
     );
 };
-const EditableFileName = ({ mediaId, mediaFileName, mediaType = 'video', onFileNameChange }) => {
+const EditableFileName = ({ mediaId, mediaFileName, mediaType = mediaTypes.VIDEO, onFileNameChange }) => {
     const [isFileNameEditorOpen, setIsFieNameEditorOpen] = useState(false);
     const [fileName, setFileName] = useState(mediaFileName);
 

@@ -84,7 +84,7 @@ const useVideoDetailsAction = (videoDetails, onDetailsChange) => {
      * @param {*} title
      */
     const updateTitle = (mediaId, title) => {
-        window.api.updateMediaTitle('video', mediaId, title).then((data) => {
+        window.api.updateMediaTitle(mediaTypes.VIDEO, mediaId, title).then((data) => {
             onDetailsChange({
                 change: 'titleChange',
                 data: data,
@@ -103,7 +103,7 @@ const useVideoDetailsAction = (videoDetails, onDetailsChange) => {
     };
 
     const updateNsfwStatus = (mediaId, isNsfw) => {
-        window.api.updateMediaNsfwStatus('video', mediaId, isNsfw).then((response) => {
+        window.api.updateMediaNsfwStatus(mediaTypes.VIDEO, mediaId, isNsfw).then((response) => {
             if (response && response.status === responseStatus.SUCCESS) {
                 setUpdatedVideoDetails({ ...updatedVideoDetails, isNsfw: isNsfw });
                 onDetailsChange({

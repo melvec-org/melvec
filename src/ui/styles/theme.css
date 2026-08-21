@@ -24,8 +24,9 @@ html[data-theme='light'] {
     --main-bg-color: rgba(243, 243, 243, 1); /* for all dimmed color */
     --secondary-copy-color: #666;
 
-    --devider-color: #ccc;
-    --separator-color: #ccc;
+    --panel-devider-color: #ccc;
+    --list-separator-color: #ddd;
+    --section-separator-color: #ccc;
 
     /* used for all buttons, links, tab headers etc */
     --interactive-active-color: #222;
@@ -81,7 +82,7 @@ html[data-theme='light'] {
     --icon-button-fill-color: #777;
     --icon-button-fill-highlight-color: #000;
 
-    --menu-item-selected-bg-color: #ccc;
+    --menu-item-selected-bg-color: #00000022;
 
     --default-hover-bg-color: rgba(0, 0, 0, 0.07);
     --button-bg-color: #ddd;
@@ -118,8 +119,9 @@ html[data-theme='light'] {
         /* for all dimmed color */
         --secondary-copy-color: #999;
 
-        --devider-color: #666;
-        --separator-color: #444;
+        --panel-devider-color: #333;
+        --list-separator-color: #333;
+        --section-separator-color: #555;
 
         /* used for all buttons, links, tab headers etc */
         --interactive-active-color: #eee;
@@ -171,7 +173,7 @@ html[data-theme='light'] {
         --icon-button-fill-color: #aaa;
         --icon-button-fill-highlight-color: #fff;
 
-        --menu-item-selected-bg-color: #555;
+        --menu-item-selected-bg-color: #ffffff33;
 
         --button-bg-color: #666;
         --button-bg-hover-color: #888;

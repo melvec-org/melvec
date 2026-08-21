@@ -111,6 +111,13 @@ const serviceMethods = {
     AUDIO_META_DATA_START_BATCH_GENERATION: 'startBatchAudioMetaDataGeneration',
     AUDIO_META_DATA_STOP_BATCH_GENERATION: 'stopBatchAudioMetaDataGeneration',
 
+    // ============ LOCATION ==========
+    LOCATION_GET_DETAILS_BY_MEDIA: 'getLocationDetailsByMedia',
+    LOCATION_IDENTIFY_CLUSTER: 'updateExistingLocationCluster',
+    LOCATION_CREATE_CUSTOM_CLUSTER: 'createCustomCluster',
+    LOCATION_UPDATE_ALIAS: 'updateLocationClusterAliases',
+    LOCATION_UPDATE_CUSTOM: 'updateCustomLocation',
+
     // ========== VIDEO PREVIEW =========
     VIDEO_PREVIEW_START_BATCH_GENERATION: 'startBatchVideoPreviewGeneration',
     VIDEO_PREVIEW_STOP_BATCH_GENERATION: 'stopBatchVideoPreviewGeneration',

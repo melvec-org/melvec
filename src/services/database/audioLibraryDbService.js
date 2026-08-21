@@ -3,6 +3,8 @@ const LRUCache = require('../service-utils/LRUCache');
 const serviceEventBus = require('../service-utils/serviceEventBus');
 const interServiceEvents = require('../../events/interServiceEvents');
 const { buildNearQuery, cleanSearchTerms } = require('../service-utils/cleanSearchQuery');
+const { getRelativeMediaPath } = require('../service-utils/mediaPath');
+const { getYearFromTime } = require('../service-utils/timeUtils');
 
 const CACHE_SIZE = 2000;
 const audioDbCache = new LRUCache(CACHE_SIZE);
@@ -58,6 +60,12 @@ const getAudioDetailsById = (id, skipCache = false) => {
         const audioDetails = stmt.get(normalizedId) || null;
 
         if (audioDetails) {
+            audioDetails.path = getRelativeMediaPath(
+                getYearFromTime(audioDetails.birthtimeMs),
+                audioDetails.coll,
+                audioDetails.name,
+                audioDetails.id,
+            );
             audioDbCache.set(normalizedId, audioDetails);
         }
 

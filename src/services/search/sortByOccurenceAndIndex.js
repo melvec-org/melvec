@@ -1,5 +1,3 @@
-// write  test cases for this file
-
 const sortByOccurenceAndIndex = (arr = []) => {
     if (arr.length === 0) return [];
 

@@ -16,6 +16,7 @@ const { videoMetaDataApi } = require('./videoMetaDataApi');
 const { imageLibraryApi } = require('./imageLibraryApi');
 const { audioLibraryApi } = require('./audioLibraryApi');
 const { audioMetaDataApi } = require('./audioMetaDataApi');
+const { locationApi } = require('./locationApi');
 
 const invokeApis = (ipcRenderer) => ({
     ...systemApi(ipcRenderer),
@@ -36,6 +37,7 @@ const invokeApis = (ipcRenderer) => ({
     ...imageLibraryApi(ipcRenderer),
     ...audioLibraryApi(ipcRenderer),
     ...audioMetaDataApi(ipcRenderer),
+    ...locationApi(ipcRenderer),
 });
 
 module.exports = {

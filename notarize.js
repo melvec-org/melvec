@@ -1,13 +1,9 @@
 const { notarize } = require('@electron/notarize');
+const fs = require('node:fs');
 const path = require('node:path');
+const { execFileSync } = require('node:child_process');
 
-exports.default = async function notarizing(context) {
-    const { electronPlatformName, appOutDir, packager } = context;
-
-    if (electronPlatformName !== 'darwin') {
-        return;
-    }
-
+async function notarizeDmg() {
     const appleId = process.env.APPLE_ID;
     const appleIdPassword = process.env.APPLE_APP_SPECIFIC_PASSWORD;
     const teamId = process.env.APPLE_TEAM_ID;
@@ -17,17 +13,37 @@ exports.default = async function notarizing(context) {
         return;
     }
 
-    const appName = packager.appInfo.productFilename;
-    const appPath = path.join(appOutDir, `${appName}.app`);
+    const outputDir = path.resolve(__dirname, 'dist-mac');
+    const dmgFiles = fs.readdirSync(outputDir).filter((file) => file.endsWith('.dmg'));
 
-    console.log(`Notarizing ${appPath}...`);
+    if (dmgFiles.length === 0) {
+        throw new Error(`No DMG files found in ${outputDir}`);
+    }
 
-    await notarize({
-        appPath,
-        appleId,
-        appleIdPassword,
-        teamId,
-    });
+    for (const dmgFile of dmgFiles) {
+        const dmgPath = path.join(outputDir, dmgFile);
 
-    console.log('Notarization complete');
-};
+        console.log(`Notarizing ${dmgPath}...`);
+
+        await notarize({
+            appPath: dmgPath,
+            appleId,
+            appleIdPassword,
+            teamId,
+        });
+
+        console.log(`Stapling ${dmgPath}...`);
+        execFileSync('xcrun', ['stapler', 'staple', dmgPath], { stdio: 'inherit' });
+
+        console.log(`Validating stapled ticket for ${dmgPath}...`);
+        execFileSync('xcrun', ['stapler', 'validate', dmgPath], { stdio: 'inherit' });
+    }
+
+    console.log('DMG notarization complete');
+}
+
+notarizeDmg().catch((error) => {
+    console.error('DMG notarization failed');
+    console.error(error);
+    process.exit(1);
+});

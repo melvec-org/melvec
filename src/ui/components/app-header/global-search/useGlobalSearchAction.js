@@ -225,8 +225,8 @@ const enrichSearchSuggestions = (quickSuggestions, searchResults, hideHiddenColl
         quickSuggestions.matchingMedia = [...quickSuggestions.matchingMedia, ...matchingFiles];
     }
 
-    if (searchResults.byMetaData.length > 0) {
-        const matchingFiles = searchResults.byMetaData.map((item) => ({
+    if (searchResults.byContent.length > 0) {
+        const matchingFiles = searchResults.byContent.map((item) => ({
             ...item,
             type: 'matchingMetaData',
         }));

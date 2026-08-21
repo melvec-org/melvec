@@ -1,7 +1,13 @@
-const { searchFromMetaData, searchLooseFromMetaData } = require('../database/metaDataDbService');
-const { getSemanticMatches } = require('./getSemanticMatches');
-const { cleanSearchTerms } = require('../service-utils/cleanSearchQuery');
-const { isAIActive } = require('../service-utils/ai');
+const {
+    searchAudiosByDescription,
+    searchAudiosLooseByDescription,
+    getEmbeddingByAudioId,
+} = require('../../database/audioLibraryDbService');
+const userPreferenceStore = require('../../../main/userPreferenceStore');
+const { cleanSearchTerms } = require('../../service-utils/cleanSearchQuery');
+const cosineSimilarityVector = require('../../related-videos/cosineSimilarityVector');
+const { generateEmbeddingFromKeywords } = require('../../service-utils/generateEmbedding');
+const { isAIActive } = require('../../service-utils/ai');
 
 const dedupeCandidates = (...candidateLists) => {
     const uniqueCandidates = new Map();
@@ -17,56 +23,60 @@ const dedupeCandidates = (...candidateLists) => {
     return Array.from(uniqueCandidates.values());
 };
 
+const rerankWithSemantic = async (keywords, searchCandidates) => {
+    if (!searchCandidates.length) return [];
+
+    const keywordsEmbedding = await generateEmbeddingFromKeywords(keywords);
+    const reranked = searchCandidates
+        .map((item) => {
+            const embedding = getEmbeddingByAudioId(item.id);
+            return {
+                ...item,
+                score: embedding.length ? cosineSimilarityVector(keywordsEmbedding, embedding) : 0,
+            };
+        })
+        .filter((item) => item.score > 0)
+        .sort((a, b) => b.score - a.score);
+
+    return reranked.length ? reranked : searchCandidates;
+};
+
 const normalizeMatches = (items) => {
     if (!items || !items.length) return [];
 
     return items.map((item) => ({
-        id: item.id ?? item.videoId,
+        id: item.id,
         score: item.score,
+        descMatch: item.desc_match ?? null,
     }));
 };
 
-const rerankWithSemantic = async (keywords, searchCandidates) => {
-    if (!searchCandidates.length) return [];
-
-    const candidateVideoIds = searchCandidates.map((item) => item.id);
-    const semanticMatches = await getSemanticMatches(keywords, candidateVideoIds);
-
-    if (!semanticMatches.length) {
-        return searchCandidates;
-    }
-
-    return semanticMatches;
-};
-
 /**
- * Metadata search strategy
+ * Audio description search strategy
  *
  * AI disabled:
- * - Use strict FTS metadata search only.
+ * - Use strict FTS description search only.
  *
  * AI enabled:
  * - Quick search:
  *   - 1 to 3 meaningful terms: use strict FTS only for speed and precision.
- *   - 4+ meaningful terms: use strict FTS candidates first; if too few results are found,
- *     expand with loose FTS candidates, then semantic-rerank the candidate set.
+ *   - 4+ meaningful terms: use strict FTS candidates first; if too few results
+ *     are found, expand with loose FTS candidates.
  *
  * - Full search:
  *   - 1 meaningful term: use strict FTS only.
- *   - 2+ meaningful terms: use strict FTS candidates first; if too few results are found,
- *     expand with loose FTS candidates, then semantic-rerank the candidate set.
- *
- * In all semantic flows:
- * - fallback to lexical candidates if semantic ranking returns no matches.
+ *   - 2+ meaningful terms: use strict FTS candidates first; if too few results
+ *     are found, expand with loose FTS candidates.
  */
-const getVideosByMetaData = async (keywords, isQuickSearch = true) => {
+const getAudiosByMetaData = async (keywords, isQuickSearch = true) => {
     const normalizedKeywords = String(keywords || '').trim();
     const effectiveTerms = cleanSearchTerms(normalizedKeywords) || [];
     const keywordCount = effectiveTerms.length;
+    const isAIEnabled = userPreferenceStore.get('isAIEnabled');
 
     if (keywordCount === 0) return [];
 
-    const strictCandidates = searchFromMetaData(normalizedKeywords);
+    const strictCandidates = searchAudiosByDescription(normalizedKeywords);
 
     if (!isAIActive()) {
         return normalizeMatches(strictCandidates);
@@ -81,7 +91,7 @@ const getVideosByMetaData = async (keywords, isQuickSearch = true) => {
         let searchCandidates = strictCandidates;
 
         if (searchCandidates.length < MIN_QUICK_SEARCH_CANDIDATES) {
-            const looseCandidates = searchLooseFromMetaData(normalizedKeywords);
+            const looseCandidates = searchAudiosLooseByDescription(normalizedKeywords);
             searchCandidates = dedupeCandidates(strictCandidates, looseCandidates);
         }
 
@@ -97,13 +107,14 @@ const getVideosByMetaData = async (keywords, isQuickSearch = true) => {
     let searchCandidates = strictCandidates;
 
     if (searchCandidates.length < MIN_FULL_SEARCH_CANDIDATES) {
-        const looseCandidates = searchLooseFromMetaData(normalizedKeywords);
+        const looseCandidates = searchAudiosLooseByDescription(normalizedKeywords);
         searchCandidates = dedupeCandidates(strictCandidates, looseCandidates);
     }
+
     const matches = await rerankWithSemantic(normalizedKeywords, searchCandidates);
     return normalizeMatches(matches);
 };
 
 module.exports = {
-    getVideosByMetaData,
+    getAudiosByMetaData,
 };

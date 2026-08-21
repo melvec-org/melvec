@@ -384,7 +384,9 @@ const VideoFilesList = ({
                                 />
                             )}
                             <div className={style.fileName}>{item.name}</div>
-                            {item.mediaType === mediaTypes.VIDEO && <div className={style.metaData}>{formatTime(item.duration)}</div>}
+                            {(item.mediaType === mediaTypes.VIDEO || item.mediaType === mediaTypes.AUDIO) && (
+                                <div className={style.metaData}>{formatTime(item.duration)}</div>
+                            )}
                         </li>
                     );
                 }

@@ -73,12 +73,17 @@ const LibraryCollection = ({ collections, onCollectionItemClick, selectedItemId 
         });
     };
 
+    const editCollectionName = (item) => {
+        setCollectionToEdit(item);
+    };
+
     return (
         <>
             <Collections
                 collection={collections}
                 collectionHeader="Library"
                 onCollectionItemClick={(item) => onCollectionItemClick(item, false)}
+                onCollectionDoubleClick={(item) => editCollectionName(item)}
                 contextMenuClick={(event, item) => collectionContextMenuClick(event, item)}
                 selectedItemId={selectedItemId}
                 collectionItemContextMenuClick={collectionItemContextMenuClick}

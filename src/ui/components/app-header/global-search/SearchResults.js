@@ -10,7 +10,7 @@ const filterLabels = {
     TAGS: 'Tags',
     TITLES: 'Titles',
     FILE_NAMES: 'File names',
-    META_DATA: 'Content',
+    CONTENT: 'Content',
 };
 
 const mediaTypeFilterTabs = [
@@ -38,7 +38,7 @@ const SearchResults = ({ searchResults, onSearchResultItemClick, createPlaylist,
         if (filterLabel === filterLabels.TAGS) return searchResults.byTags || [];
         if (filterLabel === filterLabels.TITLES) return searchResults.byTitles || [];
         if (filterLabel === filterLabels.FILE_NAMES) return searchResults.byFileNames || [];
-        if (filterLabel === filterLabels.META_DATA) return searchResults.byMetaData || [];
+        if (filterLabel === filterLabels.CONTENT) return searchResults.byContent || [];
         return [];
     };
 
@@ -79,7 +79,7 @@ const SearchResults = ({ searchResults, onSearchResultItemClick, createPlaylist,
             if (searchResults.byFileNames.length > 0)
                 tabs.push({ label: filterLabels.FILE_NAMES, count: searchResults.byFileNames.length });
 
-            if (searchResults.byMetaData.length > 0) tabs.push({ label: filterLabels.META_DATA, count: searchResults.byMetaData.length });
+            if (searchResults.byContent.length > 0) tabs.push({ label: filterLabels.META_DATA, count: searchResults.byContent.length });
 
             setMatchFields(tabs);
             setSelectedMatchField(tabs[0]?.label ?? null);

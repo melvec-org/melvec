@@ -146,6 +146,21 @@ const validateMediaDescription = (desc) => {
     return null;
 };
 
+const validateLocationName = (name) => {
+    if (!isNonEmptyString(name) || name.length > 300) {
+        return { status: 'error', message: 'Invalid location name' };
+    }
+
+    return null;
+};
+
+const validateLocationRadius = (radius) => {
+    if (radius < 0 || radius > 5000) {
+        return { status: 'error', message: 'Invalid location radius value' };
+    }
+    return null;
+};
+
 module.exports = {
     isNonEmptyString,
     isValidMediaType,
@@ -161,4 +176,6 @@ module.exports = {
     validateTheme,
     validateMediaOperationArgs,
     validateMediaDescription,
+    validateLocationName,
+    validateLocationRadius,
 };

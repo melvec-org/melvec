@@ -1,5 +1,6 @@
 import Button from '__components/core-components/button/Button';
 import Modal, { ModalActionFooter } from '__components/core-components/modal/Modal';
+import { DEFAULT_COLLECTION_ID } from '__configs/systemConfig';
 import keyCodes from '__constants/keyCodes';
 import React, { useEffect, useState } from 'react';
 
@@ -34,6 +35,12 @@ const CollectionEditForm = ({ collections, onCancel, onCollectionSelect, presele
                     </select>
                 )}
             </div>
+            {collections.length === 1 && collections[0].id === DEFAULT_COLLECTION_ID && (
+                <div className="mt10 secondaryInfo">
+                    This media currently defaults to the default collection. If you create a matching collection for this media, you can
+                    move it there afterwards.
+                </div>
+            )}
             <ModalActionFooter>
                 <Button onClick={() => onCancel()}>Cancel</Button>
                 {selectedCollection && (
@@ -107,7 +114,7 @@ const EditableCollection = ({ label = '', selectionList = [], mediaId = '', isEx
                 {selectedLabel}
             </div>
             {isCollectionEditorOpen && (
-                <Modal isOpen={isCollectionEditorOpen} onClose={() => setIsCollectionEditorOpen(false)}>
+                <Modal isOpen={isCollectionEditorOpen} onClose={() => setIsCollectionEditorOpen(false)} modifierClasses="regModal">
                     <CollectionEditForm
                         collections={selectionList}
                         preselectedLabel={selectedLabel}

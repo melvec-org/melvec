@@ -110,9 +110,6 @@ const AllCollections = () => {
         }
     }, [stateContext.collections, stateContext?.userPreferences?.hideHiddenCollections]);
 
-    useEffect(() => {
-        // const width = window.api.
-    }, []);
     return (
         <AllCollectionsLayout>
             {selectedCollectionAndVideo !== null && (
@@ -123,6 +120,7 @@ const AllCollections = () => {
                                 <LibraryCollection
                                     collections={currentVisibleCollections}
                                     onCollectionItemClick={(item) => onCollectionItemClick(item, false)}
+
                                     selectedItemId={selectedCollectionAndVideo.selectedCollection.id}
                                 />
                             )}
@@ -132,6 +130,7 @@ const AllCollections = () => {
                                     collection={watchFolders}
                                     collectionHeader="Watch folders"
                                     onCollectionItemClick={(item) => onCollectionItemClick(item, true)}
+
                                     selectedItemId={selectedCollectionAndVideo.selectedCollection.id}
                                 />
                             )}

@@ -21,7 +21,7 @@ async function getVideoDuration(videoPath) {
     ]);
 
     const dur = Number.parseFloat(String(stdout).trim());
-    if (!Number.isFinite(dur) || dur <= 0) throw new Error(`createThumbnail: Unable to read duration via ffprobe (${stdout})`);
+    if (!Number.isFinite(dur) || dur <= 0) throw new Error(`getVideoDuration: Unable to read duration via ffprobe (${stdout})`);
     return dur;
 }
 module.exports = {

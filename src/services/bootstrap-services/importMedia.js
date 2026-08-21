@@ -1,4 +1,5 @@
 const fse = require('fs-extra');
+
 const serviceEventBus = require('../service-utils/serviceEventBus');
 const systemConfig = require('../../configs/systemConfig');
 const path = require('path');
@@ -23,9 +24,11 @@ const { emitToUI } = require('../service-utils/sendToUI');
 const { getVideoDuration } = require('../service-utils/getVideoDuration');
 const { generateVideoThumbnail } = require('../service-utils/generateVideoThumbnail');
 const { generateImageThumbnail } = require('../service-utils/generateImageThumbnail');
+const { getContentCreationTime } = require('../service-utils/getContentCreationTime');
 
 const mediaTypes = require('../../constants/mediaTypes');
 const responseStatus = require('../../constants/responseStatus');
+const { extractGPSData } = require('../service-utils/extractGPSData');
 
 /**
  * Minimum gap in ms between consecutive file imports.
@@ -350,6 +353,8 @@ const importAudioToLibrary = async (mediaStats = {}, targetLibrary = '') => {
         collection_id = getUniqueID();
     }
 
+    const audioDuration = await getVideoDuration(mediaStats.path);
+
     const newMediaStats = {
         id: audioId,
         name: fileNameWihoutId,
@@ -360,7 +365,7 @@ const importAudioToLibrary = async (mediaStats = {}, targetLibrary = '') => {
         collection_id: collection_id,
         year: collectionYear,
         role: mediaStats.role || mediaTypes.AUDIO,
-        duration: mediaStats.duration ?? null,
+        duration: audioDuration ?? null,
     };
 
     try {
@@ -392,6 +397,15 @@ const importAudioToLibrary = async (mediaStats = {}, targetLibrary = '') => {
     }
 };
 
+const enrichMediaStatsWithContentCreationTime = async (mediaStats = {}) => {
+    const contentCreationTime = await getContentCreationTime(mediaStats.path, mediaStats.mediaType);
+
+    return {
+        ...mediaStats,
+        birthtimeMs: parseInt(contentCreationTime || mediaStats.birthtimeMs),
+    };
+};
+
 const importMediaToLibrary = async (mediaStats = {}, targetLibrary = '') => {
     if (!mediaStats.mediaType) {
         return {
@@ -402,23 +416,25 @@ const importMediaToLibrary = async (mediaStats = {}, targetLibrary = '') => {
         };
     }
 
-    if (mediaStats.mediaType === mediaTypes.VIDEO) {
-        return importVideoToLibrary(mediaStats, targetLibrary);
+    const normalizedMediaStats = await enrichMediaStatsWithContentCreationTime(mediaStats);
+
+    if (normalizedMediaStats.mediaType === mediaTypes.VIDEO) {
+        return importVideoToLibrary(normalizedMediaStats, targetLibrary);
     }
 
-    if (mediaStats.mediaType === mediaTypes.IMAGE) {
-        return importImageToLibrary(mediaStats, targetLibrary);
+    if (normalizedMediaStats.mediaType === mediaTypes.IMAGE) {
+        return importImageToLibrary(normalizedMediaStats, targetLibrary);
     }
 
-    if (mediaStats.mediaType === mediaTypes.AUDIO) {
-        return importAudioToLibrary(mediaStats, targetLibrary);
+    if (normalizedMediaStats.mediaType === mediaTypes.AUDIO) {
+        return importAudioToLibrary(normalizedMediaStats, targetLibrary);
     }
 
     return {
         status: 'failure',
-        fileStats: mediaStats,
-        errorDetails: `Unsupported media type for file: ${mediaStats.path}`,
-        mediaType: mediaStats.mediaType,
+        fileStats: normalizedMediaStats,
+        errorDetails: `Unsupported media type for file: ${normalizedMediaStats.path}`,
+        mediaType: normalizedMediaStats.mediaType,
     };
 };
 
@@ -490,14 +506,6 @@ const importMedia = async (mediaList, libraryPath = '') => {
                         thumbnailFolder: getThumbnailsDir(),
                         videoId: operationData.newMediaStats?.id,
                     });
-                    /* const previewPath = await generateVideoPreview({
-                        videoPath: operationData?.fullPath,
-                        previewFolder: getPreviewsDir(),
-                        videoId: operationData.newMediaStats?.id,
-                    });
-                    if (previewPath) {
-                        operationData.newMediaStats.has_preview = true;
-                    }*/
                 } catch (e) {}
             }
 
@@ -511,6 +519,14 @@ const importMedia = async (mediaList, libraryPath = '') => {
                 } catch (e) {}
             }
 
+            let gpsData = await extractGPSData(operationData?.fullPath, operationData.mediaType);
+
+            if (gpsData) {
+                if (gpsData.latitude && gpsData.longitude) {
+                    operationData.newMediaStats.latitude = gpsData.latitude;
+                    operationData.newMediaStats.longitude = gpsData.longitude;
+                }
+            }
             mediaList[i].imported = true;
             importedMediaCount++;
             filesSinceLastFlush++;

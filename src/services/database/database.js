@@ -91,6 +91,8 @@ const createTables = () => {
                 title TEXT NOT NULL,
                 size INTEGER NOT NULL,
                 duration REAL NOT NULL,
+                latitude REAL NOT NULL DEFAULT 0.0,
+                longitude REAL NOT NULL DEFAULT 0.0,
                 source TEXT NOT NULL DEFAULT 'local',
                 is_nsfw INTEGER NOT NULL DEFAULT 0 CHECK (is_nsfw IN (0, 1)),
                 has_preview INTEGER NOT NULL DEFAULT 0 CHECK (has_preview IN (0, 1))
@@ -227,8 +229,11 @@ const createTables = () => {
                 collection_id TEXT NOT NULL,
                 birthtimeMs INTEGER NOT NULL,
                 size INTEGER NOT NULL,
+                latitude REAL NOT NULL DEFAULT 0.0,
+                longitude REAL NOT NULL DEFAULT 0.0,
                 description TEXT CHECK(length(description) <= 1000),
                 embedding BLOB,
+                
                 source TEXT NOT NULL DEFAULT 'local',
                 is_nsfw INTEGER NOT NULL DEFAULT 0 CHECK (is_nsfw IN (0, 1)),
                 FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE RESTRICT
@@ -379,6 +384,60 @@ const createTables = () => {
         `);
     }
 
+    const locationClusterTableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='location_clusters'").get();
+
+    if (!locationClusterTableExists) {
+        db.exec(`
+            CREATE TABLE location_clusters (
+                id INTEGER PRIMARY KEY,
+                reference_id INTEGER UNIQUE,
+                name TEXT NOT NULL,
+                aliases TEXT,
+                center_lat REAL NOT NULL,
+                center_lon REAL NOT NULL,
+                radius INTEGER NOT NULL
+            );
+    `);
+    }
+
+    const imageLocationClusterTableExists = db
+        .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='image_location_clusters'")
+        .get();
+
+    if (!imageLocationClusterTableExists) {
+        db.exec(`
+        CREATE TABLE image_location_clusters (
+            image_id TEXT NOT NULL,
+            cluster_id INTEGER NOT NULL,
+            confidence REAL NOT NULL DEFAULT 1,
+
+            PRIMARY KEY (image_id, cluster_id),
+
+            FOREIGN KEY (image_id) REFERENCES images(id) ON DELETE CASCADE,
+            FOREIGN KEY (cluster_id) REFERENCES location_clusters(id) ON DELETE CASCADE
+        );
+    `);
+    }
+
+    const videoLocationClusterTableExists = db
+        .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='video_location_clusters'")
+        .get();
+
+    if (!videoLocationClusterTableExists) {
+        db.exec(`
+        CREATE TABLE video_location_clusters (
+            video_id TEXT NOT NULL,
+            cluster_id INTEGER NOT NULL,
+            confidence REAL NOT NULL DEFAULT 1,
+
+            PRIMARY KEY (video_id, cluster_id),
+
+            FOREIGN KEY (video_id) REFERENCES videos(id) ON DELETE CASCADE,
+            FOREIGN KEY (cluster_id) REFERENCES location_clusters(id) ON DELETE CASCADE
+        );
+    `);
+    }
+
     // FTS table for full-text search
     const ftsTableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='videos_fts'").get();
     if (!ftsTableExists) {
@@ -525,8 +584,10 @@ const createIndexes = () => {
         -- Fast playlist and tag lookups
         CREATE INDEX IF NOT EXISTS idx_playlists_videos_playlist_id 
             ON playlists_videos(playlist_id);
+
         CREATE INDEX IF NOT EXISTS idx_tags_videos_tag_id 
             ON tags_videos(tag_id);
+
         CREATE INDEX IF NOT EXISTS idx_tags_videos_video_id 
             ON tags_videos(video_id);
 
@@ -554,7 +615,18 @@ const createIndexes = () => {
         CREATE INDEX IF NOT EXISTS idx_tags_audios_audio_id 
             ON tags_audios(audio_id);
 
-        -- Your main library screen will love this one
+        CREATE INDEX IF NOT EXISTS idx_image_location_clusters_cluster
+            ON image_location_clusters(cluster_id);
+
+        CREATE INDEX IF NOT EXISTS idx_image_location_clusters_image
+            ON image_location_clusters(image_id);
+
+        CREATE INDEX IF NOT EXISTS idx_video_location_clusters_cluster
+            ON video_location_clusters(cluster_id);
+
+        CREATE INDEX IF NOT EXISTS idx_video_location_clusters_video
+            ON video_location_clusters(video_id);
+        
         CREATE INDEX IF NOT EXISTS idx_videos_year 
             ON videos(year DESC, birthtimeMs DESC);
     `);

@@ -1,31 +1,18 @@
 const { MAX_SEARCH_RESULTS_CACHE_COUNT, MAX_SEARCH_RESULTS_DISPLAY_COUNT_PER_CATEGORY } = require('../../configs/appConfig');
-const { getVideoByTitleSearch, getVideosByFileNameSearch: getVideoByFileNameDbSearch } = require('../database/videoLibraryDbService');
-const {
-    getImagesByFileNameSearch: getImageByFileNameDbSearch,
-    getImagesByTitleDbSearch,
-    getImagesByFileNameSearch,
-} = require('../database/imageLibraryDbService');
-const { getAudiosByFileNameSearch, getAudiosByTitleDbSearch } = require('../database/audioLibraryDbService');
 
 const LRUCache = require('../service-utils/LRUCache');
 const serviceEventBus = require('../service-utils/serviceEventBus');
 const interServiceEvents = require('../../events/interServiceEvents');
-const mediaTypes = require('../../constants/mediaTypes');
+
 const indexingEvents = require('../../events/indexingEvents');
 
-const { getTags } = require('../tags/tags');
-const { getVideoIdsByTag } = require('../tags/tags');
-const { getVideosByMetaData } = require('./getVideosByMetaData');
-const { rebuildAndSaveTypoCorrectionVocabulary, getSavedTypoCorrectionVocabulary } = require('./prepareTypoCorrectionVocabulary');
-const {
-    initializeTypoCorrection,
-    getCorrectionForToken,
-    isTypoCorrectionInitialized,
-    invalidateTypoCorrectionIndex,
-} = require('./typoCorrection');
-const { getImageIdsByTag } = require('../database/tagsDbService');
-const { getImagesByMetaData } = require('./getImagesByMetaData');
-const { getAudiosByMetaData } = require('./getAudiosByMetaData');
+const { rebuildAndSaveTypoCorrectionVocabulary } = require('./prepareTypoCorrectionVocabulary');
+const { invalidateTypoCorrectionIndex } = require('./typoCorrection');
+
+const { analyseQuery } = require('./search-planner/searchPlanner');
+
+const { getMediaByFileNameSearch, mediaByTitleSearch, getMediaByTagSearch } = require('./helpers/getMediaBySearchCriteria');
+const { getMediaByContent } = require('./helpers/getMediaByContent');
 
 const noSearchData = {
     byTags: [],
@@ -39,102 +26,18 @@ const noSearchData = {
 
 const searchResultsCache = new LRUCache(MAX_SEARCH_RESULTS_CACHE_COUNT);
 
-const getMediaByTagSearch = (keyword) => {
-    const allTags = getTags();
-    const tagMatches = allTags.filter((tag) => tag.label.toLowerCase().includes(keyword));
-    const tagMatchedVideos = tagMatches.map((item) => getVideoIdsByTag(item.id));
-    const tagMatchedImages = tagMatches.map((item) => getImageIdsByTag(item.id));
-    const allVideos = tagMatchedVideos.reduce((acc, videos) => acc.concat(videos), []);
-    const allImages = tagMatchedImages.reduce((acc, images) => acc.concat(images), []);
-    const allAudios = tagMatchedImages.reduce((acc, audios) => acc.concat(audios), []);
-
-    const uniqueVideos = [...new Set(allVideos)].map((id) => ({
-        id,
-        mediaType: mediaTypes.VIDEO,
-    }));
-
-    const uniqueImages = [...new Set(allImages)].map((id) => ({
-        id,
-        mediaType: mediaTypes.IMAGE,
-    }));
-
-    const uniqueAudios = [...new Set(allAudios)].map((id) => ({
-        id,
-        mediaType: mediaTypes.AUDIO,
-    }));
-
-    return [...uniqueVideos, ...uniqueImages, ...uniqueAudios];
-};
-
-const normalizeResultsByMediaType = (items, mediaType) => {
-    return (items || []).map((item) => ({
-        ...item,
-        mediaType,
-    }));
-};
-
-const mediaByTitleSearch = (keyword) => {
-    const videoMatches = normalizeResultsByMediaType(getVideoByTitleSearch(keyword), mediaTypes.VIDEO);
-    const imageMatches = normalizeResultsByMediaType(getImagesByTitleDbSearch(keyword), mediaTypes.IMAGE);
-    const audioMatches = normalizeResultsByMediaType(getAudiosByTitleDbSearch(keyword), mediaTypes.AUDIO);
-
-    return [...videoMatches, ...imageMatches, ...audioMatches];
-};
-
-const getMediaByFileNameSearch = (keyword) => {
-    const videoMatches = normalizeResultsByMediaType(getVideoByFileNameDbSearch(keyword), mediaTypes.VIDEO);
-    const imageMatches = normalizeResultsByMediaType(getImagesByFileNameSearch(keyword), mediaTypes.IMAGE);
-    const audioMatches = normalizeResultsByMediaType(getAudiosByFileNameSearch(keyword), mediaTypes.AUDIO);
-
-    return [...videoMatches, ...imageMatches, ...audioMatches];
-};
-
-const getMediaByMetaDataSearch = async (searchText, isQuickSearch) => {
-    const videoMatches = normalizeResultsByMediaType(await getVideosByMetaData(searchText, isQuickSearch), mediaTypes.VIDEO);
-    const imageMatches = normalizeResultsByMediaType(await getImagesByMetaData(searchText, isQuickSearch), mediaTypes.IMAGE);
-    const audioMatches = normalizeResultsByMediaType(await getAudiosByMetaData(searchText, isQuickSearch), mediaTypes.AUDIO);
-
-    return [...videoMatches, ...imageMatches, ...audioMatches];
-};
-
-const getCorrectedSearchText = (searchText) => {
-    const tokens = searchText.toLowerCase().trim().split(/\s+/).filter(Boolean);
-
-    if (!tokens.length) {
-        return null;
-    }
-
-    const correctedTokens = tokens.map((token) => {
-        return getCorrectionForToken(token) || token;
-    });
-
-    const correctedKeyword = correctedTokens.join(' ');
-
-    if (correctedKeyword === searchText) {
-        return null;
-    }
-
-    return correctedKeyword;
-};
-
-const ensureTypoCorrectionInitialized = () => {
-    if (isTypoCorrectionInitialized()) {
-        return;
-    }
-
-    const vocabulary = getSavedTypoCorrectionVocabulary();
-
-    if (!Array.isArray(vocabulary) || vocabulary.length === 0) {
-        return;
-    }
-
-    initializeTypoCorrection(vocabulary);
-};
+/**
+ * Filtering constraints like time, mediatype, content type, max per set results will trim down the results.
+ * @param {*} results
+ * @param {*} constraints
+ * @returns
+ */
 
 const search = async (searchText = '', isQuickSearch = true, filters = { fileNames: true, tags: true }) => {
     if (searchText === '') return noSearchData;
     searchText = searchText.toLowerCase();
 
+    // Step - 0 : If result is already cached, then return it.
     const cacheKey = `${searchText}_${isQuickSearch}`;
 
     const cachedResult = searchResultsCache.get(cacheKey);
@@ -143,37 +46,36 @@ const search = async (searchText = '', isQuickSearch = true, filters = { fileNam
         return cachedResult;
     }
 
+    // set the limits
     const RESULT_LIMIT = isQuickSearch ? 3 : MAX_SEARCH_RESULTS_DISPLAY_COUNT_PER_CATEGORY;
     const META_DATA_SEARCH_LIMIT = isQuickSearch ? 5 : MAX_SEARCH_RESULTS_DISPLAY_COUNT_PER_CATEGORY;
 
+    // Step - 01 : Analyse the search query and find contextual results
+    const searchPlan = analyseQuery(searchText);
+
+    // Step 02 : Find out media by individual search criterias
+    // tags
     const mediaByTags = getMediaByTagSearch(searchText);
 
+    // titles
     const mediaByTitles = mediaByTitleSearch(searchText);
 
+    // fileNames
     const mediaByFileNames = getMediaByFileNameSearch(searchText);
 
-    // normal perfectly matching search results
-    let mediaByMetaData = await getMediaByMetaDataSearch(searchText, isQuickSearch);
+    // content
+    const resultSet = await getMediaByContent(searchPlan, isQuickSearch);
 
-    let correctedText = '';
-    // if it does not result in anything, check if there are typo errors that can be addressed
-    if (mediaByMetaData.length === 0) {
-        ensureTypoCorrectionInitialized();
+    const mediaByContent = resultSet.results;
+    const correctedText = resultSet.correctedText;
 
-        correctedText = getCorrectedSearchText(searchText);
-
-        if (correctedText) {
-            mediaByMetaData = await getMediaByMetaDataSearch(correctedText, isQuickSearch);
-        }
-    }
-
-    const totalResults = mediaByTags.length + mediaByTitles.length + mediaByFileNames.length + mediaByMetaData.length;
+    const totalResults = mediaByTags.length + mediaByTitles.length + mediaByFileNames.length + mediaByContent.length;
 
     const finalResults = {
         byTags: mediaByTags.slice(0, RESULT_LIMIT),
         byTitles: mediaByTitles.slice(0, RESULT_LIMIT),
         byFileNames: mediaByFileNames.slice(0, RESULT_LIMIT),
-        byMetaData: mediaByMetaData.slice(0, META_DATA_SEARCH_LIMIT),
+        byContent: mediaByContent.slice(0, META_DATA_SEARCH_LIMIT),
         totalCount: totalResults,
         searchText: searchText,
         correctedText: totalResults > 0 && correctedText ? correctedText : '',

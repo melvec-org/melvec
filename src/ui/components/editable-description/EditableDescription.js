@@ -14,7 +14,7 @@ const EditableDescription = ({ mediaId, mediaTitle = '', onEditComplete, mediaTy
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
-        if (mediaType === mediaTypes.VIDEO && mediaId && shortDesc == '') {
+        if (mediaType === mediaTypes.VIDEO && mediaId && shortDesc === '') {
             // getMetaDataDetails will come with
             // 1. Audio transcript
             // 2. Desciption
@@ -33,7 +33,7 @@ const EditableDescription = ({ mediaId, mediaTitle = '', onEditComplete, mediaTy
                     setFormattedShortDescription('');
                 }
             });
-        } else if (mediaType === mediaTypes.IMAGE && mediaId && shortDesc !== '') {
+        } else if (mediaType === mediaTypes.IMAGE && mediaId) {
             const formattedDescription = shortDesc && !shortDesc.trim().endsWith('.') ? `${shortDesc.trim()}...` : shortDesc;
             setShortDescription(shortDesc);
 

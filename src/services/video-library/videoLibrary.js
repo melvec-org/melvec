@@ -29,6 +29,8 @@ const { getRelativeMediaPath, getAbsoluteMediaPath } = require('../service-utils
 const { resetMetaData } = require('../database/metaDataDbService');
 const responseStatus = require('../../constants/responseStatus');
 const mediaTypes = require('../../constants/mediaTypes');
+const { addMediaLocation } = require('../location/location');
+const { extractGPSData } = require('../service-utils/extractGPSData');
 
 const onImportFileSuccess = (data) => {
     if (data.mediaType !== mediaTypes.VIDEO) return;
@@ -43,6 +45,9 @@ const onImportFileSuccess = (data) => {
     const doesVideoExist = checkForDuplicate(videoStats.id);
     if (!doesVideoExist) {
         addVideo(videoStats);
+        if (videoStats.latitude && videoStats.longitude) {
+            addMediaLocation(mediaTypes.VIDEO, videoStats.id, videoStats.latitude, videoStats.longitude);
+        }
     }
 };
 
@@ -209,9 +214,18 @@ const importVideoFromWatchedDirectory = async (videoDetails, destinationCollecti
                 watchFolderId: videoDetails.watchFolderId,
             };
 
+            let gpsData = await extractGPSData(destinationVideoPath, mediaTypes.VIDEO);
+
+            if (gpsData) {
+                if (gpsData.latitude && gpsData.longitude) {
+                    newMediaStats.latitude = gpsData.latitude;
+                    newMediaStats.longitude = gpsData.longitude;
+                }
+            }
+
             serviceEventBus.publish(interServiceEvents.IMPORT_FILE_SUCCESS, {
                 completedMediaStats: newMediaStats,
-                mediaType: 'video',
+                mediaType: mediaTypes.VIDEO,
             });
 
             if (userPreferenceStore.get('showVideoPreviewOnHover')) {

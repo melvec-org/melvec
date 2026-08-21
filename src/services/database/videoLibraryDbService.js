@@ -50,6 +50,7 @@ const getVideoDetailsById = (id, skipCache = false) => {
     try {
         const stmt = db.prepare(`
             SELECT v.id, v.name, v.birthtimeMs, v.collection_id, v.category_id, v.year, v.title, v.size, v.duration, v.source, v.is_nsfw, v.has_preview,
+                   v.latitude, v.longitude,
                    c.label AS coll
             FROM videos v
             LEFT JOIN collections c ON v.collection_id = c.id
