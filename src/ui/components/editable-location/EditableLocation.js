@@ -61,7 +61,7 @@ const LocationEditForm = ({ locationClusterDetails = null, mediaId, mediaType, o
             saveLocation();
         }
     };
-    console.log(locationClusterDetails?.referenceId, isUnnamedCustomLocation);
+
     return (
         <div>
             <h2>Location</h2>

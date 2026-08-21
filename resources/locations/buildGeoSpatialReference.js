@@ -2,7 +2,10 @@ const fs = require('fs');
 const path = require('path');
 
 const CITIES_INPUT_FILE = path.join(__dirname, './cities/cities.normalized.json');
-const CITIES_OUTPUT_FILE = path.join(__dirname, './poi/geoSpatialReference.json');
+const CITIES_OUTPUT_FILE = path.join(__dirname, './cities/geoSpatialReference.json');
+
+const POI_INPUT_FILE = path.join(__dirname, './poi/poi.normalized.json');
+const POI_OUTPUT_FILE = path.join(__dirname, './poi/geoSpatialReference.json');
 
 const BUCKET_SIZE = 0.25;
 
@@ -41,29 +44,30 @@ function calculateRadius(population) {
     return 5000;
 }
 
-function buildReference() {
-    const cities = JSON.parse(fs.readFileSync(CITIES_INPUT_FILE, 'utf8'));
+function buildReference(inputFilePath, outputFilePath) {
+    const locations = JSON.parse(fs.readFileSync(inputFilePath, 'utf8'));
 
     const buckets = {};
 
     let count = 0;
 
-    for (const city of cities) {
-        if (city.lat === undefined || city.lng === undefined) {
+    for (const location of locations) {
+        if (location.lat === undefined || location.lng === undefined) {
             continue;
         }
 
         const record = {
-            id: city.id,
-            city: city.city,
-            admin: city.adm,
-            country: city.cty,
-            lat: city.lat,
-            lng: city.lng,
-            sr: calculateRadius(city.pop),
+            id: location.id,
+            name: location.name,
+            city: location.city,
+            admin: location.adm,
+            country: location.country,
+            lat: location.lat,
+            lng: location.lng,
+            radius: calculateRadius(location.pop),
         };
 
-        const bucket = getBucketKey(city.lat, city.lng);
+        const bucket = getBucketKey(location.lat, location.lng);
 
         if (!buckets[bucket]) {
             buckets[bucket] = [];
@@ -81,10 +85,11 @@ function buildReference() {
         buckets,
     };
 
-    fs.writeFileSync(CITIES_OUTPUT_FILE, JSON.stringify(output));
+    fs.writeFileSync(outputFilePath, JSON.stringify(output));
 
     console.log(`Generated ${count} locations`);
     console.log(`Buckets: ${Object.keys(buckets).length}`);
 }
 
-buildReference();
+buildReference(CITIES_INPUT_FILE, CITIES_OUTPUT_FILE);
+buildReference(POI_INPUT_FILE, POI_OUTPUT_FILE);

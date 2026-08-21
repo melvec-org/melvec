@@ -43,7 +43,6 @@ const getAudioDetailsById = (id, skipCache = false) => {
                 a.name,
                 a.title,
                 a.role,
-                a.path,
                 c.label AS coll,
                 a.collection_id,
                 a.birthtimeMs,
@@ -144,7 +143,6 @@ const addAudio = (audio) => {
         name,
         title = '',
         role = 'audio',
-        path,
         collection_id,
         birthtimeMs,
         size,
@@ -154,14 +152,14 @@ const addAudio = (audio) => {
         is_nsfw = 0,
     } = audio;
 
-    const requiredFields = { id, name, role, path, collection_id, birthtimeMs, size, description, source, is_nsfw };
+    const requiredFields = { id, name, role, collection_id, birthtimeMs, size, description, source, is_nsfw };
     for (const [key, value] of Object.entries(requiredFields)) {
         if (value === null || value === undefined) {
             throw new Error(`Field ${key} cannot be null or undefined`);
         }
     }
 
-    const textFields = { id, name, role, path, collection_id, source };
+    const textFields = { id, name, role, collection_id, source };
     for (const [key, value] of Object.entries(textFields)) {
         if (typeof value !== 'string' || value.trim() === '') {
             throw new Error(`Field ${key} must be a non-empty string`);
@@ -211,7 +209,6 @@ const addAudio = (audio) => {
             name,
             title,
             role,
-            path,
             collection_id,
             birthtimeMs,
             size,
@@ -220,12 +217,12 @@ const addAudio = (audio) => {
             source,
             is_nsfw
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     try {
         db.transaction(() => {
-            stmt.run(id, name, title, role, path, collection_id, birthtimeMs, size, duration, normalisedDescription, source, is_nsfw);
+            stmt.run(id, name, title, role, collection_id, birthtimeMs, size, duration, normalisedDescription, source, is_nsfw);
         })();
 
         const audioDetails = getAudioDetailsById(id);
@@ -242,14 +239,13 @@ const addAudio = (audio) => {
 const updateAudioDetails = (audio) => {
     ensureDbInitialized();
 
-    const { id, name, title, role, path, collection_id, birthtimeMs, size, duration, source, is_nsfw } = audio;
+    const { id, name, title, role, collection_id, birthtimeMs, size, duration, source, is_nsfw } = audio;
 
     const requiredFields = {
         id,
         name,
         title,
         role,
-        path,
         collection_id,
         birthtimeMs,
         size,
@@ -263,14 +259,14 @@ const updateAudioDetails = (audio) => {
         }
     }
 
-    const textFields = { id, name, title, role, path, collection_id, source };
+    const textFields = { id, name, title, role, collection_id, source };
     for (const [key, value] of Object.entries(textFields)) {
         if (typeof value !== 'string') {
             throw new Error(`Field ${key} must be a string`);
         }
     }
 
-    const nonEmptyTextFields = { id, name, role, path, collection_id, source };
+    const nonEmptyTextFields = { id, name, role, collection_id, source };
     for (const [key, value] of Object.entries(nonEmptyTextFields)) {
         if (value.trim() === '') {
             throw new Error(`Field ${key} must be a non-empty string`);
@@ -298,7 +294,6 @@ const updateAudioDetails = (audio) => {
             name = ?,
             title = ?,
             role = ?,
-            path = ?,
             collection_id = ?,
             birthtimeMs = ?,
             size = ?,
@@ -311,7 +306,7 @@ const updateAudioDetails = (audio) => {
 
     try {
         const info = db.transaction(() => {
-            const result = stmt.run(name, title, role, path, collection_id, birthtimeMs, size, duration, source, is_nsfw, id);
+            const result = stmt.run(name, title, role, collection_id, birthtimeMs, size, duration, source, is_nsfw, id);
             return result;
         })();
 

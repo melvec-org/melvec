@@ -14,10 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Enhancement to build job
+- Enhancement to build job.
 - Theme regresssion of colors fixed.
+- Reference problem while renaming a collection.
 
-No udpates here.
 --
 
 ## [0.2.2] - 2026-07-30

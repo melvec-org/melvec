@@ -2,7 +2,6 @@ const LRUCache = require('../service-utils/LRUCache');
 const serviceEventBus = require('../service-utils/serviceEventBus');
 const interServiceEvents = require('../../events/interServiceEvents');
 const { getDb } = require('../database/database');
-const path = require('path');
 const { getRelativeMediaPath } = require('../service-utils/mediaPath');
 
 const CACHE_SIZE = 2000;
@@ -188,7 +187,7 @@ const updateVideoDetails = (video) => {
 
     try {
         const info = db.transaction(() => {
-            const result = stmt.run(name, birthtimeMs, collection_id, year, title, size, duration, source, is_nsfw, path, id);
+            const result = stmt.run(name, birthtimeMs, collection_id, year, title, size, duration, source, is_nsfw, id);
             return result;
         })();
 
