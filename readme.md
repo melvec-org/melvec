@@ -56,7 +56,7 @@ See the list of wonderful people who have contributed in [CONTRIBUTORS.md](CONTR
 ## Tech Stack
 
 - **Frontend**: React + TypeScript
-- **Other libraries**: (Add your main dependencies here)
+- **Other libraries**: Lamma.cpp, ffmpeg, better-sqlite-3
 
 ## Acknowledgments
 
