@@ -10,6 +10,7 @@ Thank you to all the amazing people who have contributed to this project!
 
 <!-- Add new contributors below in alphabetical order -->
 
+- [Jeshu](https://github.com/jeshu) — Solution Reviewer
 - [SAM Neo](https://github.com/samdlaw) — Testing
 
 ---
