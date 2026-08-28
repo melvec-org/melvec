@@ -268,7 +268,7 @@ const VideoDetailsPanel = ({ videoDetailsObj = null, onDetailsChange, playPrevie
                     onClick={() =>
                         onDetailsChange({
                             change: 'deleteVideoFromLibrary',
-                            data: { videoId: updatedVideoDetails.id, initiator: 'user' },
+                            data: { mediaId: updatedVideoDetails.id, initiator: 'user' },
                         })
                     }
                 >
