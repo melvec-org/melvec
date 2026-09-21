@@ -1,7 +1,7 @@
 const { respondError, respondSuccess, respondFailure, streamToUI } = require('../service-utils/sendToUI');
 const { getBatchGenStatus, startAudioMetaDataBatchGeneration, stopAudioMetaDataBatchGeneration } = require('./batchGenerateAudioMetaData');
 const { generateAudioMetaData, stopGeneratingAudioMetadata, getEmbedding } = require('./generateAudioMetaData');
-const { getAudioDetailsById, getAudioDescriptionById } = require('../database/audioLibraryDbService');
+const { getAudioDetailsById, getAudioDescriptionById } = require('../audio-library/audioLibraryDbService');
 const { updateAudioMetaData, updateAudioTitle } = require('../audio-library/audioLibrary');
 const { getLibDir } = require('../servicePathConfig');
 const { getModelTier } = require('../ai-models/models');

@@ -1,4 +1,4 @@
-const { getEmbeddingByVideoId } = require('../database/metaDataDbService');
+const { getEmbeddingByVideoId } = require('../video-metadata/metaDataDbService');
 const cosineSimilarityVector = require('../related-videos/cosineSimilarityVector');
 const { generateEmbeddingFromKeywords } = require('../service-utils/generateEmbedding');
 

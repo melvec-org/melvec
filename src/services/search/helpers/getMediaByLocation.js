@@ -1,4 +1,4 @@
-const { getMediaIdsByClusterId } = require('../../database/locationDbService');
+const { getMediaIdsByClusterId } = require('../../location/locationDbService');
 
 const getMediaByLocations = (locations) => {
     const mediaList = new Set();

@@ -22,7 +22,7 @@ const serviceEventBus = require('../service-utils/serviceEventBus');
 const interServiceEvents = require('../../events/interServiceEvents');
 
 const { respondSuccess, respondError, respondFailure } = require('../service-utils/sendToUI');
-const { updateSource, deleteVideo } = require('../database/videoLibraryDbService');
+const { updateSource, deleteVideo } = require('./videoLibraryDbService');
 const mediaTypes = require('../../constants/mediaTypes');
 const indexingEvents = require('../../events/indexingEvents');
 const responseStatus = require('../../constants/responseStatus');

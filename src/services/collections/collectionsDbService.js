@@ -1,5 +1,5 @@
 const LRUCache = require('../service-utils/LRUCache');
-const { getDb } = require('./database');
+const { getDb } = require('../database/database');
 const serviceEventBus = require('../service-utils/serviceEventBus');
 const interServiceEvents = require('../../events/interServiceEvents');
 const systemConfig = require('../../configs/systemConfig');

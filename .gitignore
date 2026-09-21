@@ -21,6 +21,7 @@ discard/**/*.*
 .DS_Store
 **/.DS_Store
 models/**/*.*
+.vscode/**/*.*
 
 TABNINE.md
 
@@ -30,3 +31,12 @@ certificate.p12
 
 resources/locations/cities/worldcities.csv
 resources/locations/poi/world-poi.json
+
+native/face/CMakeFiles/**/**.*
+native/face/cmake_install.cmake
+native/face/CMakeCache.txt
+native/face/MakeFile
+
+
+native/face/melvec-face-test.js
+native/face/CMakeFiles/Makefile2

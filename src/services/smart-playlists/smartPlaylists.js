@@ -6,7 +6,7 @@ const { SMART_PLAYLIST_VIDEO_COUNTS } = require('../../configs/appConfig');
 const deepEqual = require('../service-utils/deepEqual');
 const sortByProp = require('../service-utils/sortByProp');
 const { getVideoMetricsByVideoId } = require('../video-metrics/videoMetrics');
-const smartPlaylistsDbService = require('../database/smartPlaylistsDbService');
+const smartPlaylistsDbService = require('./smartPlaylistsDbService');
 
 const DEBOUNCE_DELAY = 2000;
 

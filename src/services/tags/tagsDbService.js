@@ -1,10 +1,10 @@
 const LRUCache = require('../service-utils/LRUCache');
 const serviceEventBus = require('../service-utils/serviceEventBus');
 const interServiceEvents = require('../../events/interServiceEvents');
-const { getDb } = require('./database');
-const { checkVideoExists } = require('./videoLibraryDbService');
-const { checkImageExists } = require('./imageLibraryDbService');
-const { checkAudioExists } = require('./audioLibraryDbService');
+const { getDb } = require('../database/database');
+const { checkVideoExists } = require('../video-library/videoLibraryDbService');
+const { checkImageExists } = require('../image-library/imageLibraryDbService');
+const { checkAudioExists } = require('../audio-library/audioLibraryDbService');
 
 const CACHE_SIZE = 1000;
 

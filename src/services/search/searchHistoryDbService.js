@@ -1,6 +1,6 @@
 const serviceEventBus = require('../service-utils/serviceEventBus');
 const interServiceEvents = require('../../events/interServiceEvents');
-const { getDb } = require('./database');
+const { getDb } = require('../database/database');
 
 let db;
 const MAX_SEARCH_RECORDS = 2000;
@@ -138,7 +138,10 @@ const deleteSearchHistoryByLabel = (label) => {
         return {
             success: result.changes > 0,
             deletedCount: result.changes,
-            message: result.changes > 0 ? `Deleted search history entry with label "${label}"` : `No search history entry found with label "${label}"`,
+            message:
+                result.changes > 0
+                    ? `Deleted search history entry with label "${label}"`
+                    : `No search history entry found with label "${label}"`,
         };
     } catch (err) {
         console.error(`Error deleting search history entry with label "${label}":`, err);

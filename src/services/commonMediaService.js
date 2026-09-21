@@ -34,7 +34,7 @@ const {
 } = require('./tags/tags.service');
 const { removeWatchFolderMedia } = require('./watch-folders/watchFolders');
 const { deleteThumbnail } = require('./thumbnail/thumbnail');
-const { getCollectionDetailsById } = require('./database/collectionsDbService');
+const { getCollectionDetailsById } = require('./collections/collectionsDbService');
 const appConfig = require('../configs/appConfig');
 const { isNonEmptyString, isValidFileName, validateMediaId, validateMediaList } = require('./service-utils/ipcValidation');
 const {

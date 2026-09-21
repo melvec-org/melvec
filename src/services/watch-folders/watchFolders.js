@@ -21,7 +21,7 @@ const {
     addWatchFolderMedia,
     removeWatchFolderMedia: removeWatchFolderMediaFromDb,
     removeWatchFolderMediaByWatchFolderId,
-} = require('../database/watchFoldersDbService');
+} = require('./watchFoldersDbService');
 const responseStatus = require('../../constants/responseStatus');
 const mediaTypes = require('../../constants/mediaTypes');
 const { logLibraryError } = require('../logs/logService');

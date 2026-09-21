@@ -2,7 +2,7 @@ const LRUCache = require('../service-utils/LRUCache');
 const serviceEventBus = require('../service-utils/serviceEventBus');
 
 const interServiceEvents = require('../../events/interServiceEvents');
-const { getDb } = require('./database');
+const { getDb } = require('../database/database');
 const { MAX_SHORT_DESCRIPTION_LENGTH, MAX_DESCRIPTION_LENGTH, MAX_TRANSCRIPT_LENGTH } = require('../../configs/appConfig');
 const { buildNearQuery, cleanSearchTerms } = require('../service-utils/cleanSearchQuery');
 

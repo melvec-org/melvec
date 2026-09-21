@@ -1,4 +1,4 @@
-const { searchFromMetaData, searchLooseFromMetaData } = require('../../database/metaDataDbService');
+const { searchFromMetaData, searchLooseFromMetaData } = require('../../video-metadata/metaDataDbService');
 const { getSemanticMatches } = require('../getSemanticMatches');
 const { cleanSearchTerms } = require('../../service-utils/cleanSearchQuery');
 const { isAIActive } = require('../../service-utils/ai');

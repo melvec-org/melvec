@@ -1,4 +1,4 @@
-const { getDb } = require('./database');
+const { getDb } = require('../database/database');
 
 const ensureDbInitialized = () => {
     const db = getDb();

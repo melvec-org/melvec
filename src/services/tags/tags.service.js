@@ -16,7 +16,7 @@ const interServiceEvents = require('../../events/interServiceEvents');
 const mainThreadEvents = require('../../events/mainThreadEvents');
 
 const { emitToUI, respondSuccess, respondError } = require('../service-utils/sendToUI');
-const { addImageToTag, getTagById, removeImageFromTag, addAudioToTag, removeAudioFromTag } = require('../database/tagsDbService');
+const { addImageToTag, getTagById, removeImageFromTag, addAudioToTag, removeAudioFromTag } = require('../tags/tagsDbService');
 const indexingEvents = require('../../events/indexingEvents');
 const { getBasicVideoDetailsById } = require('../video-library/videoLibrary.service');
 

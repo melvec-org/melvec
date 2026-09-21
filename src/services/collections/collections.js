@@ -12,7 +12,7 @@ const {
     clearCollectionCache,
     hideCollection,
     unhideCollection,
-} = require('../database/collectionsDbService');
+} = require('./collectionsDbService');
 const { getVideoDetailsById } = require('../video-library/videoLibrary');
 const { getLibDir } = require('../servicePathConfig');
 const { renameDirectory, removeEmptyDirectories } = require('../service-utils/fileUtils');

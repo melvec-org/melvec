@@ -4,7 +4,7 @@ const serviceEventBus = require('../service-utils/serviceEventBus');
 const { addPendingProcessing, removePendingProcessing } = require('../../main/activityController');
 const timeout = require('../service-utils/timeout');
 const mainThreadEvents = require('../../events/mainThreadEvents');
-const { getDescriptionById, setGeneratedVideoMetaData } = require('../database/metaDataDbService');
+const { getDescriptionById, setGeneratedVideoMetaData } = require('../video-metadata/metaDataDbService');
 const { streamToUI } = require('../service-utils/sendToUI');
 const { getModelTier } = require('../ai-models/models');
 

@@ -5,7 +5,7 @@ const interServiceEvents = require('../../events/interServiceEvents');
 const { getLibDir, getTrashBinPath } = require('../servicePathConfig');
 const { removeFile } = require('../service-utils/fileUtils');
 const { getRelativeMediaPath, getAbsoluteMediaPath } = require('../service-utils/mediaPath');
-const { doesCollectionExists, addCollection } = require('../database/collectionsDbService');
+const { doesCollectionExists, addCollection } = require('../collections/collectionsDbService');
 const {
     initializeDb,
     checkForDuplicateAudio,
@@ -17,10 +17,10 @@ const {
     getAudioDescriptionById,
     resetAudiosMetaData,
     deleteAudioFromDb,
-} = require('../database/audioLibraryDbService');
+} = require('./audioLibraryDbService');
 const { getHiddenCollectionIds } = require('../collections/collections');
 const mediaTypes = require('../../constants/mediaTypes');
-const { getTagsByAudioId } = require('../database/tagsDbService');
+const { getTagsByAudioId } = require('../tags/tagsDbService');
 const { MAX_SHORT_DESCRIPTION_LENGTH } = require('../../configs/appConfig');
 const indexingEvents = require('../../events/indexingEvents');
 const responseStatus = require('../../constants/responseStatus');

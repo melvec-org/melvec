@@ -9,13 +9,13 @@ const { getFileYear } = require('../service-utils/timeUtils');
 const { getLibraryRootPath, getLibDir, getNonImportedLibraryDb, getThumbnailsDir } = require('../servicePathConfig');
 const { getDirectories, removeEmptyDirectories, writeJSONFile, doesFileExist, removeFile } = require('../service-utils/fileUtils');
 const { checkForDuplicate, getVideoDetailsById } = require('../video-library/videoLibrary');
-const { checkForDuplicateImage } = require('../database/imageLibraryDbService');
-const { checkForDuplicateAudio } = require('../database/audioLibraryDbService');
+const { checkForDuplicateImage } = require('../image-library/imageLibraryDbService');
+const { checkForDuplicateAudio } = require('../audio-library/audioLibraryDbService');
 
 const generateMediaId = require('../service-utils/generateMediaId');
 const interServiceEvents = require('../../events/interServiceEvents');
 const getUniqueID = require('../service-utils/getUniqueID');
-const { getCollectionByYearAndLabel } = require('../database/collectionsDbService');
+const { getCollectionByYearAndLabel } = require('../collections/collectionsDbService');
 const { logLibraryError } = require('../logs/logService');
 const timeout = require('../service-utils/timeout');
 const { createCollectionName, trimCollectionNameWithSameYear } = require('../service-utils/createCollectionName');

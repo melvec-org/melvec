@@ -1,4 +1,4 @@
-const { getDb } = require('./database');
+const { getDb } = require('../database/database');
 const LRUCache = require('../service-utils/LRUCache');
 const serviceEventBus = require('../service-utils/serviceEventBus');
 const interServiceEvents = require('../../events/interServiceEvents');

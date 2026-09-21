@@ -1,7 +1,7 @@
 const serviceEventBus = require('../service-utils/serviceEventBus');
 const interServiceEvents = require('../../events/interServiceEvents');
 const LRUCache = require('../service-utils/LRUCache');
-const { getDb } = require('./database');
+const { getDb } = require('../database/database');
 
 let db = null;
 

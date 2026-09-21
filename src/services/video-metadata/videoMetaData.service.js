@@ -6,10 +6,10 @@ const {
     setDescription,
     setGeneratedVideoMetaData,
     setEmbeddingData,
-} = require('../database/metaDataDbService');
+} = require('./metaDataDbService');
 const { respondSuccess, respondError, streamToUI, respondFailure } = require('../service-utils/sendToUI');
 const { generateVideoMetadata, stopGeneratingVideoMetadata, generateEmbeddingsFromDescription } = require('./generateVideoMetaData');
-const { getVideoDetailsById, getAllVideoIds } = require('../database/videoLibraryDbService');
+const { getVideoDetailsById, getAllVideoIds } = require('../video-library/videoLibraryDbService');
 const { getLibDir } = require('../servicePathConfig');
 const path = require('path');
 const { getModelTier } = require('../ai-models/models');

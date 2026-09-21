@@ -14,7 +14,7 @@ const {
     getTagsByVideoId,
     renameTagById,
     getTagsByImageId,
-} = require('../database/tagsDbService.js');
+} = require('./tagsDbService.js');
 const { MAX_TOP_TAGS_LIST_LENGTH } = require('../../configs/appConfig');
 
 const addNewTag = (id, label) => {

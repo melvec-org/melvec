@@ -2,7 +2,7 @@ const {
     searchAudiosByDescription,
     searchAudiosLooseByDescription,
     getEmbeddingByAudioId,
-} = require('../../database/audioLibraryDbService');
+} = require('../../audio-library/audioLibraryDbService');
 const userPreferenceStore = require('../../../main/userPreferenceStore');
 const { cleanSearchTerms } = require('../../service-utils/cleanSearchQuery');
 const cosineSimilarityVector = require('../../related-videos/cosineSimilarityVector');

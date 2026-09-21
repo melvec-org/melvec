@@ -1,4 +1,4 @@
-const { initializeDb, seedDefaultCategories, getAllCategories } = require('../database/categoriesDbService');
+const { initializeDb, seedDefaultCategories, getAllCategories } = require('../video-library/categoriesDbService');
 
 const initVideoCategoriesService = () => {
     initializeDb();

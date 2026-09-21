@@ -1,6 +1,6 @@
 const cosineSimilarity = require('./cosineSimilarity');
 const { STOP_WORDS } = require('../../constants/stopWords');
-const { getVideoDescriptionsChunk } = require('../database/metaDataDbService');
+const { getVideoDescriptionsChunk } = require('../video-metadata/metaDataDbService');
 
 /**
  * Preprocesses a description: lowercase, remove punctuation, remove stop words, split into words.

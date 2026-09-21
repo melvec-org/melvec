@@ -1,7 +1,7 @@
 const fse = require('fs-extra');
 const { respondSuccess, respondError, respondFailure } = require('../service-utils/sendToUI');
 const { startPreviewBatchGeneration, stopPreviewBatchGeneration, getBatchPreviewStatus } = require('./batchGenerateVideoPreview');
-const { clearAllPreviewStatuses, getVideoIdsWithoutPreview } = require('../database/videoLibraryDbService');
+const { clearAllPreviewStatuses, getVideoIdsWithoutPreview } = require('../video-library/videoLibraryDbService');
 const { getPreviewDir } = require('../servicePathConfig');
 
 const startBatchPreviewGenerationService = () => {

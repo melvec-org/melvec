@@ -1,4 +1,4 @@
-const { getEmbeddingByVideoId } = require('../database/metaDataDbService');
+const { getEmbeddingByVideoId } = require('../video-metadata/metaDataDbService');
 const cosineSimilarityVector = require('./cosineSimilarityVector');
 
 const deriveRelatedVideosByEmbedding = (videoId, videos, embeddingMap, topN = 24) => {

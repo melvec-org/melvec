@@ -32,12 +32,12 @@ jest.mock('../database/vocabularyDbServices', () => ({
     getVocabulary: jest.fn(),
 }));
 
-const { getAllVideoIds, getVideoDetailsById, getVideoTitlesAndDescriptionsByIds } = require('../database/videoLibraryDbService');
+const { getAllVideoIds, getVideoDetailsById, getVideoTitlesAndDescriptionsByIds } = require('../video-library/videoLibraryDbService');
 const { getMetaDataById } = require('../database/metaDataDbService');
 const { getTags } = require('../database/tagsDbService');
 const { getPlaylists } = require('../database/playlistsDbService');
 const { getAllImageIds } = require('../image-library/imageLibrary');
-const { getImageTitlesAndDescriptionsByIds } = require('../database/imageLibraryDbService');
+const { getImageTitlesAndDescriptionsByIds } = require('../image-library/imageLibraryDbService');
 
 const {
     addTextsToVocabulary,
