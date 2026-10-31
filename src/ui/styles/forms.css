@@ -43,10 +43,16 @@ input[type='range'] {
     border-top: 1px solid var(--app-bar-border-color);
     margin-top: 15px;
     padding-top: 15px;
+    &:first-child {
+        border-top: 0 none;
+    }
 }
 
 .formInputWrapper {
     padding: 10px 0;
+    input + button {
+        margin-left: 8px;
+    }
 }
 
 .formInputLabel {

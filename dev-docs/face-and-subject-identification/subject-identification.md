@@ -176,144 +176,125 @@ The subject table represents the user's semantic identity model.
 
 ---
 
-## 8. Subject Faces
+## 8. Subject Candidates as the Subject Evidence Layer
 
-A subject can have multiple representative faces.
+Subject candidates are permanent review/evidence records.
 
-This is important because appearance changes over time.
-
-Example:
+A candidate starts as `pending`. When the user identifies it, the same candidate is retained and linked to a subject:
 
 ```text
-Rahul
- ├── child appearance
- ├── teenage appearance
- ├── adult appearance
- └── older appearance
+subjects_candidates
+-------------------
+id
+status       -- pending | identified
+subject_id   -- nullable until identified
 ```
 
-Use a junction table:
+This keeps the candidate's media membership and representative faces available after identification.
+
+A subject can therefore have one or more identified candidate clusters:
 
 ```text
-subject_faces
--------------
-subject_id
+Subject Rahul
+ ├── Candidate 17 -- childhood photos
+ ├── Candidate 31 -- adult photos
+ └── Candidate 44 -- beard/glasses appearance
+```
+
+---
+
+## 9. Representative Candidate Faces
+
+Melvec does not need to store every detected face forever.
+
+A candidate should keep a small curated set of representative faces used for review, display, and recognition.
+
+Representative state lives on the candidate-face relationship:
+
+```text
+subject_candidate_faces
+-----------------------
+candidate_id
 face_id
+is_representative
+representative_rank
 ```
 
-Example:
-
-```text
-subject_id | face_id
------------|--------
-101        | FACE_A
-101        | FACE_B
-101        | FACE_C
-```
-
-`face_id` refers to the face representation created by the Face Identification system.
+`representative_rank` is initially derived from detector confidence or quality heuristics, but the user can later reorder faces manually. Lower rank means better representative face.
 
 ---
 
-## 9. Why Multiple Representative Faces?
+## 10. Candidate Face Selection
 
-A single face representation is insufficient for long-term recognition.
-
-The same person can change because of:
-
-- age
-- hairstyle
-- facial hair
-- glasses
-- weight
-- lighting
-- camera angle
-- image quality
-
-Therefore, a subject should have a small collection of representative face representations.
-
-The objective is not to store every detected face.
-
-The objective is to retain a useful set of distinct appearances.
-
----
-
-## 10. Subject Face Selection
-
-After user validation, Melvec should retain the strongest representative faces from the identified cluster.
+After clustering or user validation, Melvec should retain the strongest representative faces for the candidate.
 
 For example:
 
 ```text
-100 candidate faces
+100 detected faces
         ↓
-quality + visual diversity
+quality + visual diversity + user curation
         ↓
 5 representative faces
         ↓
-subject_faces
+subject_candidate_faces
 ```
 
-A subject might therefore have:
+The objective is not to store every detected face.
 
-```text
-Rahul
- ├── FACE_A
- ├── FACE_B
- ├── FACE_C
- ├── FACE_D
- └── FACE_E
-```
+The objective is to retain a useful set of distinct appearances while preserving media membership separately.
 
 ---
 
-## 11. Subject-to-Media Associations
+## 11. Candidate-to-Media Associations
 
-The most important permanent relationship is:
+The durable media relationship is maintained at candidate level:
 
 ```text
-Subject ↔ Media
+Candidate ↔ Media
 ```
-
-This relationship enables natural-language media discovery.
 
 Images and videos are maintained separately in Melvec.
 
-Therefore, subject associations should also be maintained separately.
-
-### `image_subjects`
+### `subject_candidates_images`
 
 ```text
-image_subjects
---------------
+subject_candidates_images
+-------------------------
+candidate_id
 image_id
-subject_id
 ```
 
-The recommended primary key is:
+The primary key is:
 
 ```text
-(image_id, subject_id)
+(candidate_id, image_id)
 ```
 
-This prevents duplicate associations.
-
-### `video_subjects`
+### `subject_candidates_videos`
 
 ```text
-video_subjects
---------------
+subject_candidates_videos
+-------------------------
+candidate_id
 video_id
-subject_id
 ```
 
-The recommended primary key is:
+The primary key is:
 
 ```text
-(video_id, subject_id)
+(candidate_id, video_id)
 ```
 
-This prevents duplicate associations.
+A subject's media is derived from identified candidates:
+
+```text
+subjects_candidates.status = identified
+subjects_candidates.subject_id = subject id
+subject_candidates_images / subject_candidates_videos
+```
+
+Direct `subject_faces`, `image_subjects`, and `video_subjects` tables are not part of the current model.
 
 ---
 
@@ -330,17 +311,19 @@ video_001
    └── Mom
 ```
 
-The database contains:
+The candidate-media tables contain the durable membership:
 
 ```text
-video_subjects
+subject_candidates_videos
 
-video_001 | Rahul
-video_001 | Sarah
-video_001 | Mom
+candidate_17 | video_001
+candidate_31 | video_001
+candidate_44 | video_001
 ```
 
-Likewise, one subject can be associated with many media items.
+When those candidates are identified, `subjects_candidates.subject_id` resolves them to user-facing subjects.
+
+Likewise, one subject can be associated with many media items through one or more identified candidates.
 
 ---
 
@@ -468,11 +451,12 @@ Subject = Rahul
 Time = 2020
 ```
 
-The search engine then uses:
+The search engine then uses identified candidate media:
 
 ```text
-image_subjects
-video_subjects
+subjects_candidates.status = identified
+subjects_candidates.subject_id = Rahul's subject id
+subject_candidates_images / subject_candidates_videos
 ```
 
 together with the normal media and time indexes.
@@ -671,9 +655,10 @@ The core permanent tables are:
 
 ```text
 subjects
-subject_faces
-image_subjects
-video_subjects
+subjects_candidates
+subject_candidate_faces
+subject_candidates_images
+subject_candidates_videos
 ```
 
 Conceptually:
@@ -681,51 +666,39 @@ Conceptually:
 ```text
                     SUBJECT
                        │
-                ┌──────┴──────┐
-                │             │
-                ▼             ▼
-         SUBJECT_FACES      MEDIA
-                              │
-                   ┌──────────┴──────────┐
-                   ▼                     ▼
-            IMAGE_SUBJECTS       VIDEO_SUBJECTS
+                       ▼
+              IDENTIFIED CANDIDATES
+                │                 │
+                ▼                 ▼
+       REPRESENTATIVE FACES      MEDIA
+                │                 │
+                ▼                 ▼
+     SUBJECT_CANDIDATE_FACES   SUBJECT_CANDIDATES_IMAGES / SUBJECT_CANDIDATES_VIDEOS
 ```
 
 ---
 
 ## 27. Recognition Workspace vs Permanent Model
 
-### Recognition Workspace
+Subject candidates are no longer throwaway recognition workspace records. They are the permanent evidence layer for both pending and identified subject clusters.
 
-```text
-face_candidates
-face_candidate_media
-face_clusters
-embeddings
-temporary face assets
-```
-
-Used for:
-
-- face recognition
-- candidate reduction
-- clustering
-- representative face selection
-- user validation
-
-### Permanent Subject Model
+### Candidate Evidence Model
 
 ```text
 subjects
-subject_faces
-image_subjects
-video_subjects
+subjects_candidates
+subject_candidate_faces
+subject_candidates_images
+subject_candidates_videos
+faces
 ```
 
 Used for:
 
 - identity
-- subject management
+- pending candidate review
+- identified subject management
+- representative face selection
 - media discovery
 - natural-language search
 
@@ -740,21 +713,19 @@ Media
   ↓
 Face Detection
   ↓
-Face Identification
-  ↓
 Candidate Reduction
   ↓
 Candidate Clustering
   ↓
+Candidate Media Association
+  ↓
+Representative Face Selection
+  ↓
 User Validation
   ↓
-Subject
+Candidate marked identified + linked to Subject
   ↓
-Subject Faces
-  ↓
-Subject ↔ Media Associations
-  ↓
-Search
+Search derives Subject ↔ Media through identified candidates
 ```
 
 ---

@@ -1,0 +1,88 @@
+.timelineScaleContainer {
+    height: calc(100vh - 55px);
+    width: 150px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 8px 8px;
+    box-sizing: border-box;
+}
+
+.timelineScaleCanvasWrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.timelineScaleCanvas {
+    display: block;
+    width: 100%;
+    cursor: crosshair;
+}
+
+.timelineScaleCurrentPointer,
+.timelineScaleHoverPointer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 0;
+    pointer-events: none;
+    will-change: transform;
+}
+
+.timelineScaleCurrentPointer {
+    border-top: 1px solid #007aff;
+    transition: transform 200ms ease-in-out;
+}
+
+.timelineScaleCurrentPointer::after,
+.timelineScaleHoverPointer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-radius: 50%;
+    transform: translate3d(50%, -50%, 0);
+}
+
+.timelineScaleCurrentPointer::after {
+    width: 8px;
+    height: 8px;
+    background-color: #007aff;
+}
+
+.timelineScaleCurrentPointerDragging {
+    transition: none;
+}
+
+.timelineScaleCurrentPointerDragging::after {
+    width: 12px;
+    height: 12px;
+}
+
+.timelineScaleHoverPointer {
+    border-top: 1px solid var(--timeline-hover-pointer-color);
+    opacity: 0.65;
+}
+
+.timelineScaleHoverPointer::after {
+    width: 6px;
+    height: 6px;
+    background-color: var(--timeline-hover-pointer-color);
+}
+
+.timelineScalePointerInfo {
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    right: 0;
+    padding: 6px 8px;
+    border-radius: 4px;
+    background-color: var(--side-panel-bg-color);
+    color: var(--text-color);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.3;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.12);
+    pointer-events: none;
+}

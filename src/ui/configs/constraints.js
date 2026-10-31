@@ -33,6 +33,10 @@ export const BLACKLISTED_TAG_LABELS = new Set(['tag', 'new tag', 'untitled'].map
 export const PLAYLIST_LABEL_REGX = /^[a-zA-Z0-9 _-]{2,80}$/;
 export const PLAYLIST_LABEL_MAX_LENGTH = 80;
 export const PLAYLIST_LABEL_MIN_LENGTH = 2;
+
+/* ==============   SUBJECTS   =====================*/
+export const SUBJECT_NAME_ALLOWED_REGX = /^[A-Za-z0-9 ]*$/;
+export const SUBJECT_NAME_VALID_REGX = /^[A-Za-z0-9 ]+$/;
 export const BLACKLISTED_PLAYLIST_LABELS = new Set(
     [
         'playlist',

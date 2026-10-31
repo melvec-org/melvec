@@ -10,44 +10,6 @@ const createTables = (db) => {
     `);
     }
 
-    const videoSubjectsTableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='video_subjects'").get();
-
-    if (!videoSubjectsTableExists) {
-        db.exec(`
-        CREATE TABLE video_subjects (
-            video_id TEXT NOT NULL,
-            subject_id TEXT NOT NULL,
-            PRIMARY KEY (video_id, subject_id),
-            FOREIGN KEY (video_id) REFERENCES videos(id),
-            FOREIGN KEY (subject_id) REFERENCES subjects(id)
-        );
-    `);
-
-        db.exec(`
-        CREATE INDEX idx_video_subjects_subject_id
-        ON video_subjects(subject_id);
-    `);
-    }
-
-    const imageSubjectsTableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='image_subjects'").get();
-
-    if (!imageSubjectsTableExists) {
-        db.exec(`
-        CREATE TABLE image_subjects (
-            image_id TEXT NOT NULL,
-            subject_id TEXT NOT NULL,
-            PRIMARY KEY (image_id, subject_id),
-            FOREIGN KEY (image_id) REFERENCES images(id),
-            FOREIGN KEY (subject_id) REFERENCES subjects(id)
-        );
-    `);
-
-        db.exec(`
-        CREATE INDEX idx_image_subjects_subject_id
-        ON image_subjects(subject_id);
-    `);
-    }
-
     // subject_candiates
 
     const subjectCandidatesTableExists = db
@@ -57,7 +19,9 @@ const createTables = (db) => {
         db.exec(`
         CREATE TABLE subjects_candidates (
             id INTEGER PRIMARY KEY,
-            status TEXT NOT NULL
+            status TEXT NOT NULL CHECK (status IN ('pending', 'identified')),
+            subject_id INTEGER,
+            FOREIGN KEY (subject_id) REFERENCES subjects(id)
         );
     `);
     }
@@ -72,7 +36,9 @@ const createTables = (db) => {
         CREATE TABLE subject_candidates_images (
             candidate_id INTEGER NOT NULL,
             image_id TEXT NOT NULL,
-            PRIMARY KEY (candidate_id, image_id)
+            PRIMARY KEY (candidate_id, image_id),
+            FOREIGN KEY (candidate_id) REFERENCES subjects_candidates(id) ON DELETE CASCADE,
+            FOREIGN KEY (image_id) REFERENCES images(id) ON DELETE CASCADE
         );
     `);
     }
@@ -87,24 +53,29 @@ const createTables = (db) => {
         CREATE TABLE subject_candidates_videos (
             candidate_id INTEGER NOT NULL,
             video_id TEXT NOT NULL,
-            PRIMARY KEY (candidate_id, video_id)
+            PRIMARY KEY (candidate_id, video_id),
+            FOREIGN KEY (candidate_id) REFERENCES subjects_candidates(id) ON DELETE CASCADE,
+            FOREIGN KEY (video_id) REFERENCES videos(id) ON DELETE CASCADE
         );
     `);
     }
 
-    const subjectFacesTableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='subject_faces'").get();
+    // subject_candidate_faces links unresolved subject candidate clusters to their extracted face records.
+    const subjectCandidateFacesTableExists = db
+        .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='subject_candidate_faces'")
+        .get();
 
-    if (!subjectFacesTableExists) {
+    if (!subjectCandidateFacesTableExists) {
         db.exec(`
-        CREATE TABLE subject_faces (
-            subject_id INTEGER NOT NULL,
+        CREATE TABLE subject_candidate_faces (
+            candidate_id INTEGER NOT NULL,
             face_id TEXT NOT NULL,
-            PRIMARY KEY (subject_id, face_id),
-            FOREIGN KEY (subject_id) REFERENCES subjects(id)
+            is_representative INTEGER NOT NULL DEFAULT 1,
+            representative_rank INTEGER,
+            PRIMARY KEY (candidate_id, face_id),
+            FOREIGN KEY (candidate_id) REFERENCES subjects_candidates(id) ON DELETE CASCADE,
+            FOREIGN KEY (face_id) REFERENCES faces(id) ON DELETE CASCADE
         );
-
-        CREATE INDEX idx_subject_faces_subject_id
-        ON subject_faces(subject_id);
     `);
     }
 
@@ -114,25 +85,41 @@ const createTables = (db) => {
         db.exec(`
         CREATE TABLE faces (
             id TEXT PRIMARY KEY,
-            path TEXT NOT NULL,
-            embedding BLOB NOT NULL
+            media_id TEXT NOT NULL,
+            embedding BLOB NOT NULL,
+            confidence REAL
         );
+
+        CREATE INDEX idx_faces_media_id
+            ON faces(media_id);
     `);
     }
 };
 const createIndexes = (db) => {
     db.exec(`
-        CREATE INDEX IF NOT EXISTS idx_video_subjects_subject_id
-        ON video_subjects(subject_id);
-
-        CREATE INDEX IF NOT EXISTS idx_image_subjects_subject_id
-        ON image_subjects(subject_id);
-
         CREATE INDEX IF NOT EXISTS idx_subject_candidates_images_candidate_id
         ON subject_candidates_images(candidate_id);
 
+        CREATE INDEX IF NOT EXISTS idx_subject_candidates_images_image_id
+        ON subject_candidates_images(image_id);
+
         CREATE INDEX IF NOT EXISTS idx_subject_candidates_videos_candidate_id
         ON subject_candidates_videos(candidate_id);
+
+        CREATE INDEX IF NOT EXISTS idx_subject_candidates_videos_video_id
+        ON subject_candidates_videos(video_id);
+
+        CREATE INDEX IF NOT EXISTS idx_subject_candidates_subject_id
+        ON subjects_candidates(subject_id);
+
+        CREATE INDEX IF NOT EXISTS idx_subject_candidate_faces_candidate_id
+        ON subject_candidate_faces(candidate_id);
+
+        CREATE INDEX IF NOT EXISTS idx_subject_candidate_faces_face_id
+        ON subject_candidate_faces(face_id);
+
+        CREATE INDEX IF NOT EXISTS idx_subject_candidate_faces_representative_rank
+        ON subject_candidate_faces(candidate_id, is_representative, representative_rank);
 
         CREATE INDEX IF NOT EXISTS idx_subject_faces_subject_id
         ON subject_faces(subject_id);

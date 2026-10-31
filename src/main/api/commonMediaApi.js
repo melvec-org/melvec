@@ -16,6 +16,9 @@ const commonMediaApi = (ipcRenderer) => ({
     resetBulkMediaMetadata: (mediaList, metaDataList) =>
         ipcRenderer.invoke(serviceMethods.MEDIA_BULK_RESET_METADATA, mediaList, metaDataList),
 
+    getAllMediaShortInfo: () => ipcRenderer.invoke(serviceMethods.MEDIA_GET_ALL_SHORT_INFO),
+    getMediaBasicDetails: (mediaType, mediaId) => ipcRenderer.invoke(serviceMethods.MEDIA_GET_BASIC_DETAILS, mediaType, mediaId),
+
     removeMediaFromLibrary: (mediaType, mediaId, initiator) =>
         ipcRenderer.invoke(serviceMethods.MEDIA_REMOVE_FROM_LIBRARY, mediaType, mediaId, initiator),
 });

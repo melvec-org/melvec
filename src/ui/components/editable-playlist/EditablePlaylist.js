@@ -20,7 +20,7 @@ const EditablePlaylist = ({ videoId = '', preselectedPlaylists = [], videoTitle 
 
     useEffect(() => {
         setPlaylists(preselectedPlaylists);
-    }, [videoId, preselectedPlaylists]);
+    }, [videoId]);
 
     const onApplicationMenuCommand = () => {
         if (!isPlaylistEditorOpen) {

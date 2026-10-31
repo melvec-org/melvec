@@ -45,7 +45,7 @@ const GENERIC_FOLDERS = new Set(
         'mobile',
     ].map((s) => s.toLowerCase()),
 );
-const DEFAULT_COLLECTION = 'Untitled';
+const UNFILTERED_COLLECTION = 'Unfiltered Collection';
 
 // Taking, mac, windows and external hdd into consideration
 const MAX_SAFE_LENGTH = 100;
@@ -65,7 +65,7 @@ const simpleHash = (str) => {
  * Used for organizing videos into meaningful folders.
  *
  * @param {string} relativePath - e.g. "Family/Vacation/2025/Jan/beach.mp4"
- * @returns {string} - e.g. "Jan" or "Projects ─ 2025 ─ Jan" or "Untitled"
+ * @returns {string} - e.g. "Jan" or "Projects ─ 2025 ─ Jan" or "Unfiltered Collection"
  */
 
 const createCollectionName = (relativePath) => {
@@ -73,13 +73,13 @@ const createCollectionName = (relativePath) => {
         .split(/[\\/]/)
         .map((p) => p.trim())
         .filter(Boolean);
-    if (parts.length <= 1) return DEFAULT_COLLECTION;
+    if (parts.length <= 1) return UNFILTERED_COLLECTION;
 
     const folders = parts.slice(0, -1); // remove filename
 
     // Remove known junk folders completely
     const cleaned = folders.filter((f) => !JUNK_FOLDERS.has(f.toLowerCase()));
-    if (cleaned.length === 0) return DEFAULT_COLLECTION;
+    if (cleaned.length === 0) return UNFILTERED_COLLECTION;
 
     // Build result: skip generic folders only if a meaningful one exists deeper
     const result = [];
@@ -95,7 +95,7 @@ const createCollectionName = (relativePath) => {
         if (!isGeneric) hasMeaningful = true;
     }
 
-    if (result.length === 0) return DEFAULT_COLLECTION;
+    if (result.length === 0) return UNFILTERED_COLLECTION;
 
     let name = result.join('-');
 

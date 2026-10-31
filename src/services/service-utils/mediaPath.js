@@ -1,22 +1,22 @@
 const path = require('path');
 const { getLibDir } = require('../servicePathConfig');
-const { DEFAULT_COLLECTION_NAME, DEFAULT_COLLECTION_YEAR } = require('../../configs/systemConfig');
 
 /**
- * Builds the library-relative storage path for a video file.
+ * Builds the library-relative storage path for a media file.
+ *
+ * The collection year is the source of truth for the year segment. Do not
+ * special-case by collection label: legacy media may exist in year-scoped
+ * collections named "Default collection", and the system default collection
+ * already carries year 10000 in its collection row.
  *
  * @param {string|number} year - Collection year segment.
  * @param {string} collecionName - Collection folder name.
- * @param {string} filename - Original video file name.
- * @param {string} id - Video identifier.
+ * @param {string} filename - Original media file name.
+ * @param {string} id - Media identifier.
  * @returns {string} Relative library path.
  */
 const getRelativeMediaPath = (year, collecionName, filename, id) => {
-    if (collecionName !== DEFAULT_COLLECTION_NAME) {
-        return path.join('' + year, collecionName, `_${id}_` + filename);
-    } else {
-        return path.join(DEFAULT_COLLECTION_YEAR.toString(), collecionName, `_${id}_` + filename);
-    }
+    return path.join(String(year), collecionName, `_${id}_` + filename);
 };
 
 /**

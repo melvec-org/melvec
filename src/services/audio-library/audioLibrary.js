@@ -325,6 +325,23 @@ const _getAudioDetailsById = (audioId = '') => {
     }
 };
 
+const getAudioShortInfoById = (audioId = '') => {
+    const audioDetails = getAudioDetailsById(audioId);
+
+    if (!audioDetails) {
+        console.error('null data is persisting, clean call please', audioId);
+        return null;
+    }
+
+    return {
+        mediaId: audioDetails.id,
+        mediaType: mediaTypes.AUDIO,
+        thumbnailURL: null,
+        birthtimeMs: audioDetails.birthtimeMs,
+        isNsfw: audioDetails.is_nsfw,
+    };
+};
+
 const getFullAudioDetailsById = (audioId = '') => {
     const audioDetails = _getAudioDetailsById(audioId);
 
@@ -366,6 +383,7 @@ const initAudioLibraryService = () => {
 module.exports = {
     initAudioLibraryService,
     getBasicAudioDetailsById: _getAudioDetailsById,
+    getAudioShortInfoById,
     getFullAudioDetailsById,
     getAllAudioIds,
     addAudio,

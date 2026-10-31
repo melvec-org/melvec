@@ -5,7 +5,7 @@ const scanMediaFiles = require('../service-utils/scanMediaFiles');
 const serviceEventBus = require('../service-utils/serviceEventBus');
 const interServiceEvents = require('../../events/interServiceEvents');
 const generateMediaId = require('../service-utils/generateMediaId');
-const { getFileYear } = require('../service-utils/timeUtils');
+const { getFileYear, getPreferredMediaTimestamp } = require('../service-utils/timeUtils');
 const systemConfig = require('../../configs/systemConfig');
 const { deleteThumbnail } = require('../thumbnail/thumbnail');
 const { getVideoDuration } = require('../service-utils/getVideoDuration');
@@ -51,7 +51,7 @@ const addMediaMetricsToScannedItem = async (scannedItemData) => {
     scannedItemData.mediaType = getMediaTypeFromPath(scannedItemData.path);
 
     const contentCreationTime = await getContentCreationTime(scannedItemData.path, scannedItemData.mediaType);
-    scannedItemData.birthtimeMs = contentCreationTime ? contentCreationTime * 1000 : parseInt(scannedItemData.birthtimeMs);
+    scannedItemData.birthtimeMs = getPreferredMediaTimestamp(contentCreationTime, scannedItemData.birthtimeMs);
     scannedItemData.year = getFileYear(scannedItemData.birthtimeMs);
 
     if (scannedItemData.mediaType === mediaTypes.VIDEO || scannedItemData.mediaType === mediaTypes.AUDIO) {

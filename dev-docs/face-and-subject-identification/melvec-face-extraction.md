@@ -44,7 +44,7 @@ native/face/
 │   └── ffmpeg_video_reader.h
 bin/models/
     ├── face_detection_yunet_2026may.onnx
-    └── face_recognition_sface_2021dec_int8bq.onnx
+    └── face_recognition_sface_2021dec_int8.onnx
 ```
 
 ## Responsibilities
@@ -60,16 +60,59 @@ Orchestrates the complete extraction pipeline:
 
 1.  Open the video through `FFmpegVideoReader`.
 2.  Configure YuNet.
-3.  Sample frames.
-4.  Detect faces.
-5.  Apply quality filters.
-6.  Align accepted faces with SFace.
-7.  Extract the SFace feature.
-8.  Save a temporary aligned face image.
-9.  Group observations with `FaceGrouping`.
-10. Select one representative per group.
-11. Delete non-representative temporary images.
-12. Return only the representatives.
+3.  Compute adaptive sample timestamps.
+4.  Choose a frame extraction strategy based on sample density.
+5.  Detect faces on sampled frames.
+6.  Apply quality filters.
+7.  Align accepted faces with SFace.
+8.  Extract the SFace feature.
+9.  Keep the accepted observation in memory.
+10. Group observations with `FaceGrouping`.
+11. Select one representative per group.
+12. Re-read only the selected source frames.
+13. Write only the final representative images.
+14. Return only the representatives.
+
+For video inputs, `FaceExtractor::extract(...)` in
+`native/face/src/face_extractor.cpp` now uses a hybrid FFmpeg sampling
+strategy:
+
+- Sparse sampling uses `FFmpegVideoReader::readFrameAtTime(...)` in
+  `native/face/src/ffmpeg_video_reader.cpp`.
+- Dense sampling uses `FFmpegVideoReader::startSequentialRead()` plus
+  `FFmpegVideoReader::read(...)` in
+  `native/face/src/ffmpeg_video_reader.cpp`.
+
+The current switch point is controlled by
+`SEQUENTIAL_SAMPLE_DENSITY_THRESHOLD` in
+`native/face/src/face_extractor.cpp`.
+
+Reasoning for the hybrid approach:
+
+- A sequential decode pass is efficient only when the pipeline plans to
+  inspect a substantial fraction of the source frames.
+- Sparse workloads should not pay the cost of decoding the entire video
+  just to inspect a small set of timestamps.
+- Repeated FFmpeg startup and seek overhead is still expensive, so once
+  sample density becomes high enough, a single sequential stream is the
+  cheaper option.
+- The decision is based on sample density rather than raw video duration
+  because two videos with the same duration can require very different
+  numbers of sampled frames.
+
+This design came directly from measured behavior in the native extractor:
+for example, a roughly 4-minute video produced only about 60 requested
+samples, which is a very small fraction of the total frame count. In
+that case, forcing sequential decode was slower because it decoded the
+entire video, while targeted timestamp extraction stayed fast.
+
+So the hybrid strategy exists to avoid two bad extremes:
+
+- decoding the full video for sparse sampling workloads
+- spawning FFmpeg too many times for dense sampling workloads
+
+For image inputs, `FaceExtractor::extract(...)` still processes the
+single loaded frame directly without FFmpeg sampling.
 
 ### `face_quality.cpp/.h`
 
@@ -113,6 +156,81 @@ GROUP_SIMILARITY_THRESHOLD = 0.30f;
 For two clusters, complete-link similarity is the **lowest** pairwise
 similarity between observations across the two clusters. Clusters merge
 only when that value reaches the threshold.
+
+This file should remain focused on grouping. It should not perform
+database persistence, subject assignment, or permanent file management.
+
+### `ffmpeg_video_reader.cpp/.h`
+
+Reads video frames by invoking FFmpeg directly and returning BGR OpenCV
+matrices.
+
+OpenCV `VideoCapture` is intentionally not used. This avoids coupling
+video decoding to the FFmpeg version linked into the Homebrew/OpenCV
+installation.
+
+The extractor currently supports two FFmpeg access patterns:
+
+```text
+Sparse seek mode:
+ffmpeg -v error -ss <timestamp> -i <video> -frames:v 1 -f rawvideo -pix_fmt bgr24 -
+
+Sequential stream mode:
+ffmpeg -v error -i <video> -f rawvideo -pix_fmt bgr24 -
+```
+
+The extraction mode is chosen by `FaceExtractor::extract(...)` in
+`native/face/src/face_extractor.cpp` based on sample density, not just
+video duration.
+
+### `face_quality.cpp/.h`
+
+Determines whether a detected face is good enough to keep and calculates
+the quality score.
+
+Current thresholds:
+
+```cpp
+MIN_CONFIDENCE = 0.80
+MIN_FACE_WIDTH = 80
+MIN_FACE_HEIGHT = 80
+MIN_SHARPNESS = 300.0
+MAX_YAW_DEGREES = 65.0
+```
+
+Current quality weights:
+
+```text
+confidence  30%
+size        20%
+sharpness   30%
+yaw         20%
+```
+
+Quality is for **observation quality**, not identity.
+
+### `face_grouping.cpp/.h`
+
+Determines which accepted observations belong to the same person.
+
+Uses SFace cosine similarity and **average-link** hierarchical clustering.
+Average-link uses the mean pairwise score across all cross-cluster pairs,
+making it robust to single weak observations (pose/lighting variation) that
+would break complete-link.
+
+Current threshold (exposed as `FaceGrouping::SIMILARITY_THRESHOLD`):
+
+```cpp
+SIMILARITY_THRESHOLD = 0.45f;
+```
+
+`selectTopCandidates` returns up to `maxPerGroup` (default 2) representatives
+per group. The primary pick is always highest-quality. Additional picks use a
+**max-min diversity criterion** — the remaining candidate with the lowest
+maximum similarity to any already-selected rep is chosen, but only if its
+similarity to the primary is below `SECONDARY_MAX_SIMILARITY = 0.55f`.
+This prevents near-duplicate second picks when all observations come from
+the same short scene.
 
 This file should remain focused on grouping. It should not perform
 database persistence, subject assignment, or permanent file management.
@@ -213,7 +331,7 @@ YuNet supplies the face bounding box, confidence, and five landmarks.
 Current model:
 
 ```text
-face_recognition_sface_2021dec_int8bq.onnx
+face_recognition_sface_2021dec_int8.onnx
 ```
 
 SFace supplies alignment, feature extraction, and similarity matching.
@@ -242,11 +360,21 @@ The exact command-line argument order is defined by `main.cpp`. The
 general development invocation is:
 
 ```text
-./melvec-face <ffmpeg> <yunet-model> <sface-model> <video> <output-directory>
+./melvec-face <input> <ffmpeg> <ffprobe> <yunet-model> <sface-model> <output-directory> [--debug] [--relaxed]
 ```
 
 Use the actual CLI implemented in `main.cpp` when changing the
 interface. Do not hard-code developer-specific paths.
+
+`--relaxed` is intended for manual retry flows. Batch extraction should
+use the default thresholds. Manual retry can use relaxed thresholds to
+increase recall when the first run detected faces but produced no usable
+subject candidates.
+
+Relaxed mode affects both quality filtering and final duplicate
+suppression. This is intentional: if manual retry admits more borderline
+qualified faces but final dedup remains equally strict, the additional
+faces may still collapse back to a single output candidate.
 
 ## Algorithm
 
@@ -273,8 +401,17 @@ A detection is rejected when it fails the current quality criteria:
 confidence < 0.80
 face width < 80
 face height < 80
-sharpness < 300
-absolute yaw > 65°
+sharpness < 120
+absolute yaw > 80°
+quality < 0.50
+```
+
+Manual retry with `--relaxed` lowers the main recall-sensitive gates:
+
+```text
+confidence < 0.75
+sharpness < 80
+quality < 0.45
 ```
 
 Sharpness is calculated using variance of the Laplacian.
@@ -325,6 +462,16 @@ Person B → one best face
 ```
 
 It does not choose identity. Grouping already established identity.
+
+After representative selection, final duplicate suppression prevents
+near-identical candidates from being returned multiple times. The normal
+similarity cutoff is `0.65`; candidates at or above that similarity to an
+already accepted output face are suppressed.
+
+In `--relaxed` mode, the final dedup cutoff is raised to `0.80`. Because
+higher cutoff means fewer candidates are treated as duplicates, manual
+retry can return more candidate faces for user review while still
+suppressing extremely similar duplicates.
 
 ### 6. Cleanup
 
@@ -635,19 +782,19 @@ This separation is the core design principle of `melvec-face`.
 
 ```json
 {
-  "status": "success",
-  "data": {
-    "sourceURL": "<input video URL or path>",
-    "faces": [
-      {
-        "id": "<face id>",
-        "imagePath": "<saved representative image path>",
-        "confidence": 0.98,
-        "quality": 0.91,
-        "embedding": [0.123, -0.456]
-      }
-    ]
-  }
+    "status": "success",
+    "data": {
+        "sourceURL": "<input video URL or path>",
+        "faces": [
+            {
+                "id": "<face id>",
+                "imagePath": "<saved representative image path>",
+                "confidence": 0.98,
+                "quality": 0.91,
+                "embedding": [0.123, -0.456]
+            }
+        ]
+    }
 }
 ```
 
@@ -655,14 +802,14 @@ This separation is the core design principle of `melvec-face`.
 
 ```json
 {
-  "status": "failure",
-  "data": {
-    "sourceURL": "<input video URL or path>",
-    "error": {
-      "code": "<stable machine-readable error code>",
-      "message": "<human-readable error message>"
+    "status": "failure",
+    "data": {
+        "sourceURL": "<input video URL or path>",
+        "error": {
+            "code": "<stable machine-readable error code>",
+            "message": "<human-readable error message>"
+        }
     }
-  }
 }
 ```
 

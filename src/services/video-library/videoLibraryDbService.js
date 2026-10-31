@@ -3,6 +3,7 @@ const serviceEventBus = require('../service-utils/serviceEventBus');
 const interServiceEvents = require('../../events/interServiceEvents');
 const { getDb } = require('../database/database');
 const { getRelativeMediaPath } = require('../service-utils/mediaPath');
+const faceExtractionStatus = require('../../constants/faceExtractionStatus');
 
 const CACHE_SIZE = 2000;
 const videoCache = new LRUCache(CACHE_SIZE);
@@ -49,7 +50,7 @@ const getVideoDetailsById = (id, skipCache = false) => {
     try {
         const stmt = db.prepare(`
             SELECT v.id, v.name, v.birthtimeMs, v.collection_id, v.category_id, v.year, v.title, v.size, v.duration, v.source, v.is_nsfw, v.has_preview,
-                   v.latitude, v.longitude,
+                   v.latitude, v.longitude, v.face_extraction_status,
                    c.label AS coll
             FROM videos v
             LEFT JOIN collections c ON v.collection_id = c.id
@@ -471,6 +472,51 @@ const resetVideosTitleAndCategory = (ids) => {
     }
 };
 
+const getAllPendingFaceExtractionVideoList = () => {
+    ensureDbInitialized();
+    ///
+    try {
+        const stmt = db.prepare(`
+            SELECT id
+            FROM videos
+            WHERE face_extraction_status IS NULL
+               OR face_extraction_status = ?
+        `);
+
+        return stmt.all(faceExtractionStatus.PROCESSING).map((row) => row.id);
+    } catch (err) {
+        throw new Error(`Error fetching videos pending face extraction: ${err.message}`);
+    }
+};
+
+const updateFaceExtractionStatus = (videoId, status) => {
+    ensureDbInitialized();
+
+    if (!videoId || typeof videoId !== 'string' || videoId.trim() === '') {
+        throw new Error('Field videoId must be a non-empty string');
+    }
+
+    if (status !== null && (typeof status !== 'string' || status.trim() === '')) {
+        throw new Error('Field status must be null or a non-empty string');
+    }
+
+    const stmt = db.prepare(`
+        UPDATE videos
+        SET face_extraction_status = ?
+        WHERE id = ?
+    `);
+
+    try {
+        const info = db.transaction(() => stmt.run(status, videoId))();
+        if (info.changes > 0) {
+            videoCache.delete(videoId);
+        }
+        return info.changes > 0;
+    } catch (err) {
+        throw new Error(`Failed to update face extraction status for video ${videoId}: ${err.message}`);
+    }
+};
+
 const clearVideosDbCache = () => videoCache.clear();
 
 const initializeDb = () => {
@@ -496,6 +542,7 @@ module.exports = {
     getVideosByCategoryId,
     getVideoIdsWithoutPreview,
     getVideoTitlesAndDescriptionsByIds,
+    getAllPendingFaceExtractionVideoList,
 
     // set operations
     addVideo,
@@ -505,6 +552,7 @@ module.exports = {
     updateVideoDetails,
     resetVideosTitleAndCategory,
     updateHasPreviewStatus,
+    updateFaceExtractionStatus,
 
     // other oeperations
     checkVideoExists,

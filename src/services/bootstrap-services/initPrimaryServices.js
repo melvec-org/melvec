@@ -10,6 +10,7 @@ const { initVideoLibraryService } = require('../video-library/videoLibrary.servi
 const { initCollectionsService } = require('../collections/collections.service');
 const { initWatchFolderService } = require('../watch-folders/watchFolders.service');
 const { initLocationService } = require('../location/location.service');
+const { initSubjectsService } = require('../subjects/subjects.service');
 
 const initPrimaryServices = () => {
     initLibraryLogService();
@@ -24,6 +25,7 @@ const initPrimaryServices = () => {
     initVideoLibraryService();
     initCollectionsService();
     initWatchFolderService();
+    initSubjectsService();
 };
 module.exports = {
     initPrimaryServices,

@@ -7,54 +7,47 @@
 
 namespace {
 
-/**
- * Minimum complete-link similarity required to merge two clusters.
- *
- * Because complete-link uses the lowest cross-cluster pairwise
- * similarity, this value is intentionally lower than similarities often
- * seen between especially similar individual frames.
- */
-constexpr float GROUP_SIMILARITY_THRESHOLD = 0.30f;
+// Threshold is defined as FaceGrouping::SIMILARITY_THRESHOLD in the header.
 
 
 /**
- * Calculates complete-link similarity between two candidate clusters.
+ * Calculates average-link similarity between two candidate clusters.
  *
- * Complete-link similarity is defined as the lowest pairwise similarity
- * between any observation in `clusterA` and any observation in
- * `clusterB`, which prevents loose chain-like merges.
+ * Average-link similarity is the mean pairwise cosine similarity across
+ * all cross-cluster observation pairs. Unlike complete-link (which uses
+ * the minimum and breaks on any one weak pair) or single-link (which
+ * uses the maximum and can chain unrelated faces), average-link gives a
+ * robust estimate of overall cluster affinity — the right trade-off for
+ * face identity grouping where pose and lighting vary between frames.
  */
-float calculateCompleteLinkSimilarity(
+float calculateAverageLinkSimilarity(
     const std::vector<int>& clusterA,
     const std::vector<int>& clusterB,
     const std::vector<std::vector<float>>& similarityMatrix
 ) {
-    float minimumSimilarity =
-        std::numeric_limits<float>::max();
-
+    float totalSimilarity = 0.0f;
+    int pairCount = 0;
 
     for (int observationA : clusterA) {
 
         for (int observationB : clusterB) {
 
-            float similarity =
+            totalSimilarity +=
                 similarityMatrix[
                     observationA
                 ][
                     observationB
                 ];
 
-
-            if (similarity < minimumSimilarity) {
-
-                minimumSimilarity =
-                    similarity;
-            }
+            ++pairCount;
         }
     }
 
+    if (pairCount == 0) {
+        return 0.0f;
+    }
 
-    return minimumSimilarity;
+    return totalSimilarity / static_cast<float>(pairCount);
 }
 
 
@@ -93,7 +86,7 @@ float FaceGrouping::cosineSimilarity(
 
 /**
  * Groups extracted observations into identity clusters using
- * hierarchical complete-link clustering over the full pairwise SFace
+ * hierarchical average-link clustering over the full pairwise SFace
  * similarity matrix.
  *
  * Each returned group contains indexes into the original
@@ -188,10 +181,10 @@ std::vector<std::vector<int>> FaceGrouping::group(
 
 
     /*
-     * Hierarchical complete-link clustering.
+     * Hierarchical average-link clustering.
      *
      * At every iteration we find the pair of clusters with
-     * the highest minimum pairwise similarity.
+     * the highest mean pairwise similarity.
      */
     while (groups.size() > 1) {
 
@@ -219,7 +212,7 @@ std::vector<std::vector<int>> FaceGrouping::group(
             ) {
 
                 float similarity =
-                    calculateCompleteLinkSimilarity(
+                    calculateAverageLinkSimilarity(
                         groups[groupA],
                         groups[groupB],
                         similarityMatrix
@@ -254,7 +247,7 @@ std::vector<std::vector<int>> FaceGrouping::group(
             bestGroupA < 0 ||
             bestGroupB < 0 ||
             bestSimilarity <
-                GROUP_SIMILARITY_THRESHOLD
+                FaceGrouping::SIMILARITY_THRESHOLD
         ) {
             break;
         }
@@ -330,64 +323,154 @@ std::vector<std::vector<int>> FaceGrouping::group(
 
 
 /**
- * Selects the highest-quality observation from each completed identity
- * group.
+ * Selects up to `maxPerGroup` representative observations from each
+ * completed identity group, maximising both quality and visual diversity.
  *
- * Returned values are indexes into the original `observations` vector.
- * This function does not delete thumbnails or move files.
+ * Selection strategy:
+ *   1. Always pick the highest-quality observation as the primary rep.
+ *   2. For each additional slot, pick the remaining candidate that is
+ *      most dissimilar (lowest cosine similarity) to all already-selected
+ *      reps for this group. This ensures the two shots of the same person
+ *      are complementary (e.g. different pose or lighting) rather than
+ *      near-duplicates of the best frame.
+ *
+ * Each returned pair: (observationIndex, groupIndex).
  */
-std::vector<int> FaceGrouping::selectBest(
+std::vector<std::pair<int,int>> FaceGrouping::selectTopCandidates(
     const std::vector<std::vector<int>>& groups,
-    const std::vector<ExtractedFace>& observations
+    const std::vector<ExtractedFace>& observations,
+    const cv::Ptr<cv::FaceRecognizerSF>& recognizer,
+    size_t maxPerGroup
 ) {
-    std::vector<int> representatives;
-
+    std::vector<std::pair<int,int>> representatives;
 
     for (
         size_t groupIndex = 0;
         groupIndex < groups.size();
         ++groupIndex
     ) {
-
         const std::vector<int>& group =
             groups[groupIndex];
-
 
         if (group.empty()) {
             continue;
         }
 
+        /*
+         * Step 1: sort all candidates by quality descending so the
+         * primary representative is always the best-quality one.
+         */
+        std::vector<int> ranked = group;
 
-        int bestObservation =
-            group.front();
+        std::sort(
+            ranked.begin(),
+            ranked.end(),
+            [&](int leftIndex, int rightIndex) {
+                const ExtractedFace& left =
+                    observations[leftIndex];
 
+                const ExtractedFace& right =
+                    observations[rightIndex];
 
-        float bestQuality =
-            observations[bestObservation].quality;
+                if (left.quality != right.quality) {
+                    return left.quality > right.quality;
+                }
 
+                if (left.confidence != right.confidence) {
+                    return left.confidence > right.confidence;
+                }
 
-        for (int observationIndex : group) {
+                return left.frameIndex < right.frameIndex;
+            }
+        );
 
-            const ExtractedFace& observation =
-                observations[observationIndex];
+        /*
+         * Step 2: greedily pick up to maxPerGroup candidates.
+         *
+         * The first pick is always ranked[0] (best quality).
+         * Every subsequent pick is the remaining candidate with the
+         * lowest maximum similarity to any already-selected candidate —
+         * i.e. the one that looks most different from all selected so far.
+         */
+        std::vector<int> selected;
+        selected.reserve(maxPerGroup);
 
+        std::vector<bool> used(ranked.size(), false);
 
-            if (observation.quality > bestQuality) {
+        for (
+            size_t slot = 0;
+            slot < maxPerGroup && slot < ranked.size();
+            ++slot
+        ) {
+            if (slot == 0) {
+                /*
+                 * Primary: always the highest-quality candidate.
+                 */
+                selected.push_back(ranked[0]);
+                used[0] = true;
+                continue;
+            }
 
-                bestQuality =
-                    observation.quality;
+            /*
+             * Diversity pick: find the candidate least similar to
+             * any already-selected rep for this group.
+             *
+             * We use min-max similarity: for each remaining candidate
+             * compute its maximum similarity to any selected rep, then
+             * pick the candidate with the lowest such maximum.
+             * This is the standard max-min diversity criterion.
+             */
+            int bestCandidatePos = -1;
+            float bestMaxSimilarity =
+                std::numeric_limits<float>::max();
 
-                bestObservation =
-                    observationIndex;
+            for (
+                size_t candidatePos = 0;
+                candidatePos < ranked.size();
+                ++candidatePos
+            ) {
+                if (used[candidatePos]) {
+                    continue;
+                }
+
+                const ExtractedFace& candidate =
+                    observations[ranked[candidatePos]];
+
+                float maxSimilarityToSelected = -1.0f;
+
+                for (int selectedIndex : selected) {
+                    const float sim =
+                        cosineSimilarity(
+                            candidate.feature,
+                            observations[selectedIndex].feature,
+                            recognizer
+                        );
+
+                    if (sim > maxSimilarityToSelected) {
+                        maxSimilarityToSelected = sim;
+                    }
+                }
+
+                if (maxSimilarityToSelected < bestMaxSimilarity) {
+                    bestMaxSimilarity = maxSimilarityToSelected;
+                    bestCandidatePos =
+                        static_cast<int>(candidatePos);
+                }
+            }
+
+            if (bestCandidatePos >= 0) {
+                selected.push_back(ranked[bestCandidatePos]);
+                used[bestCandidatePos] = true;
             }
         }
 
-
-        representatives.push_back(
-            bestObservation
-        );
+        for (int observationIndex : selected) {
+            representatives.emplace_back(
+                observationIndex,
+                static_cast<int>(groupIndex)
+            );
+        }
     }
-
 
     return representatives;
 }

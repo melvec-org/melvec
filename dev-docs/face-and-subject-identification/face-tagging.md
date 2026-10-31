@@ -91,6 +91,32 @@ This information exists primarily to support recognition and validation.
 
 It should remain separate from the permanent subject-management data.
 
+### Media face extraction status
+
+The `videos.face_extraction_status` and `images.face_extraction_status`
+columns store the media-level face extraction result. This status answers
+whether extraction ran and whether the native extractor found face
+candidates. It does not guarantee that subject candidates were persisted.
+Downstream best-face selection may still discard every detected face.
+
+The application code should use `src/constants/faceExtractionStatus.js`
+instead of raw strings. The database stores compact four-character codes:
+
+```text
+NULL  → not started
+proc  → processing / recoverable interrupted run
+cfdt  → completed, at least one native face candidate detected
+cnfd  → completed, no native face candidates detected
+fail  → technical/runtime failure
+```
+
+Batch face extraction should only pick media where the status is `NULL`
+or `proc`. It should not automatically retry `cfdt`, `cnfd`, or `fail`.
+
+Manual retry may be offered for `cfdt` because it means faces were found,
+but relaxed thresholds may be needed to produce usable subject candidates.
+Manual retry should not be offered for `cnfd` or `fail`.
+
 ---
 
 ## 5. Face Thumbnail
@@ -584,7 +610,7 @@ The recognition workspace should not necessarily be deleted immediately after sc
 
 It can contain:
 
-- unidentified candidates
+- unnamed candidates
 - pending clusters
 - clusters awaiting validation
 - representative face images

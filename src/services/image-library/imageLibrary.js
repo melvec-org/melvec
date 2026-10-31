@@ -20,12 +20,14 @@ const {
 } = require('./imageLibraryDbService');
 const { getHiddenCollectionIds } = require('../collections/collections');
 const mediaTypes = require('../../constants/mediaTypes');
+const faceExtractionStatus = require('../../constants/faceExtractionStatus');
 const { getTagsByImageId } = require('../tags/tagsDbService');
 const { MAX_SHORT_DESCRIPTION_LENGTH } = require('../../configs/appConfig');
 const indexingEvents = require('../../events/indexingEvents');
 const responseStatus = require('../../constants/responseStatus');
 const { addMediaLocation, getLocationNameByMediaId } = require('../location/location');
 const { extractGPSData } = require('../service-utils/extractGPSData');
+const { getSubjectCandidatesForMedia } = require('../subjects/subjects');
 
 const updateImageDetailsById = (id = '', udpatedDetails = {}) => {
     if (id !== '') {
@@ -332,6 +334,7 @@ const _getImageDetailsById = (imageId = '') => {
             isHidden: hiddenCollections.has(imageDetails.collection_id),
             isNsfw: imageDetails.is_nsfw,
             source: imageDetails.source,
+            faceExtractionStatus: imageDetails.face_extraction_status,
             mediaType: mediaTypes.IMAGE,
         };
     } else {
@@ -339,6 +342,23 @@ const _getImageDetailsById = (imageId = '') => {
         console.error('null data is persisting, clean call please', imageId);
         return null;
     }
+};
+
+const getImageShortInfoById = (imageId = '') => {
+    const imageDetails = getImageDetailsById(imageId);
+
+    if (!imageDetails) {
+        console.error('null data is persisting, clean call please', imageId);
+        return null;
+    }
+
+    return {
+        mediaId: imageDetails.id,
+        mediaType: mediaTypes.IMAGE,
+        thumbnailURL: path.join(getThumbnailsDir(), `${imageId}.jpg`),
+        birthtimeMs: imageDetails.birthtimeMs,
+        isNsfw: imageDetails.is_nsfw,
+    };
 };
 
 const getFullImageDetailsById = (imageId = '') => {
@@ -351,6 +371,8 @@ const getFullImageDetailsById = (imageId = '') => {
     const tags = getTagsByImageId(imageId);
     const description = getImageDescriptionById(imageId);
     const locationName = getLocationNameByMediaId(mediaTypes.IMAGE, imageId);
+    const subjects = getSubjectCandidatesForMedia(mediaTypes.IMAGE, imageId);
+    const canRetryFaceExtraction = faceExtractionStatus.isFaceExtractionRetryEligible(imageDetails.faceExtractionStatus);
 
     const shortDesc = description ? description.slice(0, MAX_SHORT_DESCRIPTION_LENGTH) : '';
 
@@ -359,6 +381,8 @@ const getFullImageDetailsById = (imageId = '') => {
         tags,
         shortDesc,
         locationName,
+        subjects,
+        canRetryFaceExtraction,
     };
 };
 
@@ -384,6 +408,7 @@ const initImageLibraryService = () => {
 module.exports = {
     initImageLibraryService,
     getBasicImageDetailsById: _getImageDetailsById,
+    getImageShortInfoById,
     getFullImageDetailsById,
     getAllImageIds,
     addImage,

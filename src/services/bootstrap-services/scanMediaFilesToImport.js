@@ -25,6 +25,7 @@ const scanMediaFilesToImport = () => {
     excludeDirList.push(new RegExp(systemConfig.THUMBNAILS_DIR));
     excludeDirList.push(new RegExp(systemConfig.PREVIEW_DIR));
     excludeDirList.push(new RegExp(systemConfig.TRASHBIN_DIR));
+    excludeDirList.push(new RegExp(systemConfig.FACES_DIR));
     excludeDirList.push(/.DS_Store/);
 
     const freshUnImportedFilesList = scanMediaFiles({

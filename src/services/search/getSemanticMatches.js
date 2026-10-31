@@ -1,5 +1,5 @@
 const { getEmbeddingByVideoId } = require('../video-metadata/metaDataDbService');
-const cosineSimilarityVector = require('../related-videos/cosineSimilarityVector');
+const cosineSimilarityVector = require('../service-utils/cosineSimilarityVector');
 const { generateEmbeddingFromKeywords } = require('../service-utils/generateEmbedding');
 
 const getSemanticMatches = async (keywords, candidateVideoIds) => {

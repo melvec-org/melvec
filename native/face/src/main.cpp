@@ -111,7 +111,7 @@ static int printFailureResponse(
  * CLI entry point for the native face extraction executable.
  *
  * Expected arguments:
- *   1. video path
+ *   1. input path (video or image)
  *   2. ffmpeg path
  *   3. ffprobe path
  *   4. YuNet model path
@@ -129,11 +129,11 @@ int main(int argc, char** argv) {
         ? argv[1]
         : "";
 
-    if (argc != 7) {
+    if (argc < 7 || argc > 9) {
         return printFailureResponse(
             videoPath,
             "INVALID_ARGUMENTS",
-            "Usage: melvec-face <video> <ffmpeg> <ffprobe> <yunet.onnx> <sface.onnx> <output-directory>"
+            "Usage: melvec-face <input> <ffmpeg> <ffprobe> <yunet.onnx> <sface.onnx> <output-directory> [--debug] [--relaxed]"
         );
     }
 
@@ -143,6 +143,24 @@ int main(int argc, char** argv) {
     const std::string yunetPath = argv[4];
     const std::string sfacePath = argv[5];
     const std::string outputDirectory = argv[6];
+    bool debug = false;
+    bool relaxed = false;
+
+    for (int argIndex = 7; argIndex < argc; ++argIndex) {
+        const std::string option = argv[argIndex];
+
+        if (option == "--debug") {
+            debug = true;
+        } else if (option == "--relaxed") {
+            relaxed = true;
+        } else {
+            return printFailureResponse(
+                videoPath,
+                "INVALID_ARGUMENTS",
+                "Unknown option: " + option
+            );
+        }
+    }
 
     try {
 
@@ -154,11 +172,13 @@ int main(int argc, char** argv) {
         );
 
 
-        std::vector<ExtractedFace> faces =
+        FaceExtractionResult result =
             extractor.extract(
                 videoPath,
                 outputDirectory,
-                1.0
+                1.0,
+                debug,
+                relaxed
             );
 
 
@@ -179,11 +199,29 @@ int main(int argc, char** argv) {
         );
 
         std::cout
+            << ",\"summary\":{";
+
+        std::cout
+            << "\"detectedFaces\":"
+            << result.summary.detectedFaces;
+
+        std::cout
+            << ",\"qualifiedFaces\":"
+            << result.summary.qualifiedFaces;
+
+        std::cout
+            << ",\"outputFaces\":"
+            << result.summary.outputFaces;
+
+        std::cout
+            << "}";
+
+        std::cout
             << ",\"faces\":[";
 
         for (
             size_t i = 0;
-            i < faces.size();
+            i < result.faces.size();
             i++
         ) {
 
@@ -192,7 +230,7 @@ int main(int argc, char** argv) {
             }
 
             const auto& face =
-                faces[i];
+                result.faces[i];
 
             std::cout
                 << "{";
@@ -218,6 +256,10 @@ int main(int argc, char** argv) {
             std::cout
                 << ",\"quality\":"
                 << face.quality;
+
+            std::cout
+                << ",\"identityIndex\":"
+                << face.identityIndex;
 
             std::cout
                 << ",\"embedding\":[";

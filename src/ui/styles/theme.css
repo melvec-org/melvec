@@ -107,6 +107,10 @@ html[data-theme='light'] {
 
     --audio-player-bg-color: #d9d9d9;
     --form-toggle-bg-color: #00000044;
+
+    --timeline-bar-color: #aaa;
+    --timeline-hover-pointer-color: #777;
+    --timeline-year-color: #333;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -196,5 +200,9 @@ html[data-theme='light'] {
 
         --audio-player-bg-color: #404040;
         --form-toggle-bg-color: #ffffff44;
+
+        --timeline-bar-color: #666;
+        --timeline-hover-pointer-color: #aaa;
+        --timeline-year-color: #eee;
     }
 }

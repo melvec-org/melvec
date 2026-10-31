@@ -1,3 +1,9 @@
+### Compile command
+
+```
+cmake --build . -j
+```
+
 DNN - deep neural network - built into open cv
 
 Note:

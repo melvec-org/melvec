@@ -3,8 +3,23 @@
 
 #include <opencv2/opencv.hpp>
 
+#include <chrono>
 #include <string>
 #include <vector>
+
+struct FaceExtractionSummary {
+    int detectedFaces = 0;
+    int qualifiedFaces = 0;
+    int outputFaces = 0;
+};
+
+struct FaceExtractionTiming {
+    std::chrono::steady_clock::duration frameReadTime{};
+    std::chrono::steady_clock::duration processFrameTime{};
+    std::chrono::steady_clock::duration groupingTime{};
+    std::chrono::steady_clock::duration finalWriteTime{};
+    FaceExtractionSummary summary;
+};
 
 
 /**
@@ -20,7 +35,7 @@ struct ExtractedFace {
     /** Stable per-run identifier derived from frame and detection index. */
     std::string id;
 
-    /** Path to the saved aligned face thumbnail image. */
+    /** Path to the final saved aligned face thumbnail image. */
     std::string imagePath;
 
     /** YuNet detection confidence for this observation. */
@@ -29,11 +44,31 @@ struct ExtractedFace {
     /** Computed observation quality score used for representative selection. */
     float quality;
 
-    /** Zero-based source video frame index where the face was observed. */
+    /**
+     * Approximate zero-based source video frame index for the sampled
+     * timestamp where the face was observed.
+     */
     int frameIndex;
 
-    /** Timestamp in seconds derived from frame index and video FPS. */
+    /**
+     * Zero-based index into the ordered sample list for this extraction
+     * run. Used by early deduplication to compare proximity in sampling
+     * space rather than raw frame space, which is meaningful for both
+     * sequential (frame-accurate) and sparse batch sampling paths.
+     */
+    int sampleIndex = 0;
+
+    /**
+     * Requested sample timestamp in seconds for the extracted frame.
+     */
     double timestamp;
+
+    /**
+     * Original YuNet detection row retained so the representative face
+     * can be recovered from the source frame during the final image-write
+     * pass.
+     */
+    cv::Mat detection;
 
     /**
      * SFace feature used during the current extraction and grouping run.
@@ -48,6 +83,21 @@ struct ExtractedFace {
      * persistence.
      */
     std::vector<float> embedding;
+
+    /**
+     * Zero-based identity group index assigned during clustering.
+     *
+     * All representatives that belong to the same person share the same
+     * `identityIndex`. The index is stable within a single extraction
+     * run and is ordered by the first observation of each identity.
+     */
+    int identityIndex = -1;
+};
+
+
+struct FaceExtractionResult {
+    std::vector<ExtractedFace> faces;
+    FaceExtractionSummary summary;
 };
 
 
@@ -58,8 +108,11 @@ public:
      * Creates a face extraction pipeline bound to specific model and
      * ffmpeg/ffprobe executable paths.
      *
+     * ffmpeg/ffprobe are used for video inputs, while still images are
+     * loaded directly through OpenCV.
+     *
      * @param ffmpegPath Path to the ffmpeg executable used for video
-     * decoding.
+     * frame extraction.
      * @param ffprobePath Path to the ffprobe executable used for video
      * probing.
      * @param detectorModel Path to the YuNet ONNX model.
@@ -74,26 +127,31 @@ public:
 
 
     /**
-     * Runs the full extraction pipeline for a video.
+     * Runs the full extraction pipeline for a video or image.
      *
-     * Stages include frame sampling, YuNet detection, quality filtering,
-     * SFace alignment and feature extraction, identity grouping,
-     * representative selection, and deletion of non-representative
-     * temporary thumbnails.
+     * For videos, stages include sparse frame sampling, YuNet detection,
+     * quality filtering, SFace alignment and feature extraction,
+     * identity grouping, representative selection, and final image write
+     * only for the selected representatives.
      *
-     * @param videoPath Path to the input video.
+     * For images, the same face-processing pipeline is applied to the
+     * single loaded frame.
+     *
+     * @param videoPath Path to the input video or image.
      * @param outputDirectory Directory where aligned face thumbnails are
      * written.
-     * @param sampleIntervalSeconds Interval between sampled frames.
+     * @param sampleIntervalSeconds Legacy sampling interval fallback.
      *
      * @return One `ExtractedFace` per selected identity representative.
      *
      * @throws std::runtime_error If extraction cannot be completed.
      */
-    std::vector<ExtractedFace> extract(
+    FaceExtractionResult extract(
         const std::string& videoPath,
         const std::string& outputDirectory,
-        double sampleIntervalSeconds = 1.0
+        double sampleIntervalSeconds = 1.0,
+        bool debug = false,
+        bool relaxed = false
     );
 
 
@@ -110,10 +168,25 @@ private:
 
     cv::Ptr<cv::FaceRecognizerSF> recognizer;
 
+    bool debug = false;
+    bool relaxed = false;
+
 
     std::string generateFaceId(
         int frameIndex,
         int faceIndex
+    );
+
+    void processFrame(
+        const cv::Mat& frame,
+        int frameIndex,
+        int sampleIndex,
+        int maxSampleGap,
+        double timestampSeconds,
+        const std::string& outputDirectory,
+        std::vector<ExtractedFace>& observations,
+        double fps,
+        FaceExtractionTiming* timing = nullptr
     );
 };
 

@@ -18,8 +18,7 @@ const AppNav = () => {
     };
 
     const showPlayerModeControl =
-        stateContext.currentApplicationView !== applicationViewStates.PLAYER_VIEW &&
-        stateContext.currentPlaybackVideo !== undefined;
+        stateContext.currentApplicationView !== applicationViewStates.PLAYER_VIEW && stateContext.currentPlaybackVideo !== undefined;
 
     useEffect(() => {
         registerAccKeyListener(applicationMenuEvents.OPEN_SETTINGS, () => {
@@ -40,9 +39,13 @@ const AppNav = () => {
 
     return (
         <div className={style.appNav}>
-            {showPlayerModeControl && (
-                <PlayerModeControl onTitleClick={() => onNavigationClick(applicationViewStates.PLAYER_VIEW)} />
-            )}
+            {showPlayerModeControl && <PlayerModeControl onTitleClick={() => onNavigationClick(applicationViewStates.PLAYER_VIEW)} />}
+            <IconButton
+                title={'Timeline view'}
+                isSelected={stateContext.currentApplicationView === applicationViewStates.TIMELINE_VIEW}
+                icon={'timeline'}
+                onClick={() => onNavigationClick(applicationViewStates.TIMELINE_VIEW)}
+            />
             <IconButton
                 title={'Playlist dashboard'}
                 isSelected={stateContext.currentApplicationView === applicationViewStates.PLAYLISTS_DASHBOARD_VIEW}

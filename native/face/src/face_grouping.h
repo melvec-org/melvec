@@ -20,6 +20,13 @@ class FaceGrouping {
 public:
 
     /**
+     * Minimum average-link similarity required to merge two clusters,
+     * and reused by the final identity reassignment pass in
+     * `face_extractor.cpp` to unify survivors that grouping split.
+     */
+    static constexpr float SIMILARITY_THRESHOLD = 0.45f;
+
+    /**
      * Groups accepted observations by identity using SFace similarity.
      *
      * The returned nested vectors contain indexes into the original
@@ -38,27 +45,33 @@ public:
 
 
     /**
-     * Selects the highest-quality observation from each group.
+     * Selects up to `maxPerGroup` representative observations from each
+     * group, ordered best-first by quality and then confidence.
      *
      * The returned indexes refer back to the original `observations`
      * vector, not to positions inside each group.
      *
      * @param groups Identity groups returned by `FaceGrouping::group(...)`.
-     * @param observations Original observations that contain quality
-     * scores.
-     * @return One observation index per group.
+     * @param observations Original observations that contain ranking
+     * signals.
+     * @param maxPerGroup Maximum number of representatives to keep for
+     * each identity group.
+     * @return Ordered observation indexes across all groups.
      */
-    static std::vector<int> selectBest(
+    static std::vector<std::pair<int,int>> selectTopCandidates(
         const std::vector<std::vector<int>>& groups,
-        const std::vector<ExtractedFace>& observations
+        const std::vector<ExtractedFace>& observations,
+        const cv::Ptr<cv::FaceRecognizerSF>& recognizer,
+        size_t maxPerGroup = 2
     );
 
-
-private:
 
     /**
      * Computes cosine similarity between two SFace feature matrices using
      * OpenCV's `cv::FaceRecognizerSF::match()` implementation.
+     *
+     * This is used both by the final identity grouping stage and by the
+     * earlier near-duplicate suppression step in `face_extractor.cpp`.
      *
      * @return Similarity score, or `-1.0f` when inputs are invalid.
      */

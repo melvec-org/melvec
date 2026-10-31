@@ -26,6 +26,25 @@ const std::vector<cv::Point3f> FACE_3D_POINTS = {
 
 
 /**
+ * Converts an input face image to grayscale while preserving single-
+ * channel inputs.
+ */
+static cv::Mat toGray(const cv::Mat& face) {
+    if (face.empty()) {
+        return cv::Mat();
+    }
+
+    if (face.channels() == 1) {
+        return face;
+    }
+
+    cv::Mat gray;
+    cv::cvtColor(face, gray, cv::COLOR_BGR2GRAY);
+    return gray;
+}
+
+
+/**
  * Calculates image sharpness using variance of the Laplacian.
  *
  * Empty images are treated as unusable and return `0.0f`.
@@ -33,16 +52,10 @@ const std::vector<cv::Point3f> FACE_3D_POINTS = {
 float FaceQuality::calculateSharpness(
     const cv::Mat& face
 ) {
-    if (face.empty()) {
+    cv::Mat gray = toGray(face);
+
+    if (gray.empty()) {
         return 0.0f;
-    }
-
-    cv::Mat gray;
-
-    if (face.channels() == 1) {
-        gray = face;
-    } else {
-        cv::cvtColor(face, gray, cv::COLOR_BGR2GRAY);
     }
 
     cv::Mat laplacian;
@@ -64,6 +77,45 @@ float FaceQuality::calculateSharpness(
 
     return static_cast<float>(
         stddev[0] * stddev[0]
+    );
+}
+
+
+float FaceQuality::calculateBrightness(
+    const cv::Mat& face
+) {
+    cv::Mat gray = toGray(face);
+
+    if (gray.empty()) {
+        return 0.0f;
+    }
+
+    return static_cast<float>(
+        cv::mean(gray)[0]
+    );
+}
+
+
+float FaceQuality::calculateContrast(
+    const cv::Mat& face
+) {
+    cv::Mat gray = toGray(face);
+
+    if (gray.empty()) {
+        return 0.0f;
+    }
+
+    cv::Scalar mean;
+    cv::Scalar stddev;
+
+    cv::meanStdDev(
+        gray,
+        mean,
+        stddev
+    );
+
+    return static_cast<float>(
+        stddev[0]
     );
 }
 
@@ -184,15 +236,17 @@ double FaceQuality::calculateYaw(
  * Combines multiple normalized quality signals into a single weighted
  * score for representative selection.
  *
- * The current weighting favors confidence and sharpness while still
- * considering face size and frontal pose.
+ * The current weighting favors confidence, sharpness, and frontal pose
+ * while also rewarding reasonable exposure and visible contrast.
  */
 float FaceQuality::calculateQuality(
     float confidence,
     int faceWidth,
     int faceHeight,
     double sharpness,
-    double yaw
+    double yaw,
+    double brightness,
+    double contrast
 ) {
     double confidenceScore =
         std::clamp(
@@ -200,7 +254,6 @@ float FaceQuality::calculateQuality(
             0.0,
             1.0
         );
-
 
     double size =
         static_cast<double>(
@@ -214,14 +267,12 @@ float FaceQuality::calculateQuality(
             1.0
         );
 
-
     double sharpnessScore =
         std::clamp(
             (sharpness - MIN_SHARPNESS) / 400.0,
             0.0,
             1.0
         );
-
 
     double yawScore =
         1.0 -
@@ -231,11 +282,35 @@ float FaceQuality::calculateQuality(
             1.0
         );
 
+    /*
+     * Favor faces near a mid-range brightness target so extremely dark
+     * and washed-out crops are both penalized.
+     */
+    constexpr double TARGET_BRIGHTNESS = 135.0;
+    constexpr double BRIGHTNESS_TOLERANCE = 70.0;
+
+    double brightnessScore =
+        1.0 -
+        std::clamp(
+            std::abs(brightness - TARGET_BRIGHTNESS) /
+                BRIGHTNESS_TOLERANCE,
+            0.0,
+            1.0
+        );
+
+    double contrastScore =
+        std::clamp(
+            contrast / 55.0,
+            0.0,
+            1.0
+        );
 
     return static_cast<float>(
-        confidenceScore * 0.30 +
-        sizeScore       * 0.20 +
-        sharpnessScore  * 0.30 +
-        yawScore        * 0.20
+        confidenceScore * 0.22 +
+        sizeScore       * 0.15 +
+        sharpnessScore  * 0.22 +
+        yawScore        * 0.18 +
+        brightnessScore * 0.13 +
+        contrastScore   * 0.10
     );
 }

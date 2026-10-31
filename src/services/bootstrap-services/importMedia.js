@@ -5,7 +5,7 @@ const systemConfig = require('../../configs/systemConfig');
 const path = require('path');
 
 const validateFilename = require('../service-utils/validateFileName');
-const { getFileYear } = require('../service-utils/timeUtils');
+const { getFileYear, getPreferredMediaTimestamp } = require('../service-utils/timeUtils');
 const { getLibraryRootPath, getLibDir, getNonImportedLibraryDb, getThumbnailsDir } = require('../servicePathConfig');
 const { getDirectories, removeEmptyDirectories, writeJSONFile, doesFileExist, removeFile } = require('../service-utils/fileUtils');
 const { checkForDuplicate, getVideoDetailsById } = require('../video-library/videoLibrary');
@@ -399,10 +399,11 @@ const importAudioToLibrary = async (mediaStats = {}, targetLibrary = '') => {
 
 const enrichMediaStatsWithContentCreationTime = async (mediaStats = {}) => {
     const contentCreationTime = await getContentCreationTime(mediaStats.path, mediaStats.mediaType);
+    const preferredTimestamp = getPreferredMediaTimestamp(contentCreationTime, mediaStats.birthtimeMs);
 
     return {
         ...mediaStats,
-        birthtimeMs: parseInt(contentCreationTime || mediaStats.birthtimeMs),
+        birthtimeMs: preferredTimestamp,
     };
 };
 

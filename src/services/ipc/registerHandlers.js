@@ -20,6 +20,7 @@ const { imageMetaDataServiceHandlers } = require('./handlers/imageMetaData.handl
 const { audioLibraryServiceHandlers } = require('./handlers/audioLibrary.handlers');
 const { audioMetaDataServiceHandlers } = require('./handlers/audioMetaData.handlers');
 const { locationServiceHandlers } = require('./handlers/location.handlers');
+const { subjectsServiceHandlers } = require('./handlers/subjects.handlers');
 
 const registerHandlers = () => {
     const handlers = [
@@ -42,6 +43,7 @@ const registerHandlers = () => {
         ...audioLibraryServiceHandlers,
         ...audioMetaDataServiceHandlers,
         ...locationServiceHandlers,
+        ...subjectsServiceHandlers,
     ];
 
     handlers.forEach(([name, handler]) => {

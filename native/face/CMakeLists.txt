@@ -14,6 +14,7 @@ add_executable(
     src/face_quality.cpp
     src/face_grouping.cpp
     src/ffmpeg_video_reader.cpp
+    src/ffmpeg_batch_video_reader.cpp
 )
 
 set_target_properties(

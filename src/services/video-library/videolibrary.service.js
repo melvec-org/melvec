@@ -24,9 +24,11 @@ const interServiceEvents = require('../../events/interServiceEvents');
 const { respondSuccess, respondError, respondFailure } = require('../service-utils/sendToUI');
 const { updateSource, deleteVideo } = require('./videoLibraryDbService');
 const mediaTypes = require('../../constants/mediaTypes');
+const faceExtractionStatus = require('../../constants/faceExtractionStatus');
 const indexingEvents = require('../../events/indexingEvents');
 const responseStatus = require('../../constants/responseStatus');
 const { getLocationNameByMediaId } = require('../location/location');
+const { getSubjectCandidatesForMedia } = require('../subjects/subjects');
 
 const _getBasicVideoDetailsById = (videoId) => {
     if (videoId === undefined) {
@@ -67,6 +69,23 @@ const _getBasicVideoDetailsById = (videoId) => {
     return null;
 };
 
+const _getVideoShortInfoById = (videoId) => {
+    const videoDetails = getVideoDetailsById(videoId);
+
+    if (!videoDetails) {
+        console.error('null data is persisting, clean call please', videoId);
+        return null;
+    }
+
+    return {
+        mediaId: videoDetails.id,
+        mediaType: mediaTypes.VIDEO,
+        thumbnailURL: path.join(getThumbnailsDir(), `${videoId}.jpg`),
+        birthtimeMs: videoDetails.birthtimeMs,
+        isNsfw: videoDetails.is_nsfw,
+    };
+};
+
 const _getFullVideoDetailsById = (videoId) => {
     let videoDetails = _getBasicVideoDetailsById(videoId);
 
@@ -80,9 +99,12 @@ const _getFullVideoDetailsById = (videoId) => {
         videoDetails.playlists = getPlaylistsByVideoId(videoId);
         videoDetails.tags = getTagsByVideoId(videoId);
         videoDetails.locationName = getLocationNameByMediaId(mediaTypes.VIDEO, videoId);
+        videoDetails.subjects = getSubjectCandidatesForMedia(mediaTypes.VIDEO, videoId);
+        videoDetails.canRetryFaceExtraction = faceExtractionStatus.isFaceExtractionRetryEligible(videoDetails.faceExtractionStatus);
 
         return videoDetails;
     }
+
     return null;
 };
 
@@ -193,6 +215,7 @@ module.exports = {
     initVideoLibraryService,
     getFullVideoDetailsById: _getFullVideoDetailsById,
     getBasicVideoDetailsById: _getBasicVideoDetailsById,
+    getVideoShortInfoById: _getVideoShortInfoById,
     removeVideoFromLibrary,
     removeVideoFromLibraryService,
     updateVideoTitleService,

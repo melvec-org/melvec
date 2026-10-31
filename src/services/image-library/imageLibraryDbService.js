@@ -5,6 +5,7 @@ const interServiceEvents = require('../../events/interServiceEvents');
 const { buildNearQuery, cleanSearchTerms } = require('../service-utils/cleanSearchQuery');
 const { getRelativeMediaPath } = require('../service-utils/mediaPath');
 const { getYearFromTime } = require('../service-utils/timeUtils');
+const faceExtractionStatus = require('../../constants/faceExtractionStatus');
 
 const CACHE_SIZE = 2000;
 const imageDbCache = new LRUCache(CACHE_SIZE);
@@ -52,7 +53,8 @@ const getImageDetailsById = (id, skipCache = false) => {
                 i.source,
                 i.is_nsfw,
                 i.latitude,
-                i.longitude
+                i.longitude,
+                i.face_extraction_status
             FROM images i
             LEFT JOIN collections c ON c.id = i.collection_id
             WHERE i.id = ?
@@ -226,20 +228,7 @@ const addImage = (image) => {
 
     try {
         db.transaction(() => {
-            stmt.run(
-                id,
-                name,
-                title,
-                role,
-                collection_id,
-                birthtimeMs,
-                size,
-                normalisedDescription,
-                source,
-                is_nsfw,
-                latitude,
-                longitude,
-            );
+            stmt.run(id, name, title, role, collection_id, birthtimeMs, size, normalisedDescription, source, is_nsfw, latitude, longitude);
         })();
 
         const imageDetails = getImageDetailsById(id);
@@ -679,6 +668,51 @@ const getImageListWithoutDescription = () => {
     }
 };
 
+const getAllPendingFaceExtractionImageList = () => {
+    ensureDbInitialized();
+
+    try {
+        const stmt = db.prepare(`
+            SELECT id
+            FROM images
+            WHERE face_extraction_status IS NULL
+               OR face_extraction_status = ?
+        `);
+
+        return stmt.all(faceExtractionStatus.PROCESSING).map((row) => row.id);
+    } catch (err) {
+        throw new Error(`Error fetching images pending face extraction: ${err.message}`);
+    }
+};
+
+const updateFaceExtractionStatus = (imageId, status) => {
+    ensureDbInitialized();
+
+    if (!imageId || typeof imageId !== 'string' || imageId.trim() === '') {
+        throw new Error('Field imageId must be a non-empty string');
+    }
+
+    if (status !== null && (typeof status !== 'string' || status.trim() === '')) {
+        throw new Error('Field status must be null or a non-empty string');
+    }
+
+    const stmt = db.prepare(`
+        UPDATE images
+        SET face_extraction_status = ?
+        WHERE id = ?
+    `);
+
+    try {
+        const info = db.transaction(() => stmt.run(status, imageId))();
+        if (info.changes > 0) {
+            imageDbCache.delete(imageId);
+        }
+        return info.changes > 0;
+    } catch (err) {
+        throw new Error(`Failed to update face extraction status for image ${imageId}: ${err.message}`);
+    }
+};
+
 /**
  * Returns titles and descriptions for a batch of image IDs.
  * Fetches both fields in one query to avoid 2 DB calls per image.
@@ -768,26 +802,34 @@ const initializeDb = () => {
 };
 
 module.exports = {
+    // get operations
     getImageDetailsById,
     getImageDescriptionById,
     getAllImageIds,
-    checkForDuplicateImage,
-    addImage,
-    updateImageDetails,
-    deleteImageFromDb,
-    checkImageExists,
-    updateImageSource,
-    updateImageDescription,
-
-    clearImagesCache,
     getImagesByFileNameSearch,
     getImagesByTitleDbSearch,
-    initializeDb,
-    updateDescriptionAndEmbedding,
     getImageListWithoutDescription,
+    getAllPendingFaceExtractionImageList,
     getEmbeddingByImageId,
     searchImagesByDescription,
     searchImagesLooseByDescription,
     getImageTitlesAndDescriptionsByIds,
+    checkImageExists,
+    checkForDuplicateImage,
+
+    // set operations
+    addImage,
+    updateImageDetails,
+    updateImageSource,
+    updateImageDescription,
+    updateDescriptionAndEmbedding,
+    updateFaceExtractionStatus,
     resetImagesMetaData,
+
+    // delete operations
+    deleteImageFromDb,
+
+    // other operations
+    clearImagesCache,
+    initializeDb,
 };

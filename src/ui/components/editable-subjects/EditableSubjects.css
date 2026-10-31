@@ -1,0 +1,5 @@
+.subjectList {
+    display: flex;
+    margin-top: 15px;
+    column-gap: 5px;
+}

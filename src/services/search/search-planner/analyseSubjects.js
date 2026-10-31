@@ -8,6 +8,7 @@ const subjectIndexes = {
     exact: new Map(),
     tokens: new Map(),
 };
+const { getAllSubjects } = require('../../subjects/subjectsDbService');
 const { STOP_WORDS } = require('../../../constants/stopWords');
 
 /**
@@ -28,28 +29,6 @@ const normalizeLookupValue = (value = '') =>
     normalizeWords(value)
         .map((word) => word.toLowerCase())
         .join(' ');
-
-const getSubjectsList = () => {
-    // TODO - fetch the subjectd data from db - keep it minimal.
-    // note that subject list is flattned array. if there are aliases, then it has to be flattened as well.
-    /*
-    [
- {
-   name:"john smith",
-   id:"123"
- },
- {
-   name:"papa",
-   id:"123"
- },
- {
-   name:"dad",
-   id:"123"
- }
-]
- */
-    return [];
-};
 
 function addSubjectToIndex(index, key, subject) {
     if (!key) return;
@@ -76,7 +55,7 @@ function addSubjectToIndex(index, key, subject) {
  */
 const getSubjectNames = (subjectsList = null) => {
     if (subjectsList === null) {
-        subjectsList = getSubjectsList();
+        subjectsList = getAllSubjects();
     }
 
     subjectIndexes.exact.clear();

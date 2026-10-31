@@ -1,4 +1,15 @@
 // core contains 1. collections, 2. videos 3. Images, 4. Audios
+const faceExtractionStatus = require('../../../constants/faceExtractionStatus');
+
+const faceExtractionStatusCheck = `
+    face_extraction_status IS NULL OR
+    face_extraction_status IN (
+        '${faceExtractionStatus.PROCESSING}',
+        '${faceExtractionStatus.COMPLETED_FACE_DETECTED}',
+        '${faceExtractionStatus.COMPLETED_NO_FACE_DETECTED}',
+        '${faceExtractionStatus.FAILED}'
+    )
+`;
 
 const createTables = (db) => {
     // collections table
@@ -34,7 +45,7 @@ const createTables = (db) => {
                 longitude REAL NOT NULL DEFAULT 0.0,
                 source TEXT NOT NULL DEFAULT 'local',
                 is_nsfw INTEGER NOT NULL DEFAULT 0 CHECK (is_nsfw IN (0, 1)),
-                face_extraction_status TEXT DEFAULT NULL,
+                face_extraction_status TEXT DEFAULT NULL CHECK (${faceExtractionStatusCheck}),
                 has_preview INTEGER NOT NULL DEFAULT 0 CHECK (has_preview IN (0, 1))
                 
             )
@@ -60,7 +71,7 @@ const createTables = (db) => {
                 
                 source TEXT NOT NULL DEFAULT 'local',
                 is_nsfw INTEGER NOT NULL DEFAULT 0 CHECK (is_nsfw IN (0, 1)),
-                face_extraction_status TEXT DEFAULT NULL,
+                face_extraction_status TEXT DEFAULT NULL CHECK (${faceExtractionStatusCheck}),
                 FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE RESTRICT
             )
         `);
