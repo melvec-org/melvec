@@ -1,7 +1,7 @@
 const mainThreadEvents = require('../../events/mainThreadEvents');
-const { getPlaylists, getPlaylistsByVideoId, checkPlaylistExists, addVideoToPlaylist } = require('../database/playlistsDbService');
-const { getTags, getTagsByVideoId, checkTagExists, addVideoToTag } = require('../database/tagsDbService');
-const { getAllVideos, checkVideoExists } = require('../database/videoLibraryDbService');
+const { getPlaylists, getPlaylistsByVideoId, checkPlaylistExists, addVideoToPlaylist } = require('../playlists/playlistsDbService');
+const { getTags, getTagsByVideoId, checkTagExists, addVideoToTag } = require('../tags/tagsDbService');
+const { getAllVideos, checkVideoExists } = require('../video-library/videoLibraryDbService');
 const { logLibraryError } = require('../logs/logService');
 const { getVideoMetricsByVideoId, updateContentQuality, updateContentRating, updateViews } = require('../video-metrics/videoMetrics');
 const { addNewPlaylist } = require('../playlists/playlists');

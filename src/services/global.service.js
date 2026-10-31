@@ -2,18 +2,18 @@ const { getLibDir } = require('./servicePathConfig');
 const { clearAllActionHistory } = require('./history/actionHistory');
 const { indexRelatedVideos } = require('./related-videos/relatedVideos');
 const { clearLogs } = require('./logs/logService');
-const { getAllCollectionNames } = require('./database/collectionsDbService');
+const { getAllCollectionNames } = require('./collections/collectionsDbService');
 const { getFolderSize } = require('./service-utils/fileUtils');
 const { resetAllVideoMetaData, resetAllImageMetaData } = require('./database/database');
-const { clearTagsDbCache, getTags } = require('./database/tagsDbService');
-const { clearPlaylistDbCache, getPlaylists } = require('./database/playlistsDbService');
-const { clearVideosDbCache, getAllVideoIds } = require('./database/videoLibraryDbService');
+const { clearTagsDbCache, getTags } = require('./tags/tagsDbService');
+const { clearPlaylistDbCache, getPlaylists } = require('./playlists/playlistsDbService');
+const { clearVideosDbCache, getAllVideoIds } = require('./video-library/videoLibraryDbService');
 const { clearVideoMetricsDbCache } = require('./video-metrics/videoMetrics');
-const { respondSuccess, emitToUI, respondError } = require('./service-utils/sendToUI');
+const { respondSuccess, respondError } = require('./service-utils/sendToUI');
 const { forceUpdateSmartLists } = require('./smart-playlists/smartPlaylists.service');
 const { resetApplicationSettings } = require('./application-settings/applicationSettings');
 const userPreferenceStore = require('../main/userPreferenceStore');
-const { clearImagesCache } = require('./database/imageLibraryDbService');
+const { clearImagesCache } = require('./image-library/imageLibraryDbService');
 
 /**
  * Rebuilds derived/indexed application data.

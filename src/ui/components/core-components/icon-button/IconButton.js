@@ -11,6 +11,7 @@ import AutoPlayIcon from '../icons/AutoPlayIcon';
 import CollectionBrowwerIcon from '../icons/CollectionBrowserIcon';
 import InfoIcon from '../icons/InfoIcon';
 import AiIcon from '../icons/aiIcon';
+import TimelineIcon from '../icons/TimelineView';
 
 const icons = {
     edit: <span>✎</span>,
@@ -31,6 +32,11 @@ const icons = {
     info: <InfoIcon />,
     ai: <AiIcon />,
     expand: <span>⛶</span>,
+    refresh: <span>↺</span>,
+    eject: <span>⏏</span>,
+    timeline: <TimelineIcon />,
+    representativeSelected: <span>★</span>,
+    representativeUnselected: <span>☆</span>,
 };
 
 const IconButton = React.forwardRef(

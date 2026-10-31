@@ -14,7 +14,7 @@ const {
     removePlaylistById,
     cleanupVideoFromPlaylists,
     renamePlaylistById,
-} = require('../database/playlistsDbService');
+} = require('./playlistsDbService');
 
 const addNewPlaylist = (id, label) => {
     addPlaylist(id, label);

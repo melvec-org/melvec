@@ -48,6 +48,8 @@ const getLibraryErrorLogFilePath = () => path.join(libraryRootPath, 'errors.log'
 
 const getTrashBinPath = () => path.join(getLibraryRootPath(), systemConfig.TRASHBIN_DIR);
 
+const getFacesPath = () => path.join(getLibraryRootPath(), systemConfig.FACES_DIR);
+
 module.exports = {
     dbFileNames,
     setLibraryRootPath,
@@ -60,4 +62,5 @@ module.exports = {
     getNonImportedLibraryDb,
     getLibraryErrorLogFilePath,
     getTrashBinPath,
+    getFacesPath,
 };

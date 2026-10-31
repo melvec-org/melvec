@@ -185,6 +185,23 @@ const removeFile = async (filePath = '', trashbinPath = '') => {
     }
 };
 
+/**
+ * Renames (moves) a file from oldPath to newPath.
+ * If oldPath and newPath are identical, this is a no-op.
+ *
+ * @param {string} oldPath - Current file path.
+ * @param {string} newPath - Desired file path.
+ */
+const renameFile = async (oldPath, newPath) => {
+    if (oldPath === newPath) return;
+
+    try {
+        await fse.rename(oldPath, newPath);
+    } catch (err) {
+        throw new Error(`Error renaming file from ${oldPath} to ${newPath}: ${err.message}`);
+    }
+};
+
 const renameDirectory = async (oldPath, newPath) => {
     try {
         await fse.rename(oldPath, newPath);
@@ -236,6 +253,7 @@ module.exports = {
     writeFile,
     removeFile,
     doesDirectoryExist,
+    renameFile,
     renameDirectory,
     getFolderSize,
     ensureDir: fse.ensureDirSync,

@@ -71,6 +71,8 @@ const serviceMethods = {
     MEDIA_BULK_UPDATE_COLLECTION: 'changeBulkMediaCollection',
     MEDIA_BULK_IMPORT_TO_COLLECTION: 'importBulkMediaToCollection',
     MEDIA_BULK_RESET_METADATA: 'resetBulkMediaMetadata',
+    MEDIA_GET_ALL_SHORT_INFO: 'getAllMediaShortInfo',
+    MEDIA_GET_BASIC_DETAILS: 'getMediaBasicDetails',
     MEDIA_REMOVE_FROM_LIBRARY: 'removeMediaFromLibrary',
 
     // ========= VIDEO METRICS =========
@@ -123,6 +125,23 @@ const serviceMethods = {
     VIDEO_PREVIEW_STOP_BATCH_GENERATION: 'stopBatchVideoPreviewGeneration',
     VIDEO_PREVIEW_GET_PENDING_COUNT: 'getPendingVideoPreviewCount',
     VIDEO_PREVIEW_CLEAR_ALL: 'clearAllVideoPreviews',
+
+    // ========= SUBJECTS / FACE EXTRACTION ========
+    SUBJECTS_START_FACE_EXTRACTION: 'startFaceExtraction',
+    SUBJECTS_STOP_FACE_EXTRACTION: 'stopFaceExtraction',
+    SUBJECTS_GET_PENDING_FACE_EXTRACTION_COUNT: 'getPendingFaceExtractionCount',
+    SUBJECTS_EXTRACT_FACES_FROM_MEDIA: 'extractFacesFromMedia',
+    SUBJECTS_DELETE_FACE: 'deleteFace',
+    SUBJECTS_DELETE_CANDIDATE_CLUSTER: 'deleteSubjectCandidateCluster',
+    SUBJECTS_REMOVE_CANDIDATE_FROM_MEDIA: 'removeSubjectCandidateFromMedia',
+    SUBJECTS_TOGGLE_REPRESENTATIVE_FACE_FROM_CANDIDATE: 'toggleRepresentativeFaceFromSubjectCandidate',
+    SUBJECTS_MERGE_CANDIDATE_CLUSTERS: 'mergeSubjectCandidateClusters',
+    SUBJECTS_SPLIT_CANDIDATE_CLUSTER: 'splitSubjectCandidateCluster',
+    SUBJECTS_IDENTIFY_CANDIDATE: 'identifySubjectCandidate',
+    SUBJECTS_IDENTIFY_CANDIDATE_BY_FACE: 'identifySubjectCandidateByFace',
+    SUBJECTS_UPDATE_SUBJECT_NAME: 'updateSubjectName',
+    SUBJECTS_GET_BY_MEDIA: 'getSubjectsByMedia',
+    SUBJECTS_GET_CANDIDATE_CLUSTERS: 'getSubjectCandidateClusters',
 
     // ========= SEARCH ========
     SEARCH_GET_RESULTS: 'getSearchResults',

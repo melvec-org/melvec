@@ -31,6 +31,7 @@ const mainThreadEvents = {
     ON_BATCH_DESCRIPTION_PROCESS: 'mainThreadEvents/onBatchDescriptionProcess',
     ON_BATCH_PREVIEW_PROCESS: 'mainThreadEvents/onBatchPreviewProcess',
     ON_BULK_IMPORT_TO_COLLECTION_PROCESS: 'mainThreadEvents/onBulkImportToCollectionProcess',
+    ON_BATCH_FACE_EXTRACTION_PROCESS: 'mainThreadEvents/onBatchFaceExtractionProcess',
 
     ON_VIDEO_DESCRIPTION_GENERATED: 'mainThreadEvents/onVideoDescriptionGenerated',
     ON_IMAGE_DESCRIPTION_GENERATED: 'mainThreadEvents/onImageDescriptionGenerated',

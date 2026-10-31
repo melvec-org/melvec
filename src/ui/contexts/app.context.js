@@ -10,6 +10,7 @@ export const applicationViewStates = {
     COLLECTIONS_VIEW: 'showAllCollectionsWindow',
     PLAYLISTS_DASHBOARD_VIEW: 'showAllPlaylistsWindow',
     PLAYER_VIEW: 'show-player-view',
+    TIMELINE_VIEW: 'timeline-view',
 };
 
 export const userPreferences = {

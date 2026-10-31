@@ -16,8 +16,9 @@ const systemConfig = {
     LIBRARY_DIR: '_lib_',
     PREVIEW_DIR: '._pvw_',
     THUMBNAILS_DIR: '_th_',
+    FACES_DIR: '._fc_',
     TRASHBIN_DIR: 'melvec_trash',
-    SYSTEM_DIRECTORY_LIST_REGEX: /._v_|_lib_|_th_|._pvw_|melvec_trash|.DS_Store/i,
+    SYSTEM_DIRECTORY_LIST_REGEX: /._fc_|._v_|_lib_|_th_|._pvw_|melvec_trash|.DS_Store/i,
 };
 
 module.exports = systemConfig;

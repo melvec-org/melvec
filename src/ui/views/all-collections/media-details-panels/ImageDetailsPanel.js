@@ -16,6 +16,7 @@ import useImageDetailsAction from './useImageDetailsAction';
 import EditableTagList from '__components/editable-tag-list/EditableTagList';
 import EditableDescription from '__components/editable-description/EditableDescription';
 import EditableLocation from '__components/editable-location/EditableLocation';
+import EditableSubjects from '__components/editable-subjects/EditableSubjects';
 
 const ImageDetailsPanel = ({ imageDetailsObj = null, onDetailsChange }) => {
     const [stateContext] = useApplicationContext();
@@ -219,6 +220,19 @@ const ImageDetailsPanel = ({ imageDetailsObj = null, onDetailsChange }) => {
                             mediaType={mediaTypes.IMAGE}
                         />
                     </MetaDataValue>
+                    {updatedImageDetails?.subjects && updatedImageDetails?.subjects[0] && (
+                        <>
+                            <MetaDataHeader>Subjects</MetaDataHeader>
+                            <MetaDataValue>
+                                <EditableSubjects
+                                    mediaId={updatedImageDetails.id}
+                                    subjects={updatedImageDetails.subjects}
+                                    onEditComplete={refreshshImageDetails}
+                                    mediaType={mediaTypes.IMAGE}
+                                />
+                            </MetaDataValue>
+                        </>
+                    )}
                 </>
             )}
 

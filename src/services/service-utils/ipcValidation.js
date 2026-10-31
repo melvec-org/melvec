@@ -28,11 +28,14 @@ const APPLICATION_SETTINGS_VALIDATORS = {
     isPlaylistAutoPlay: (value) => typeof value === 'boolean',
     isPlaylistShuffle: (value) => typeof value === 'boolean',
     isPlaylistRepeatPlay: (value) => typeof value === 'boolean',
+    currentTimelineDateStamp: (value) => typeof value === 'number' && Number.isInteger(value),
 };
 
 const isNonEmptyString = (value) => typeof value === 'string' && value.trim() !== '';
 
 const isValidMediaType = (mediaType) => Object.values(mediaTypes).includes(mediaType);
+
+const isValidSubjectCandidateType = (candidateType) => ['pending', 'identified'].includes(candidateType);
 
 const isValidFileName = (fileName) => {
     if (!isNonEmptyString(fileName)) {
@@ -101,6 +104,14 @@ const validateMediaOperationArgs = (mediaType, mediaId) => {
     return null;
 };
 
+const validateSubjectCandidateType = (candidateType) => {
+    if (!isValidSubjectCandidateType(candidateType)) {
+        return respondError('Invalid subject candidate type. Expected "pending" or "identified".');
+    }
+
+    return null;
+};
+
 const validateRenameMediaArgs = (mediaType, mediaId, oldFileName, newFileName) => {
     const mediaValidationError = validateMediaOperationArgs(mediaType, mediaId);
     if (mediaValidationError) {
@@ -164,6 +175,7 @@ const validateLocationRadius = (radius) => {
 module.exports = {
     isNonEmptyString,
     isValidMediaType,
+    isValidSubjectCandidateType,
     isValidFileName,
     isAbsoluteExistingDirectory,
     validateMediaId,
@@ -175,6 +187,7 @@ module.exports = {
     validateWatchFolderRemoveArgs,
     validateTheme,
     validateMediaOperationArgs,
+    validateSubjectCandidateType,
     validateMediaDescription,
     validateLocationName,
     validateLocationRadius,

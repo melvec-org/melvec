@@ -1,11 +1,14 @@
 const { getVideoIdsByTag } = require('../../tags/tags');
-const { getImageIdsByTag } = require('../../database/tagsDbService');
+const { getImageIdsByTag } = require('../../tags/tagsDbService');
 const { getTags } = require('../../tags/tags');
 const mediaTypes = require('../../../constants/mediaTypes');
-const { getImagesByTitleDbSearch, getImagesByFileNameSearch } = require('../../database/imageLibraryDbService');
-const { getAudiosByFileNameSearch, getAudiosByTitleDbSearch } = require('../../database/audioLibraryDbService');
+const { getImagesByTitleDbSearch, getImagesByFileNameSearch } = require('../../image-library/imageLibraryDbService');
+const { getAudiosByFileNameSearch, getAudiosByTitleDbSearch } = require('../../audio-library/audioLibraryDbService');
 
-const { getVideoByTitleSearch, getVideosByFileNameSearch: getVideoByFileNameDbSearch } = require('../../database/videoLibraryDbService');
+const {
+    getVideoByTitleSearch,
+    getVideosByFileNameSearch: getVideoByFileNameDbSearch,
+} = require('../../video-library/videoLibraryDbService');
 
 const { getImagesByMetaData } = require('./getImagesByMetaData');
 const { getAudiosByMetaData } = require('./getAudiosByMetaData');

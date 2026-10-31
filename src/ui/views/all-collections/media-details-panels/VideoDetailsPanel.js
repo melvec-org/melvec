@@ -21,6 +21,7 @@ import EditableCategory from '__components/editable-category/EditableCategory';
 import { MetaDataRow, MetaDataHeader, MetaDataLabel, MetaDataValue } from '__components/core-components/meta-data/MetaData';
 import mediaTypes from '__constants/mediaTypes';
 import EditableLocation from '__components/editable-location/EditableLocation';
+import EditableSubjects from '__components/editable-subjects/EditableSubjects';
 
 const VideoDetailsPanel = ({ videoDetailsObj = null, onDetailsChange, playPreview }) => {
     const [stateContext] = useApplicationContext();
@@ -261,6 +262,19 @@ const VideoDetailsPanel = ({ videoDetailsObj = null, onDetailsChange, playPrevie
                             mediaType={mediaTypes.VIDEO}
                         />
                     </MetaDataValue>
+                    {(updatedVideoDetails?.subjects?.length > 0 || updatedVideoDetails.canRetryFaceExtraction) && (
+                        <>
+                            <MetaDataHeader>Subjects</MetaDataHeader>
+                            <MetaDataValue>
+                                <EditableSubjects
+                                    mediaId={updatedVideoDetails.id}
+                                    subjects={updatedVideoDetails.subjects}
+                                    onEditComplete={refreshshVideoDetails}
+                                    mediaType={mediaTypes.VIDEO}
+                                />
+                            </MetaDataValue>
+                        </>
+                    )}
                 </>
             )}
             <div className={mediaDetailsStyles.mediaDetailsPanelFooter}>
@@ -268,7 +282,7 @@ const VideoDetailsPanel = ({ videoDetailsObj = null, onDetailsChange, playPrevie
                     onClick={() =>
                         onDetailsChange({
                             change: 'deleteVideoFromLibrary',
-                            data: { videoId: updatedVideoDetails.id, initiator: 'user' },
+                            data: { mediaId: updatedVideoDetails.id, initiator: 'user' },
                         })
                     }
                 >

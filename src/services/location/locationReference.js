@@ -1,4 +1,4 @@
-const { getCustomLocationClusters } = require('../database/locationDbService');
+const { getCustomLocationClusters } = require('../location/locationDbService');
 
 const BUCKET_SIZE = 0.25;
 const EARTH_RADIUS_METERS = 6371000;

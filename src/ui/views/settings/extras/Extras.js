@@ -34,7 +34,7 @@ const Extras = () => {
         stopResizing,
     } = useExtrasAction();
     return (
-        <div>
+        <>
             <div className={formStyles.formSection}>
                 <h3>File format conversion</h3>
                 <p>Convert video files into another supported format.</p>
@@ -156,7 +156,7 @@ const Extras = () => {
             <p className="secondaryInfo">
                 <strong>Note:</strong> Do one task at a time. And stay on this section till the task is completed.
             </p>
-        </div>
+        </>
     );
 };
 

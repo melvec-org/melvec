@@ -19,6 +19,7 @@ import WelcomeMessage from '__components/welcome-message/WelcomeMessage';
 import applicationMenuEvents from '__events/applicationMenuEvents';
 import AllCollections from './views/all-collections/AllCollections';
 import ipcChannels from '__constants/ipcChannels';
+import Timeline from './views/timeline/Timeline';
 
 const getCurrentView = (stateContext) => {
     switch (stateContext.currentApplicationView) {
@@ -30,6 +31,8 @@ const getCurrentView = (stateContext) => {
             return <AllCollections />;
         case applicationViewStates.PLAYER_VIEW:
             return <Player />;
+        case applicationViewStates.TIMELINE_VIEW:
+            return <Timeline />;
     }
 };
 

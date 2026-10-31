@@ -1,7 +1,7 @@
 const { respondError, respondSuccess, respondFailure, streamToUI } = require('../service-utils/sendToUI');
 const { getBatchGenStatus, startImageMetaDataBatchGeneration, stopImageMetaDataBatchGeneration } = require('./batchGenerateImageMetaData');
 const { generateImageMetaData, stopGeneratingImageMetadata, getEmbedding } = require('./generateImageMetaData');
-const { getImageDetailsById, getImageDescriptionById, updateDescriptionAndEmbedding } = require('../database/imageLibraryDbService');
+const { getImageDetailsById, getImageDescriptionById, updateDescriptionAndEmbedding } = require('../image-library/imageLibraryDbService');
 const { updateImageMetaData, updateImageTitle } = require('../image-library/imageLibrary');
 const { getLibDir } = require('../servicePathConfig');
 const { getModelTier } = require('../ai-models/models');

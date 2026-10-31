@@ -1,8 +1,8 @@
 var { createCollectionName } = require('./createCollectionName');
 
 const tests = [
-    { path: 'video.mp4', expected: 'Untitled' },
-    { path: 'DCIM/100APPLE/video.mp4', expected: 'Untitled' },
+    { path: 'video.mp4', expected: 'Unfiltered Collection' },
+    { path: 'DCIM/100APPLE/video.mp4', expected: 'Unfiltered Collection' },
     { path: 'videos/test.mp4', expected: 'videos' }, // include videos as this is immidiate parent
     { path: 'WhatsApp Video/Exports/beach trip 2025.mp4', expected: 'WhatsApp Video-Exports' }, // export is not included
     { path: 'Exports/whatsapp/beach trip 2025.mp4', expected: 'Exports-whatsapp' }, // exports and whatsapp both to be incldued

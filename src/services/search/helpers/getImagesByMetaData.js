@@ -2,10 +2,10 @@ const {
     searchImagesByDescription,
     searchImagesLooseByDescription,
     getEmbeddingByImageId,
-} = require('../../database/imageLibraryDbService');
+} = require('../../image-library/imageLibraryDbService');
 const userPreferenceStore = require('../../../main/userPreferenceStore');
 const { cleanSearchTerms } = require('../../service-utils/cleanSearchQuery');
-const cosineSimilarityVector = require('../../related-videos/cosineSimilarityVector');
+const cosineSimilarityVector = require('../../service-utils/cosineSimilarityVector');
 const { generateEmbeddingFromKeywords } = require('../../service-utils/generateEmbedding');
 const { isAIActive } = require('../../service-utils/ai');
 

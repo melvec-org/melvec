@@ -97,6 +97,22 @@ function getAiBinaryPath(binaryName, checkForArch = false) {
     return path.join(__dirname, '../../../bin', platformDir, archDir, exeName);
 }
 
+function getBundledModelPath(modelName) {
+    if (isProd()) {
+        return path.join(process.resourcesPath, 'bin', 'models', modelName);
+    }
+
+    return path.join(__dirname, '../../../bin/models', modelName);
+}
+
+function getFaceDetectionModelPath() {
+    return getBundledModelPath('face_detection_yunet_2026may.onnx');
+}
+
+function getFaceRecognitionModelPath() {
+    return getBundledModelPath('face_recognition_sface_2021dec_int8.onnx');
+}
+
 function getLlamaCompletionBinaryPath() {
     return getAiBinaryPath('llama-completion');
 }
@@ -115,6 +131,9 @@ module.exports = {
     getFfprobePath,
     getWhisperCliPath,
     getAiBinaryPath,
+    getBundledModelPath,
+    getFaceDetectionModelPath,
+    getFaceRecognitionModelPath,
     getLlamaCompletionBinaryPath,
     getLlamaMtmdBinaryPath,
     getLlamaEmbeddingBinaryPath,

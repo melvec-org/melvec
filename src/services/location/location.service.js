@@ -1,4 +1,4 @@
-const { initializeDb, getLocationDetailsByMediaId } = require('../database/locationDbService');
+const { initializeDb, getLocationDetailsByMediaId } = require('../location/locationDbService');
 const { respondSuccess, respondError } = require('../service-utils/sendToUI');
 const { identifyLocationCluster, addCustomMediaLocation, updateCustomLocationCluster } = require('./location');
 

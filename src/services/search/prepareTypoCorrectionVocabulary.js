@@ -1,11 +1,15 @@
 const { tokenizeText } = require('./typoCorrection');
-const { getAllVideoIds, getVideoDetailsById, getVideoTitlesAndDescriptionsByIds } = require('../database/videoLibraryDbService');
-const { getMetaDataById } = require('../database/metaDataDbService');
-const { getTags } = require('../database/tagsDbService');
-const { getPlaylists } = require('../database/playlistsDbService');
-const { saveVocabulary, getVocabulary } = require('../database/vocabularyDbServices');
+const { getAllVideoIds, getVideoDetailsById, getVideoTitlesAndDescriptionsByIds } = require('../video-library/videoLibraryDbService');
+const { getMetaDataById } = require('../video-metadata/metaDataDbService');
+const { getTags } = require('../tags/tagsDbService');
+const { getPlaylists } = require('../playlists/playlistsDbService');
+const { saveVocabulary, getVocabulary } = require('./vocabularyDbServices');
 const { getAllImageIds } = require('../image-library/imageLibrary');
-const { getImageDetailsById, getImageDescriptionById, getImageTitlesAndDescriptionsByIds } = require('../database/imageLibraryDbService');
+const {
+    getImageDetailsById,
+    getImageDescriptionById,
+    getImageTitlesAndDescriptionsByIds,
+} = require('../image-library/imageLibraryDbService');
 
 const VOCABULARY_BATCH_SIZE = 200;
 

@@ -1,0 +1,93 @@
+.subjectFace {
+    width: 150px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
+    align-items: center;
+    min-height: 140px;
+}
+
+.subjectFaceImageWrapper {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.subjectFaceImage {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+
+    display: block;
+    background: var(--app-bg-color);
+}
+
+.subjectFaceDeleteControl {
+    position: absolute;
+
+    right: 0;
+    top: 0;
+    display: flex;
+    justify-content: center;
+    padding: 4px 0;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    width: 32px;
+    height: 32px;
+
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    border-bottom-left-radius: 8px;
+}
+
+.subjectFaceImageWrapper:hover .subjectFaceDeleteControl {
+    opacity: 1;
+}
+
+.subjectFaceDeleteButton {
+    color: #fff;
+    height: 24px;
+    width: 24px;
+}
+
+.subjectFaceId {
+    margin-top: 6px;
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.subjectFaceStatus {
+    font-size: 11px;
+    opacity: 0.7;
+}
+.subjectFaceName {
+    font-size: 0.85rem;
+    width: 100%;
+    min-height: 28px;
+}
+
+.subjectFaceNameEditor {
+    display: flex;
+    flex-direction: column;
+}
+
+.subjectFaceNameInput {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.subjectFaceNameActions {
+    display: flex;
+    column-gap: 2px;
+    flex-direction: row-reverse;
+}
+
+.subjectFaceNameActionButton {
+    width: 20px;
+    height: 20px;
+}

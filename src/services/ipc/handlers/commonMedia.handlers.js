@@ -16,6 +16,8 @@ const {
     bulkMediaCollectionChangeService,
     removeMediaService,
     bulkMediaMetaDataResetService,
+    getMediaBasicDetailsService,
+    getAllMediaShortInfoService,
 } = require('../../commonMediaService');
 
 const commonMediaServiceHandlers = [
@@ -114,6 +116,8 @@ const commonMediaServiceHandlers = [
             return bulkMediaMetaDataResetService(mediaList, metaDataList);
         },
     ],
+    [serviceMethods.MEDIA_GET_ALL_SHORT_INFO, async () => getAllMediaShortInfoService()],
+    [serviceMethods.MEDIA_GET_BASIC_DETAILS, async (mediaType, mediaId) => getMediaBasicDetailsService(mediaType, mediaId)],
 ];
 module.exports = {
     commonMediaServiceHandlers,

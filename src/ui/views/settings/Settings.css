@@ -6,15 +6,15 @@
     width: 100%;
 }
 .settingsContainer {
-    width: 700px;
+    width: 730px;
     min-height: 400px;
-    height: calc(100vh - 150px);
+    height: calc(100vh - 100px);
     overflow-y: auto;
     background-color: var(--main-bg-color);
     display: flex;
     border-radius: 8px;
     padding: 20px;
-    margin-top: 50px;
+    margin-top: 25px;
 }
 
 .formInputDisabledSelection {

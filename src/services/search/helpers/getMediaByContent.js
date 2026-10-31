@@ -1,11 +1,11 @@
 const { getMediaByLocations } = require('./getMediaByLocation');
-const { getMediaBySubjects } = require('./getMediaBySubjects');
 
 const { getMediaByMetaDataSearch } = require('./getMediaBySearchCriteria');
 
 const { initializeTypoCorrection, getCorrectionForToken, isTypoCorrectionInitialized } = require('../typoCorrection');
 const { getSavedTypoCorrectionVocabulary } = require('../prepareTypoCorrectionVocabulary');
 const { populateMediaDetails } = require('./populateMediaDetails');
+const { getMediaBySubjects } = require('../../subjects/subjectsDbService');
 
 /**
  * Returns a typo-corrected version of the search text when any token can be corrected.
@@ -106,7 +106,9 @@ const buildCandidateMediaSet = (constraints) => {
 
     // subjects
     if (constraints.subjects.length > 0) {
-        candidateSets.push(getMediaBySubjects(constraints.subjects));
+        const media = getMediaBySubjects(constraints.subjects);
+
+        candidateSets.push(media);
     }
 
     let candidateMedia = intersectMedia(...candidateSets);

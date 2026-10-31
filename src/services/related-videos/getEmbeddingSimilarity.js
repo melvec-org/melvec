@@ -1,5 +1,5 @@
 const { getEmbeddingByVideoId } = require('../database/metaDataDbService');
-const cosineSimilarityVector = require('./cosineSimilarityVector');
+const cosineSimilarityVector = require('../service-utils/cosineSimilarityVector');
 
 const getEmbeddingSimilarity = (sourceVideoId, candidateVideoId) => {
     const sourceEmbedding = getEmbeddingByVideoId(sourceVideoId) || [];

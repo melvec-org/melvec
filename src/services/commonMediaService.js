@@ -4,8 +4,15 @@ const {
     updateNsfwStatusService: updateVideoNsfwStatusService,
     renameVideoFile,
     removeVideoFromLibraryService,
+    getVideoShortInfoById,
+    getBasicVideoDetailsById,
 } = require('./video-library/videoLibrary.service');
-const { updateNsfwStatus: updateVideoNsfwStatus, updateVideoCategory, resetVideosMetaData } = require('./video-library/videoLibrary');
+const {
+    updateNsfwStatus: updateVideoNsfwStatus,
+    updateVideoCategory,
+    resetVideosMetaData,
+    getAllVideoIds,
+} = require('./video-library/videoLibrary');
 const {
     updateImageTitleService,
     updateImageNsfwStatusService,
@@ -14,6 +21,7 @@ const {
     updateImageNsfwStatus,
     resetImagesMetaData,
 } = require('./image-library/imageLibrary.service');
+const { getAllImageIds, getImageShortInfoById, getBasicImageDetailsById } = require('./image-library/imageLibrary');
 const {
     moveVideoFromOneCollectionToAnother,
     moveImageFromOneCollectionToAnother,
@@ -34,7 +42,7 @@ const {
 } = require('./tags/tags.service');
 const { removeWatchFolderMedia } = require('./watch-folders/watchFolders');
 const { deleteThumbnail } = require('./thumbnail/thumbnail');
-const { getCollectionDetailsById } = require('./database/collectionsDbService');
+const { getCollectionDetailsById } = require('./collections/collectionsDbService');
 const appConfig = require('../configs/appConfig');
 const { isNonEmptyString, isValidFileName, validateMediaId, validateMediaList } = require('./service-utils/ipcValidation');
 const {
@@ -45,6 +53,7 @@ const {
     resetAudiosMetaData,
     removeAudioFromLibraryService,
 } = require('./audio-library/audioLibrary.service');
+const { getAllAudioIds, getAudioShortInfoById, getBasicAudioDetailsById } = require('./audio-library/audioLibrary');
 const responseStatus = require('../constants/responseStatus');
 
 const validateMediaServiceArgs = (mediaType, mediaId) => {
@@ -640,6 +649,55 @@ const bulkMediaMetaDataResetService = async (mediaList, metaDataList = []) => {
     }
 };
 
+const getMediaBasicDetailsService = (mediaType, mediaId) => {
+    const validationError = validateMediaServiceArgs(mediaType, mediaId);
+    if (validationError) {
+        return validationError;
+    }
+
+    try {
+        let mediaDetails = null;
+
+        switch (mediaType) {
+            case mediaTypes.VIDEO:
+                mediaDetails = getBasicVideoDetailsById(mediaId);
+                break;
+            case mediaTypes.IMAGE:
+                mediaDetails = getBasicImageDetailsById(mediaId);
+                break;
+            case mediaTypes.AUDIO:
+                mediaDetails = getBasicAudioDetailsById(mediaId);
+                break;
+            default:
+                return respondError(`Unsupported media type: ${mediaType}`);
+        }
+
+        if (!mediaDetails) {
+            return respondError(`Media not found: ${mediaId}`);
+        }
+
+        return respondSuccess('Media basic details fetched successfully', mediaDetails);
+    } catch (error) {
+        return respondError(`Failed to fetch media basic details: ${error.message}`);
+    }
+};
+
+const getAllMediaShortInfoService = () => {
+    try {
+        const videoShortInfoList = getAllVideoIds().map((videoId) => getVideoShortInfoById(videoId));
+        const imageShortInfoList = getAllImageIds().map((imageId) => getImageShortInfoById(imageId));
+        const audioShortInfoList = getAllAudioIds().map((audioId) => getAudioShortInfoById(audioId));
+
+        const mediaShortInfoList = [...videoShortInfoList, ...imageShortInfoList, ...audioShortInfoList]
+            .filter((mediaShortInfo) => mediaShortInfo !== null)
+            .sort((a, b) => b.birthtimeMs - a.birthtimeMs);
+
+        return respondSuccess('Media short info fetched successfully', mediaShortInfoList);
+    } catch (error) {
+        return respondError(`Failed to fetch media short info: ${error.message}`);
+    }
+};
+
 module.exports = {
     updateMediaTitleService,
     updateMediaNsfwStatusService,
@@ -654,4 +712,6 @@ module.exports = {
     bulkMediaCategoryService,
     bulkMediaCollectionChangeService,
     bulkMediaMetaDataResetService,
+    getMediaBasicDetailsService,
+    getAllMediaShortInfoService,
 };

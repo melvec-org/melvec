@@ -15,7 +15,7 @@ const serviceEventBus = require('../service-utils/serviceEventBus');
 const interServiceEvents = require('../../events/interServiceEvents');
 const { emitToUI, respond, respondSuccess, respondError } = require('../service-utils/sendToUI');
 const { getFullVideoDetailsById, getBasicVideoDetailsById } = require('../video-library/videoLibrary.service');
-const { addMultipleVideosToPlaylist, updateVideoOrderInPlaylist } = require('../database/playlistsDbService');
+const { addMultipleVideosToPlaylist, updateVideoOrderInPlaylist } = require('./playlistsDbService');
 const indexingEvents = require('../../events/indexingEvents');
 
 const publishUpdatePlaylist = (playlists) => {

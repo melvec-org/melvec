@@ -9,6 +9,7 @@ import AdvancedSettings from './advanced-settings/AdvancedSettings';
 import BackupSettings from './backup-settings/BackupSettings';
 import Extras from './extras/Extras';
 import DisplaySettings from './display-settings/DisplaySettings';
+import SubjectsSettings from './subjects-settings/SubjectsSettings';
 
 let tabsSettings = [
     {
@@ -28,6 +29,10 @@ let tabsSettings = [
         component: <TagSettings />,
     },
     {
+        header: 'Subjects',
+        component: <SubjectsSettings />,
+    },
+    {
         header: 'Playlists',
         component: <PlaylistSettings />,
     },
@@ -39,6 +44,7 @@ let tabsSettings = [
         header: 'Advanced',
         component: <AdvancedSettings />,
     },
+
     {
         header: 'Extras',
         component: <Extras />,

@@ -5,7 +5,7 @@ const interServiceEvents = require('../../events/interServiceEvents');
 const { getLibDir, getTrashBinPath } = require('../servicePathConfig');
 const { removeFile } = require('../service-utils/fileUtils');
 const { getRelativeMediaPath, getAbsoluteMediaPath } = require('../service-utils/mediaPath');
-const { doesCollectionExists, addCollection } = require('../database/collectionsDbService');
+const { doesCollectionExists, addCollection } = require('../collections/collectionsDbService');
 const {
     initializeDb,
     checkForDuplicateAudio,
@@ -17,10 +17,10 @@ const {
     getAudioDescriptionById,
     resetAudiosMetaData,
     deleteAudioFromDb,
-} = require('../database/audioLibraryDbService');
+} = require('./audioLibraryDbService');
 const { getHiddenCollectionIds } = require('../collections/collections');
 const mediaTypes = require('../../constants/mediaTypes');
-const { getTagsByAudioId } = require('../database/tagsDbService');
+const { getTagsByAudioId } = require('../tags/tagsDbService');
 const { MAX_SHORT_DESCRIPTION_LENGTH } = require('../../configs/appConfig');
 const indexingEvents = require('../../events/indexingEvents');
 const responseStatus = require('../../constants/responseStatus');
@@ -325,6 +325,23 @@ const _getAudioDetailsById = (audioId = '') => {
     }
 };
 
+const getAudioShortInfoById = (audioId = '') => {
+    const audioDetails = getAudioDetailsById(audioId);
+
+    if (!audioDetails) {
+        console.error('null data is persisting, clean call please', audioId);
+        return null;
+    }
+
+    return {
+        mediaId: audioDetails.id,
+        mediaType: mediaTypes.AUDIO,
+        thumbnailURL: null,
+        birthtimeMs: audioDetails.birthtimeMs,
+        isNsfw: audioDetails.is_nsfw,
+    };
+};
+
 const getFullAudioDetailsById = (audioId = '') => {
     const audioDetails = _getAudioDetailsById(audioId);
 
@@ -366,6 +383,7 @@ const initAudioLibraryService = () => {
 module.exports = {
     initAudioLibraryService,
     getBasicAudioDetailsById: _getAudioDetailsById,
+    getAudioShortInfoById,
     getFullAudioDetailsById,
     getAllAudioIds,
     addAudio,

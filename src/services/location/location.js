@@ -7,9 +7,9 @@ const {
     getLocationClusterDetailsById,
     getAllLocationClusterNames,
     getMediaIdsByClusterId,
-} = require('../database/locationDbService');
-const { getImageDetailsById } = require('../database/imageLibraryDbService');
-const { getVideoDetailsById } = require('../database/videoLibraryDbService');
+} = require('../location/locationDbService');
+const { getImageDetailsById } = require('../image-library/imageLibraryDbService');
+const { getVideoDetailsById } = require('../video-library/videoLibraryDbService');
 const { formatLocation } = require('./locationFormater');
 const { findLocation } = require('./locationReference');
 const mediaTypes = require('../../constants/mediaTypes');

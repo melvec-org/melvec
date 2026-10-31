@@ -1,10 +1,10 @@
 const { getAllVideos, getAllVideoIds, getVideoDetailsById } = require('../video-library/videoLibrary');
 const { generateTitleSimilarityIndexes } = require('./generateTitleSimilarityIndexes');
 
-const { getAllTagLabelsByVideoId } = require('../database/tagsDbService');
+const { getAllTagLabelsByVideoId } = require('../tags/tagsDbService');
 const { getVideosByCollection } = require('../collections/collections');
 
-const { getAllPlaylistLabelsByVideoId } = require('../database/playlistsDbService');
+const { getAllPlaylistLabelsByVideoId } = require('../playlists/playlistsDbService');
 const { generateSimilarityIndexes } = require('./generateSimilarityIndexes');
 const { initializeDb, getRelatedVideos, setRelatedVideos } = require('./relatedVideosDbServices');
 const serviceEventBus = require('../service-utils/serviceEventBus');
@@ -14,7 +14,7 @@ const { addPendingProcessing, removePendingProcessing } = require('../../main/ac
 const { generateDescriptionSimilarityIndexesFromDbAsync } = require('./generateDescriptionSimilarityIndexes');
 const userPreferenceStore = require('../../main/userPreferenceStore');
 const { generateDescVectorSimilarityMap } = require('./deriveRelatedVideosByEmbedding');
-const { getVideosByCategoryId } = require('../database/videoLibraryDbService');
+const { getVideosByCategoryId } = require('../video-library/videoLibraryDbService');
 const indexingEvents = require('../../events/indexingEvents');
 
 let lastRelatedVideosMap = null;

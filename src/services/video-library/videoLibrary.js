@@ -22,11 +22,11 @@ const {
 
     updateCategory,
     resetVideosTitleAndCategory,
-} = require('../database/videoLibraryDbService');
-const { addCollection, doesCollectionExists } = require('../database/collectionsDbService');
+} = require('./videoLibraryDbService');
+const { addCollection, doesCollectionExists } = require('../collections/collectionsDbService');
 const { getRelativeMediaPath, getAbsoluteMediaPath } = require('../service-utils/mediaPath');
 
-const { resetMetaData } = require('../database/metaDataDbService');
+const { resetMetaData } = require('../video-metadata/metaDataDbService');
 const responseStatus = require('../../constants/responseStatus');
 const mediaTypes = require('../../constants/mediaTypes');
 const { addMediaLocation } = require('../location/location');

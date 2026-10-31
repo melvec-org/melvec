@@ -1,4 +1,4 @@
-const { setAudioTranscript, getMetaDataById } = require('../database/metaDataDbService');
+const { setAudioTranscript, getMetaDataById } = require('../video-metadata/metaDataDbService');
 const { logLibraryError } = require('../logs/logService');
 const { getVideoTranscript } = require('./getVideoTranscript');
 const path = require('path');

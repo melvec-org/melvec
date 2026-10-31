@@ -12,7 +12,7 @@ const {
     clearCollectionCache,
     hideCollection,
     unhideCollection,
-} = require('../database/collectionsDbService');
+} = require('./collectionsDbService');
 const { getVideoDetailsById } = require('../video-library/videoLibrary');
 const { getLibDir } = require('../servicePathConfig');
 const { renameDirectory, removeEmptyDirectories } = require('../service-utils/fileUtils');
@@ -59,8 +59,7 @@ const addNewCollection = (year, label, isHidden) => {
 const removeCollection = (collectionId) => {
     const collectionDetails = getCollectionDetailsById(collectionId);
     const isCollectionRemoved = deleteCollection(collectionId);
-    const folderPath = path.join(getLibDir(), collectionDetails.year, collectionDetails.label);
-
+    const folderPath = path.join(getLibDir(), String(collectionDetails.year), collectionDetails.label);
     if (isCollectionRemoved) {
         removeEmptyDirectories(folderPath);
         serviceEventBus.publish(interServiceEvents.INDEX_DATA_CHANGED, {

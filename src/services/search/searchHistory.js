@@ -6,7 +6,7 @@ const {
     clearSearchHistory,
     addToSearchHistory: dbAddToSearchHistory,
     getSearchHistoryByOccurenceAndTime,
-} = require('../database/searchHistoryDbService');
+} = require('./searchHistoryDbService');
 
 const { addToSearchedVideos, getSearchedVideos } = require('../history/actionHistory');
 
