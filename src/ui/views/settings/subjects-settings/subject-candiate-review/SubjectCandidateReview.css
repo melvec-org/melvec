@@ -94,3 +94,6 @@
     left: 0;
     z-index: 4;
 }
+.candidatePreviewButton {
+    padding: 24px;
+}

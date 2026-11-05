@@ -125,6 +125,69 @@ const removeEmptyDirectories = async (directory) => {
 const getDirectories = async (source) =>
     (await fsPromises.readdir(source, { withFileTypes: true })).filter((dirent) => dirent.isDirectory()).map((dirent) => dirent.name);
 
+const isPathInsideDirectory = (candidatePath, directoryPath) => {
+    const relativePath = path.relative(directoryPath, candidatePath);
+    return relativePath === '' || (!!relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath));
+};
+
+const assertRegularFilePath = async (filePath, extension) => {
+    if (typeof filePath !== 'string' || filePath.trim() === '') {
+        throw new Error('File path is empty.');
+    }
+
+    if (!path.isAbsolute(filePath)) {
+        throw new Error(`File path must be absolute: ${filePath}`);
+    }
+
+    const resolvedFilePath = path.resolve(filePath);
+
+    if (extension && path.extname(resolvedFilePath).toLowerCase() !== extension.toLowerCase()) {
+        throw new Error(`File path must have ${extension} extension: ${resolvedFilePath}`);
+    }
+
+    const stats = await fsPromises.lstat(resolvedFilePath);
+    if (!stats.isFile() || stats.isSymbolicLink()) {
+        throw new Error(`File path is not a regular file: ${resolvedFilePath}`);
+    }
+
+    return resolvedFilePath;
+};
+
+const assertFilePath = async (filePath, rootPath, extension) => {
+    if (typeof rootPath !== 'string' || rootPath.trim() === '') {
+        throw new Error('Root path is empty.');
+    }
+
+    const resolvedRootPath = path.resolve(rootPath);
+    const resolvedFilePath = await assertRegularFilePath(filePath, extension);
+
+    if (!isPathInsideDirectory(resolvedFilePath, resolvedRootPath)) {
+        throw new Error(`File path is outside allowed directory: ${resolvedFilePath}`);
+    }
+
+    return resolvedFilePath;
+};
+
+const assertDirectoryPath = async (directoryPath) => {
+    if (typeof directoryPath !== 'string' || directoryPath.trim() === '') {
+        throw new Error('Directory path is empty.');
+    }
+
+    if (!path.isAbsolute(directoryPath)) {
+        throw new Error(`Directory path must be absolute: ${directoryPath}`);
+    }
+
+    const resolvedDirectoryPath = path.resolve(directoryPath);
+    await fse.ensureDir(resolvedDirectoryPath);
+
+    const stats = await fsPromises.lstat(resolvedDirectoryPath);
+    if (!stats.isDirectory() || stats.isSymbolicLink()) {
+        throw new Error(`Path is not a regular directory: ${resolvedDirectoryPath}`);
+    }
+
+    return resolvedDirectoryPath;
+};
+
 /**
  * Removes a file:
  * - If a trashbinPath is provided, moves the file to the trash folder (safe delete)
@@ -135,52 +198,56 @@ const getDirectories = async (source) =>
  * @returns {Promise<{status: string, message: string, from: string, to?: string}>}
  */
 const removeFile = async (filePath = '', trashbinPath = '') => {
+    let resolvedFilePath = filePath;
+    let resolvedTrashbinPath = trashbinPath;
+
     try {
-        if (!filePath) {
-            throw new Error('File path is empty.');
-        }
+        resolvedFilePath = await assertRegularFilePath(filePath);
 
         // If no trashbinPath, permanently remove file
         if (!trashbinPath) {
-            await fsPromises.rm(filePath);
+            await fsPromises.rm(resolvedFilePath);
             return {
                 status: 'success',
                 message: 'File permanently removed.',
-                from: filePath,
+                from: resolvedFilePath,
             };
         }
 
         // Otherwise: move the file to the provided trashbin folder
-        const fileName = path.basename(filePath);
-        const targetTrashDir = trashbinPath;
+        resolvedTrashbinPath = await assertDirectoryPath(trashbinPath);
+        const fileName = path.basename(resolvedFilePath);
 
-        await fse.ensureDir(targetTrashDir);
-
-        let destinationPath = path.join(targetTrashDir, fileName);
+        let destinationPath = path.join(resolvedTrashbinPath, fileName);
 
         // Handle name collisions
         if (await fse.pathExists(destinationPath)) {
             const timeStamp = Date.now();
             const ext = path.extname(fileName);
             const base = path.basename(fileName, ext);
-            destinationPath = path.join(targetTrashDir, `${base}_${timeStamp}${ext}`);
+            destinationPath = path.join(resolvedTrashbinPath, `${base}_${timeStamp}${ext}`);
         }
 
-        await fse.move(filePath, destinationPath, { overwrite: false });
+        const resolvedDestinationPath = path.resolve(destinationPath);
+        if (!isPathInsideDirectory(resolvedDestinationPath, resolvedTrashbinPath)) {
+            throw new Error(`Trash destination is outside trash directory: ${resolvedDestinationPath}`);
+        }
+
+        await fse.move(resolvedFilePath, resolvedDestinationPath, { overwrite: false });
 
         return {
             status: 'success',
             message: 'File moved to trash.',
-            from: filePath,
-            to: destinationPath,
+            from: resolvedFilePath,
+            to: resolvedDestinationPath,
         };
     } catch (err) {
         return {
             status: 'failure',
             message: err.message,
             code: err.code,
-            from: filePath,
-            to: trashbinPath || '',
+            from: resolvedFilePath,
+            to: resolvedTrashbinPath || '',
         };
     }
 };
@@ -251,6 +318,7 @@ module.exports = {
     removeEmptyDirectories,
     getDirectories,
     writeFile,
+    assertFilePath,
     removeFile,
     doesDirectoryExist,
     renameFile,

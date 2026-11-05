@@ -1,3 +1,19 @@
+jest.mock('./analyseLocations', () => ({
+    analyseLocations: jest.fn((query) => ({
+        locations: [],
+        usedWords: [],
+        remainingWords: query,
+    })),
+}));
+
+jest.mock('./analyseSubjects', () => ({
+    analyseSubjects: jest.fn((query) => ({
+        subjects: [],
+        usedWords: [],
+        remainingWords: query,
+    })),
+}));
+
 const { analyseQuery } = require('./searchPlanner');
 
 describe('analyseQuery', () => {

@@ -26,13 +26,13 @@ const Collections = ({
         if (collection.length > 0 && collectionType === 'file') {
             const collectionWithYearTemp = collection.reduce((acc, item) => {
                 const year = item.year;
-                if (!acc[year]) {
-                    acc[year] = { year, items: [] };
+                if (!acc.has(year)) {
+                    acc.set(year, { year, items: [] });
                 }
-                acc[year].items.push(item);
+                acc.get(year).items.push(item);
                 return acc;
-            }, {});
-            const collectionWithYear = Object.values(collectionWithYearTemp);
+            }, new Map());
+            const collectionWithYear = Array.from(collectionWithYearTemp.values());
 
             setCollectionWithYear(collectionWithYear);
         } else {

@@ -35,7 +35,7 @@ const startFaceExtractionService = async () => {
         const currentState = getBatchFaceProcessingStatus();
 
         if (currentState.status === 'processing' || currentState.status === 'stopping') {
-            return respondFailure('Face extraction is already in progress.', currentState);
+            return respondSuccess('Face extraction is already in progress.', currentState);
         }
 
         startBatchFaceProcessing();
@@ -59,19 +59,6 @@ const stopFaceExtractionService = async () => {
         return respondSuccess('Face extraction stopped.');
     } catch (error) {
         return respondError(`Failed to stop face extraction: ${error.message}`);
-    }
-};
-
-/**
- * Processes queued subject candidates.
- *
- * Delegates to `subjects.js` when implementation exists.
- *
- * @returns {*}
- */
-const processSubjectCandidatesService = async (...args) => {
-    if (typeof processSubjectCandidates === 'function') {
-        return processSubjectCandidates(...args);
     }
 };
 
@@ -314,7 +301,6 @@ module.exports = {
     initSubjectsService,
     startFaceExtractionService,
     stopFaceExtractionService,
-    processSubjectCandidatesService,
     getSubjectCandidatesForMediaService,
     discardFacesService,
     identifySubjectService,

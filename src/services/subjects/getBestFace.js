@@ -3,12 +3,26 @@ const { getLlamaMtmdBinaryPath } = require('../service-utils/binaryPaths');
 const { runStoppable, createKillHandle } = require('../service-utils/process');
 
 const runningJobs = new Map();
+const FACE_SCORING_TIMEOUT_MS = 60_000;
+const FACE_SCORING_TIMEOUT_CODE = 'FACE_SCORING_TIMEOUT';
+const FACE_SCORING_CANCELLED_CODE = 'FACE_SCORING_CANCELLED';
 
 const dynamicAnalysisParams = {
-    basic:    { '-n': '16', '-c': '4096' },
+    basic: { '-n': '16', '-c': '4096' },
     standard: { '-n': '16', '-c': '8192' },
     advanced: { '-n': '16', '-c': '8192' },
 };
+
+const createScoringError = (message, code) => {
+    const error = new Error(message);
+    error.code = code;
+    return error;
+};
+
+const createJobState = () => ({
+    killHandle: null,
+    cancelled: false,
+});
 
 /**
  * Scores a single face image using the local vision LLM.
@@ -21,6 +35,7 @@ const dynamicAnalysisParams = {
  * @param {string} projPath
  * @param {string} llamaMtmdBinaryPath
  * @param {object} paramsByTier
+ * @param {(child: import('child_process').ChildProcess) => void} [onSpawn]
  * @returns {Promise<number>} Score 1–10, or 0 on parse failure.
  */
 const scoreFace = async (imagePath, modelPath, projPath, llamaMtmdBinaryPath, paramsByTier, onSpawn) => {
@@ -36,21 +51,55 @@ const scoreFace = async (imagePath, modelPath, projPath, llamaMtmdBinaryPath, pa
     ].join('\n');
 
     const args = [
-        '-m', modelPath,
-        '--mmproj', projPath,
-        '--image', imagePath,
-        '-p', prompt,
-        '--temp', '0.1',
-        '--top-p', '0.9',
-        '--repeat-penalty', '1.2',
-        '-n', paramsByTier['-n'],
-        '-c', paramsByTier['-c'],
+        '-m',
+        modelPath,
+        '--mmproj',
+        projPath,
+        '--image',
+        imagePath,
+        '-p',
+        prompt,
+        '--temp',
+        '0.1',
+        '--top-p',
+        '0.9',
+        '--repeat-penalty',
+        '1.2',
+        '-n',
+        paramsByTier['-n'],
+        '-c',
+        paramsByTier['-c'],
     ];
 
-    const { stdout } = await runStoppable(llamaMtmdBinaryPath, args, { stdin: '' });
-    const raw = stdout.replace(/\n?>?\s*EOF by user\s*$/i, '').trim();
-    const score = parseInt(raw, 10);
-    return Number.isNaN(score) ? 0 : Math.min(10, Math.max(0, score));
+    let timeoutHandle;
+    let localKillHandle;
+
+    const runFaceScoring = runStoppable(llamaMtmdBinaryPath, args, {
+        stdin: '',
+        onSpawn: (child) => {
+            localKillHandle = createKillHandle(child);
+            if (typeof onSpawn === 'function') onSpawn(child);
+        },
+    });
+
+    const timeout = new Promise((_, reject) => {
+        timeoutHandle = setTimeout(async () => {
+            try {
+                if (localKillHandle) await localKillHandle.kill();
+            } finally {
+                reject(createScoringError(`Face scoring timed out after ${FACE_SCORING_TIMEOUT_MS}ms`, FACE_SCORING_TIMEOUT_CODE));
+            }
+        }, FACE_SCORING_TIMEOUT_MS);
+    });
+
+    try {
+        const { stdout } = await Promise.race([runFaceScoring, timeout]);
+        const raw = stdout.replace(/\n?>?\s*EOF by user\s*$/i, '').trim();
+        const score = parseInt(raw, 10);
+        return Number.isNaN(score) ? 0 : Math.min(10, Math.max(0, score));
+    } finally {
+        if (timeoutHandle) clearTimeout(timeoutHandle);
+    }
 };
 
 /**
@@ -71,6 +120,9 @@ const getBestFace = async (faceList, processId) => {
         throw new Error('getBestFace: faceList is empty');
     }
 
+    const jobState = processId ? createJobState() : null;
+    if (processId) runningJobs.set(processId, jobState);
+
     try {
         const llamaMtmdBinaryPath = getLlamaMtmdBinaryPath();
         const modelPath = getModelPath('slmModel');
@@ -78,34 +130,46 @@ const getBestFace = async (faceList, processId) => {
         const modelTier = getModelTier();
         const paramsByTier = dynamicAnalysisParams[modelTier];
 
+        if (!paramsByTier) {
+            throw new Error(`Unsupported model tier: ${modelTier}`);
+        }
+
         // Score every face sequentially — one LLM call at a time.
         // Running in parallel would cause multiple vision model processes
         // to compete for CPU/GPU and memory, which is a bottleneck.
         // Single-face groups are scored too — a solo unusable face must be
         // caught here rather than silently passed through.
         const scores = [];
+        const onSpawn = jobState
+            ? (child) => {
+                  jobState.killHandle = createKillHandle(child);
+              }
+            : undefined;
 
         for (const face of faceList) {
+            if (jobState?.cancelled) {
+                throw createScoringError('Face scoring was cancelled.', FACE_SCORING_CANCELLED_CODE);
+            }
+
             let score = 0;
             try {
-                score = await scoreFace(
-                    face.imagePath,
-                    modelPath,
-                    projPath,
-                    llamaMtmdBinaryPath,
-                    paramsByTier,
-                    processId
-                        ? (child) => runningJobs.set(processId, createKillHandle(child))
-                        : undefined
-                );
-            } catch {
+                score = await scoreFace(face.imagePath, modelPath, projPath, llamaMtmdBinaryPath, paramsByTier, onSpawn);
+            } catch (error) {
+                if (jobState?.cancelled || error.code === FACE_SCORING_CANCELLED_CODE) {
+                    throw createScoringError('Face scoring was cancelled.', FACE_SCORING_CANCELLED_CODE);
+                }
+
+                if (error.code === FACE_SCORING_TIMEOUT_CODE) {
+                    throw error;
+                }
+
                 score = 0;
+            } finally {
+                if (jobState) jobState.killHandle = null;
             }
 
             scores.push(score);
         }
-
-        if (processId) runningJobs.delete(processId);
 
         // Pick the face with the highest LLM score.
         let bestIndex = 0;
@@ -125,18 +189,24 @@ const getBestFace = async (faceList, processId) => {
         return faceList[bestIndex];
     } catch (error) {
         throw new Error(`getBestFace failed: ${error.message}`);
+    } finally {
+        if (processId) runningJobs.delete(processId);
     }
 };
 
 const stopGettingBestFace = async (processId) => {
-    const job = runningJobs.get(processId);
+    const jobState = runningJobs.get(processId);
 
-    if (!job) return true;
+    if (!jobState) return true;
+
+    jobState.cancelled = true;
+
+    if (!jobState.killHandle) return true;
 
     try {
-        await job.kill();
+        await jobState.killHandle.kill();
     } finally {
-        runningJobs.delete(processId);
+        jobState.killHandle = null;
     }
 
     return true;

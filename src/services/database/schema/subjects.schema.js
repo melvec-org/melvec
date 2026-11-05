@@ -120,9 +120,6 @@ const createIndexes = (db) => {
 
         CREATE INDEX IF NOT EXISTS idx_subject_candidate_faces_representative_rank
         ON subject_candidate_faces(candidate_id, is_representative, representative_rank);
-
-        CREATE INDEX IF NOT EXISTS idx_subject_faces_subject_id
-        ON subject_faces(subject_id);
     `);
 };
 

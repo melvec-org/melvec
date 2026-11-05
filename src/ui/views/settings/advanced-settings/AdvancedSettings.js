@@ -101,7 +101,7 @@ const AdvancedSettings = () => {
     const generateSystemReport = () => {
         window.api.getSystemReport().then((response) => {
             if (response.status === responseStatus.SUCCESS) {
-                setSystemReport(response);
+                setSystemReport(response.data);
             } else {
                 alert('Failed to generate system report.', response.message);
             }

@@ -776,7 +776,9 @@ This separation is the core design principle of `melvec-face`.
 
 ## Output JSON contract
 
-`melvec-face` should emit a single JSON object with this shape.
+`melvec-face` must emit exactly one JSON object to `stdout`. The JSON shape is
+produced in `native/face/src/main.cpp` and consumed by
+`src/services/service-utils/extractFaces.js` in `extractFaces()`.
 
 ### Success
 
@@ -785,15 +787,39 @@ This separation is the core design principle of `melvec-face`.
     "status": "success",
     "data": {
         "sourceURL": "<input video URL or path>",
+        "summary": {
+            "detectedFaces": 12,
+            "qualifiedFaces": 7,
+            "outputFaces": 3
+        },
         "faces": [
             {
-                "id": "<face id>",
+                "id": "<native observation id>",
                 "imagePath": "<saved representative image path>",
                 "confidence": 0.98,
                 "quality": 0.91,
+                "identityIndex": 0,
                 "embedding": [0.123, -0.456]
             }
         ]
+    }
+}
+```
+
+A successful extraction with no output faces must still return `success` with a
+summary and an empty `faces` array:
+
+```json
+{
+    "status": "success",
+    "data": {
+        "sourceURL": "<input video URL or path>",
+        "summary": {
+            "detectedFaces": 4,
+            "qualifiedFaces": 0,
+            "outputFaces": 0
+        },
+        "faces": []
     }
 }
 ```
@@ -816,9 +842,18 @@ This separation is the core design principle of `melvec-face`.
 Rules:
 
 - `status` must be either `success` or `failure`.
-- On `success`, `data.faces` must be present and `data.error` must be omitted.
-- On `failure`, `data.error` must be present and `data.faces` must be omitted.
+- On `success`, `data.summary` must be present, `data.faces` must be present as an array, and `data.error` must be omitted.
+- On `failure`, `data.error` must be present and `data.summary` / `data.faces` must be omitted.
+- `summary.detectedFaces` is the number of raw detector hits before quality filtering.
+- `summary.qualifiedFaces` is the number of detector hits that passed native quality checks and were eligible for grouping/selection.
+- `summary.outputFaces` is the number of representative faces emitted in `data.faces` by the native extractor.
+- `summary.outputFaces` must always equal `data.faces.length`.
+- `summary.detectedFaces > 0` does not mean there is a usable face for subject-candidate persistence.
+- `summary.qualifiedFaces > 0` does not guarantee persistence either; the JavaScript wrapper may still reject all output faces in `selectBestFacePerIdentity()`.
+- Downstream subject-candidate persistence must use the wrapper result from `extractFaces()` — specifically `faces.length` / `selectedFaceCount` — not `summary.detectedFaces`.
+- `id` is the native observation identifier. The persisted face ID is generated later from `imagePath` in `extractFaces()` using `generateMediaId()`.
 - `confidence` is the detection confidence from YuNet.
 - `quality` is the computed observation quality score.
+- `identityIndex` groups observations that the native extractor believes belong to the same person.
 - `embedding` is the extracted SFace feature as a float array.
-- `imagePath` points to the selected representative face image.
+- `imagePath` points to the representative face image emitted by the native extractor.

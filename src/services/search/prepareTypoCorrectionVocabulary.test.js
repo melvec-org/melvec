@@ -1,18 +1,18 @@
-jest.mock('../database/videoLibraryDbService', () => ({
+jest.mock('../video-library/videoLibraryDbService', () => ({
     getAllVideoIds: jest.fn(),
     getVideoDetailsById: jest.fn(),
     getVideoTitlesAndDescriptionsByIds: jest.fn(),
 }));
 
-jest.mock('../database/metaDataDbService', () => ({
+jest.mock('../video-metadata/metaDataDbService', () => ({
     getMetaDataById: jest.fn(),
 }));
 
-jest.mock('../database/tagsDbService', () => ({
+jest.mock('../tags/tagsDbService', () => ({
     getTags: jest.fn(),
 }));
 
-jest.mock('../database/playlistsDbService', () => ({
+jest.mock('../playlists/playlistsDbService', () => ({
     getPlaylists: jest.fn(),
 }));
 
@@ -21,21 +21,21 @@ jest.mock('../image-library/imageLibrary', () => ({
     getFullImageDetailsById: jest.fn(),
 }));
 
-jest.mock('../database/imageLibraryDbService', () => ({
+jest.mock('../image-library/imageLibraryDbService', () => ({
     getImageDetailsById: jest.fn(),
     getImageDescriptionById: jest.fn(),
     getImageTitlesAndDescriptionsByIds: jest.fn(),
 }));
 
-jest.mock('../database/vocabularyDbServices', () => ({
+jest.mock('./vocabularyDbServices', () => ({
     saveVocabulary: jest.fn(),
     getVocabulary: jest.fn(),
 }));
 
 const { getAllVideoIds, getVideoDetailsById, getVideoTitlesAndDescriptionsByIds } = require('../video-library/videoLibraryDbService');
-const { getMetaDataById } = require('../database/metaDataDbService');
-const { getTags } = require('../database/tagsDbService');
-const { getPlaylists } = require('../database/playlistsDbService');
+const { getMetaDataById } = require('../video-metadata/metaDataDbService');
+const { getTags } = require('../tags/tagsDbService');
+const { getPlaylists } = require('../playlists/playlistsDbService');
 const { getAllImageIds } = require('../image-library/imageLibrary');
 const { getImageTitlesAndDescriptionsByIds } = require('../image-library/imageLibraryDbService');
 

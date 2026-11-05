@@ -77,7 +77,7 @@ const ImagePreview = forwardRef(
                             <div className={style.imagePreviewControls}>
                                 <IconButton
                                     icon="expand"
-                                    _classes={style.imageControlButton}
+                                    overrideClass={style.imageControlButton}
                                     title="Large review"
                                     onClick={openFullscreenPreview}
                                 ></IconButton>

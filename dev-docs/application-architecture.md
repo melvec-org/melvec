@@ -115,6 +115,10 @@ This module:
 
 This is the central boundary where renderer requests are mapped to backend services.
 
+IPC handlers live under `src/services/ipc/handlers`. Handler modules should validate renderer-provided arguments before delegating to service modules. For example, `src/services/ipc/handlers/commonMedia.handlers.js` uses `validateRenameMediaArgs`, `validateBulkMediaArgs`, and `validateMediaOperationArgs` before calling `commonMediaService` functions.
+
+Common media commands are routed through `src/services/commonMediaService.js`. That service dispatches shared operations by `mediaType` across video, image, and audio implementations. Current shared operations include title updates, NSFW updates, file rename, library removal, tag association, bulk removal, bulk collection changes, metadata reset, and basic/short-info reads.
+
 ### Feature service modules
 
 Feature service modules typically use the `*.service.js` suffix.

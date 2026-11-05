@@ -130,14 +130,17 @@ const __processMediaFaces = async ({ mediaId, mediaType }) => {
 
     const faceData = await extractFaces(mediaPath, mediaType, mediaId);
 
-    if (faceData.detectedFaceCount > 0) {
+    if (faceData.selectedFaceCount > 0) {
         persistExtractedFaces(faceData, mediaType);
-        updateMediaFaceExtractionStatus(mediaType, mediaId, processFlags.COMPLETED_FACE_DETECTED);
-        return processFlags.COMPLETED_FACE_DETECTED;
     }
 
-    updateMediaFaceExtractionStatus(mediaType, mediaId, processFlags.COMPLETED_NO_FACE_DETECTED);
-    return processFlags.COMPLETED_NO_FACE_DETECTED;
+    const status =
+        faceData.detectedFaceCount > 0
+            ? processFlags.COMPLETED_FACE_DETECTED
+            : processFlags.COMPLETED_NO_FACE_DETECTED;
+
+    updateMediaFaceExtractionStatus(mediaType, mediaId, status);
+    return status;
 };
 
 const startBatchFaceProcessing = async () => {
@@ -186,7 +189,6 @@ const startBatchFaceProcessing = async () => {
                     status,
                 };
             } catch (error) {
-                console.log(error);
                 batchFaceProcessingStatus.progress.failedCount++;
                 batchFaceProcessingStatus.currentMediaStatus = {
                     status: processFlags.FAILED,
@@ -203,9 +205,7 @@ const startBatchFaceProcessing = async () => {
 
             batchFaceProcessingStatus.progress.message =
                 `${batchFaceProcessingStatus.progress.currentIndex} of ${batchFaceProcessingStatus.progress.totalItems} media processed.` +
-                (batchFaceProcessingStatus.progress.failedCount > 0
-                    ? ` ${batchFaceProcessingStatus.progress.failedCount} failed.`
-                    : '');
+                (batchFaceProcessingStatus.progress.failedCount > 0 ? ` ${batchFaceProcessingStatus.progress.failedCount} failed.` : '');
             _streamUpdate();
             batchFaceProcessingStatus.progress.currentIndex++;
             await timeout(BATCH_PROCESS_BREATHER_INTERVAL);
@@ -215,9 +215,7 @@ const startBatchFaceProcessing = async () => {
             batchFaceProcessingStatus.status = 'complete';
             batchFaceProcessingStatus.progress.message =
                 'Face extraction batch completed.' +
-                (batchFaceProcessingStatus.progress.failedCount > 0
-                    ? ` ${batchFaceProcessingStatus.progress.failedCount} failed.`
-                    : '');
+                (batchFaceProcessingStatus.progress.failedCount > 0 ? ` ${batchFaceProcessingStatus.progress.failedCount} failed.` : '');
             _streamUpdate();
         }
     } catch (error) {

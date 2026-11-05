@@ -5,23 +5,9 @@
 Here is the list of features that are planned to be done.
 
 - Support for windows
-- FaceTagging implementation
 - Improvement of accessibility
 - Drag & Drop of files
-- Timeline view
-- Improve curated Place of Interest for India, US for phase 1
-
-### search planner
-
-This is to help find the constraints in search query to finetune results
-This raises need two other features to be available to make it stand out as an enhancement.
-
-    - Face tagging // finding the subjects in media
-
-We will have phase by phase implementation.
-
-- We will add the face tagging as a manual effort by the user initially. Later we will add ai based face cluster implementation.
-- Geo tagging would be only be available to media that has the metatags. But users can add/modify any location as they wish.
+- Improve curated Place of Interest for US for before release version 1.0.0
 
 ## Tech Debts
 
@@ -29,4 +15,4 @@ We will have phase by phase implementation.
 
 ## Documentation
 
-- Impove help-docs.
+- Improve help-docs.

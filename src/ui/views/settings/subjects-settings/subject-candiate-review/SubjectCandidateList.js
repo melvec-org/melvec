@@ -9,6 +9,7 @@ import {
     HeaderControlBarLeft,
     HeaderControlBarRight,
 } from '__components/core-components/header-control-bar/HeaderControlBar';
+import IconButton from '__components/core-components/icon-button/IconButton';
 
 const SubjectCandidateList = ({
     visibleCandidateList,
@@ -95,9 +96,12 @@ const SubjectCandidateList = ({
                                     <div className={style.candidatePreview}>
                                         <SubjectFace face={candidate.faces[0]} />
                                         <div className={style.candidatePreviewOverlay}>
-                                            <Button title="Edit images and identify subject" onClick={() => openCandidateModal(candidate)}>
-                                                Edit
-                                            </Button>
+                                            <IconButton
+                                                icon="faceEdit"
+                                                title="Edit images and identify subject"
+                                                onClick={() => openCandidateModal(candidate)}
+                                                overrideClass={style.candidatePreviewButton}
+                                            ></IconButton>
                                         </div>
                                         {isMultiEditEnabled && (
                                             <input

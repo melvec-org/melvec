@@ -1,8 +1,8 @@
 jest.mock('../database/metaDataDbService', () => ({
     getEmbeddingByVideoId: jest.fn(),
-}));
+}), { virtual: true });
 
-jest.mock('./cosineSimilarityVector', () => jest.fn());
+jest.mock('../service-utils/cosineSimilarityVector', () => jest.fn());
 
 const { getEmbeddingByVideoId } = require('../database/metaDataDbService');
 const cosineSimilarityVector = require('../service-utils/cosineSimilarityVector');

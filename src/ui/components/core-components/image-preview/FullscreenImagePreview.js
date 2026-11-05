@@ -264,7 +264,7 @@ const FullscreenImagePreview = ({ isOpen, src, alt, onClose }) => {
             <div className={imageControlClass}>
                 <IconButton
                     icon="close"
-                    _classes={style.imageControlButton}
+                    overrideClass={style.imageControlButton}
                     onClick={handleOverlayClick}
                     aria-label="Close image preview"
                     title="Close image preview"
