@@ -12,9 +12,11 @@ import CollectionBrowwerIcon from '../icons/CollectionBrowserIcon';
 import InfoIcon from '../icons/InfoIcon';
 import AiIcon from '../icons/aiIcon';
 import TimelineIcon from '../icons/TimelineView';
+import FaceEditIcon from '../icons/FaceEditIcon';
 
 const icons = {
     edit: <span>✎</span>,
+    faceEdit: <FaceEditIcon />,
     close: <CloseIcon />,
     add: <AddIcon />,
     settings: <SettingsIcon />,
@@ -40,8 +42,11 @@ const icons = {
 };
 
 const IconButton = React.forwardRef(
-    ({ icon, _classes = '', onClick, isSelected = false, title = '', tabIndex = 0, isfocused = 'false', onKeyDown, ...props }, ref) => {
-        const buttonClass = `${style.iconButton} ${_classes} ${isSelected ? style.isSelected : ''}`;
+    (
+        { icon, overrideClass = '', onClick, isSelected = false, title = '', tabIndex = 0, isfocused = 'false', onKeyDown, ...props },
+        ref,
+    ) => {
+        const buttonClass = `${style.iconButton} ${overrideClass} ${isSelected ? style.isSelected : ''}`;
 
         return (
             <button

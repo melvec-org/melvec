@@ -40,7 +40,7 @@ const SearchHistorySuggestionItem = ({ item, onSuggestedKeywordSelect, deleteSea
 
             <IconButton
                 icon={'close'}
-                _classes={style.removeHistoryBtn}
+                overrideClass={style.removeHistoryBtn}
                 title="Remove"
                 isfocused={`${item.id}_del` === focusKey ? 'true' : 'false'}
                 onClick={() => deleteSearchItem(item)}

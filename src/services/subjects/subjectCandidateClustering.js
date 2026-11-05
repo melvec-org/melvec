@@ -193,12 +193,6 @@ const recreateClusters = (threshold = CANDIDATE_CLUSTER_MATCH_THRESHOLD) => {
     };
 };
 
-const mergeClusters = (clusterList) => {
-    // mergeThe face clusters.
-};
-
-const removeFaceFromCluster = (clusterId, faceId) => {};
-
 module.exports = {
     createCluster,
     assignFaceToCandidateCluster,

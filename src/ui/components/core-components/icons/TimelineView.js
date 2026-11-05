@@ -4,7 +4,7 @@ import style from './icons.css';
 const TimelineViewIcon = () => {
     return (
         <span className={style.icon}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <svg viewBox="-2 -1 28 28" fill="none" stroke="currentColor">
                 <g transform="scale(0.046875)">
                     <g transform="scale(-1,1) translate(-512,0)">
                         <rect x="210" y="90" width="130" height="70" rx="15" ry="15" />

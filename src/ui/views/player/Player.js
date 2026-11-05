@@ -19,13 +19,13 @@ const PlaylistControls = ({ controlsData, changeControlsData }) => {
                 icon={'autoPlay'}
                 title="Auto Play"
                 isSelected={controlsData.autoPlay}
-                _classes={styles.groupIconButton}
+                overrideClass={styles.groupIconButton}
                 onClick={() => changeControlsData('autoPlay', !controlsData.autoPlay)}
             />
             <IconButton
                 icon={'repeatPlay'}
                 title="Repeat"
-                _classes={styles.groupIconButton}
+                overrideClass={styles.groupIconButton}
                 isSelected={controlsData.repeat}
                 onClick={() => changeControlsData('repeat', !controlsData.repeat)}
             />
@@ -33,7 +33,7 @@ const PlaylistControls = ({ controlsData, changeControlsData }) => {
                 icon={'shuffle'}
                 isSelected={controlsData.isSuffle}
                 title="Suffle playlist"
-                _classes={styles.groupIconButton}
+                overrideClass={styles.groupIconButton}
                 onClick={() => changeControlsData('shuffle', !controlsData.isShuffle)}
             />
         </>

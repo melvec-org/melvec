@@ -57,7 +57,7 @@ const TagChip = ({
                 {isActive && (
                     <IconButton
                         icon={'close'}
-                        _classes={style.chipCloseBtn}
+                        overrideClass={style.chipCloseBtn}
                         onKeyDown={(e) => closeButtonKeyDown(e)}
                         onClick={() => {
                             onTagRemove({ id: id, label: label });

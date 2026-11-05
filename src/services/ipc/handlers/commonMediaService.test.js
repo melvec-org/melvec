@@ -21,6 +21,21 @@ jest.mock('../../image-library/imageLibrary.service', () => ({
     resetImagesMetaData: jest.fn(),
 }));
 
+jest.mock('../../audio-library/audioLibrary.service', () => ({
+    updateAudioTitleService: jest.fn(),
+    updateAudioNsfwStatusService: jest.fn(),
+    renameAudioFileService: jest.fn(),
+    updateAudioNsfwStatus: jest.fn(),
+    resetAudiosMetaData: jest.fn(),
+    removeAudioFromLibraryService: jest.fn(),
+}));
+
+jest.mock('../../audio-library/audioLibrary', () => ({
+    getAllAudioIds: jest.fn(),
+    getAudioShortInfoById: jest.fn(),
+    getBasicAudioDetailsById: jest.fn(),
+}));
+
 jest.mock('../../collections/collections.service', () => ({
     moveVideoFromOneCollectionToAnother: jest.fn(),
     moveImageFromOneCollectionToAnother: jest.fn(),
@@ -43,7 +58,7 @@ jest.mock('../../thumbnail/thumbnail', () => ({
     deleteThumbnail: jest.fn(),
 }));
 
-jest.mock('../../database/collectionsDbService', () => ({
+jest.mock('../../collections/collectionsDbService', () => ({
     getCollectionDetailsById: jest.fn(),
 }));
 
@@ -56,6 +71,7 @@ jest.mock('../../service-utils/sendToUI', () => ({
 
 const { renameVideoFile } = require('../../video-library/videoLibrary.service');
 const { renameImageFileService } = require('../../image-library/imageLibrary.service');
+const { renameAudioFileService } = require('../../audio-library/audioLibrary.service');
 const { respondError } = require('../../service-utils/sendToUI');
 const { renameMediaFileService } = require('../../commonMediaService');
 
@@ -82,11 +98,22 @@ describe('renameMediaFileService', () => {
         expect(renameVideoFile).not.toHaveBeenCalled();
     });
 
-    it('returns an error response for an unsupported media type', () => {
-        renameMediaFileService('audio', 'media-1', 'old.mp3', 'new.mp3');
+    it('delegates to renameAudioFileService for audio mediaType', async () => {
+        renameAudioFileService.mockResolvedValue({ status: 'success', message: 'File name updated successfully' });
 
-        expect(respondError).toHaveBeenCalledWith('Unsupported media type: audio');
+        await renameMediaFileService('audio', 'aud-1', 'old.mp3', 'new.mp3');
+
+        expect(renameAudioFileService).toHaveBeenCalledWith('aud-1', 'old.mp3', 'new.mp3');
         expect(renameVideoFile).not.toHaveBeenCalled();
         expect(renameImageFileService).not.toHaveBeenCalled();
+    });
+
+    it('returns an error response for an unsupported media type', () => {
+        renameMediaFileService('unknown', 'media-1', 'old.mp3', 'new.mp3');
+
+        expect(respondError).toHaveBeenCalledWith('Unsupported media type: unknown');
+        expect(renameVideoFile).not.toHaveBeenCalled();
+        expect(renameImageFileService).not.toHaveBeenCalled();
+        expect(renameAudioFileService).not.toHaveBeenCalled();
     });
 });

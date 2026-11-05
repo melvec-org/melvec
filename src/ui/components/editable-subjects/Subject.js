@@ -60,7 +60,7 @@ const Subject = ({ subject, onSubjectNameChange, onSubjectDelete }) => {
                 <div className={style.subjectFaceDeleteControl}>
                     <IconButton
                         icon="close"
-                        _classes={style.subjectFaceDeleteButton}
+                        overrideClass={style.subjectFaceDeleteButton}
                         onClick={deleteSubject}
                         title="Delete subject"
                         aria-label="Delete subject"
@@ -82,14 +82,14 @@ const Subject = ({ subject, onSubjectNameChange, onSubjectDelete }) => {
                     <div className={style.subjectFaceNameActions}>
                         <IconButton
                             icon="check"
-                            _classes={style.subjectFaceNameActionButton}
+                            overrideClass={style.subjectFaceNameActionButton}
                             onClick={saveName}
                             title="Save name"
                             aria-label="Save name"
                         />
                         <IconButton
                             icon="close"
-                            _classes={style.subjectFaceNameActionButton}
+                            overrideClass={style.subjectFaceNameActionButton}
                             onClick={cancelNameEdit}
                             title="Cancel name edit"
                             aria-label="Cancel name edit"

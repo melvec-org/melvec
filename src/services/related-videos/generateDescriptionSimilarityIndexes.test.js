@@ -1,8 +1,8 @@
-jest.mock('../database/metaDataDbService', () => ({
+jest.mock('../video-metadata/metaDataDbService', () => ({
     getVideoDescriptionsChunk: jest.fn(),
 }));
 
-const { getVideoDescriptionsChunk } = require('../database/metaDataDbService');
+const { getVideoDescriptionsChunk } = require('../video-metadata/metaDataDbService');
 const {
     preprocessDescription,
     buildInvertedIndex,

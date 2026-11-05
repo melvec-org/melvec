@@ -1,8 +1,8 @@
-jest.mock('../database/metaDataDbService', () => ({
+jest.mock('../video-metadata/metaDataDbService', () => ({
     getEmbeddingByVideoId: jest.fn(),
 }));
 
-const { getEmbeddingByVideoId } = require('../database/metaDataDbService');
+const { getEmbeddingByVideoId } = require('../video-metadata/metaDataDbService');
 const {
     deriveRelatedVideosByEmbedding,
     generateDescVectorSimilarityMap,
@@ -136,7 +136,7 @@ describe('generateDescVectorSimilarityMap', () => {
         expect(getEmbeddingByVideoId).toHaveBeenNthCalledWith(3, 'video3');
     });
 
-    test('returns empty related list for videos without embeddings', () => {
+    test('omits videos without embeddings and returns empty related lists for embedded videos with no matches', () => {
         getEmbeddingByVideoId.mockImplementation((videoId) => {
             const embeddings = {
                 video1: [],
@@ -149,7 +149,6 @@ describe('generateDescVectorSimilarityMap', () => {
         const result = generateDescVectorSimilarityMap(['video1', 'video2']);
 
         expect(result).toEqual({
-            video1: [],
             video2: [],
         });
     });

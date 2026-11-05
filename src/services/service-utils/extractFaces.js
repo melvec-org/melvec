@@ -11,26 +11,81 @@ const {
 } = require('./binaryPaths');
 const { run } = require('./process');
 const { getBestFace } = require('../subjects/getBestFace');
-const { removeFile, renameFile } = require('./fileUtils');
+const { isAIActive } = require('./ai');
+const { assertFilePath, removeFile, renameFile } = require('./fileUtils');
+
+const FACE_IMAGE_EXTENSION = '.jpg';
+
+const assertFaceFilePath = (faceImagePath) => assertFilePath(faceImagePath, getFacesPath(), FACE_IMAGE_EXTENSION);
+
+const removeFaceFile = async (faceImagePath) => {
+    const safeFacePath = await assertFaceFilePath(faceImagePath);
+    const result = await removeFile(safeFacePath);
+
+    if (result?.status !== 'success') {
+        throw new Error(`Failed to remove face file ${safeFacePath}: ${result?.message || 'unknown error'}`);
+    }
+};
 
 /**
- * Groups faces by identityIndex, selects the best representative per
- * group using the vision LLM, renames the chosen image to its stable
- * mediaId filename, and deletes all rejected images.
+ * Renames a face image to its stable mediaId-based filename and returns
+ * a face object with the updated imagePath.
  *
+ * The faces table stores `face.mediaId` as the face ID, and downstream
+ * readers derive the image path from that ID instead of storing imagePath.
+ * Because of that, every retained face must be moved to a filename based
+ * on `face.mediaId`, even when AI selection is skipped.
+ *
+ * @param {Object} face - Mapped face object from melvec-face output.
+ * @param {string} face.mediaId - Stable content-derived face ID used as the persisted face ID.
+ * @param {string} face.imagePath - Current extracted image path from melvec-face.
+ * @returns {Promise<Object>} Face object with stable imagePath.
+ */
+const renameFaceToStablePath = async (face) => {
+    const safeFacePath = await assertFaceFilePath(face.imagePath);
+    const stablePath = path.join(path.dirname(safeFacePath), `${face.mediaId}${FACE_IMAGE_EXTENSION}`);
+    await renameFile(safeFacePath, stablePath);
+
+    return {
+        ...face,
+        imagePath: stablePath,
+    };
+};
+
+/**
+ * Returns the retained face images for a media item and normalizes their
+ * filenames to the stable `mediaId` convention used by face persistence.
+ *
+ * Behavior depends on AI availability:
+ * - AI disabled/unavailable: no best-face selection is performed. Every
+ *   extracted face is kept, renamed to its stable `mediaId` filename, and
+ *   returned so the user can decide which faces to keep later.
+ * - AI active: faces are grouped by `identityIndex`; each group is scored
+ *   by the vision LLM, the best representative is kept and renamed, and
+ *   all rejected images are deleted.
+ *
+ * Additional AI-active behavior:
  * - Every group is scored by the LLM, including single-face groups.
  *   A solo face may be unusable (side profile, no eyes) and must be
  *   discarded rather than passed through unchecked.
- * - Returns null from getBestFace means the entire group is unusable —
- *   all images are deleted and the group is excluded from results.
+ * - `null` from `getBestFace` means the entire group is unusable — all
+ *   images in that group are deleted and excluded from results.
  * - Falls back to highest extractor quality only on LLM infrastructure
  *   failures (binary missing, process crash), not on bad face quality.
  *
- * @param {Array} faces - Mapped face objects from melvec-face output.
- * @returns {Promise<Array>} One best face per identity with stable imagePath.
+ * @param {Array<Object>} faces - Mapped face objects from melvec-face output.
+ * @returns {Promise<Array<Object>>} Retained faces with stable imagePath values.
  */
 const selectBestFacePerIdentity = async (faces) => {
     if (faces.length === 0) return [];
+
+    if (!isAIActive()) {
+        const renamedFaces = [];
+        for (const face of faces) {
+            renamedFaces.push(await renameFaceToStablePath(face));
+        }
+        return renamedFaces;
+    }
 
     // Group by identityIndex.
     const groups = new Map();
@@ -59,7 +114,7 @@ const selectBestFacePerIdentity = async (faces) => {
         // null means every face in the group was unusable — discard all.
         if (chosen === null) {
             for (const face of group) {
-                await removeFile(face.imagePath);
+                await removeFaceFile(face.imagePath);
             }
             continue;
         }
@@ -67,19 +122,11 @@ const selectBestFacePerIdentity = async (faces) => {
         // Permanently delete all rejected images for this identity.
         for (const face of group) {
             if (face !== chosen) {
-                await removeFile(face.imagePath);
+                await removeFaceFile(face.imagePath);
             }
         }
 
-        // Rename chosen image to its stable mediaId-based filename.
-        const ext = path.extname(chosen.imagePath);
-        const stablePath = path.join(path.dirname(chosen.imagePath), `${chosen.mediaId}${ext}`);
-        await renameFile(chosen.imagePath, stablePath);
-
-        bestFaces.push({
-            ...chosen,
-            imagePath: stablePath,
-        });
+        bestFaces.push(await renameFaceToStablePath(chosen));
     }
 
     return bestFaces;
@@ -87,11 +134,14 @@ const selectBestFacePerIdentity = async (faces) => {
 
 /**
  * Extracts faces from a single video or image using the melvec-face
- * binary, then selects the best representative per detected identity
- * using the local vision LLM.
+ * binary, generates stable IDs for the extracted face images, and returns
+ * the retained faces after optional AI-based representative selection.
  *
- * Returns one face per identity — the batch processor does not need to
- * know about identity grouping or LLM selection.
+ * When AI is active, the result contains one selected representative per
+ * detected identity. When AI is disabled or unavailable, all extracted
+ * faces are returned so the user can decide later. In both cases, retained
+ * face image files are renamed to their stable `mediaId` filename because
+ * downstream face lookups derive image paths from the persisted face ID.
  *
  * @param {string} mediaPath - Absolute path to the video or image.
  * @param {string} mediaType - Media type constant.
@@ -119,7 +169,7 @@ const extractFaces = async (mediaPath, mediaType, mediaId, options = {}) => {
     try {
         response = JSON.parse(stdout);
     } catch (error) {
-        throw new Error(`Failed to parse melvec-face output.\nstdout:\n${stdout}\nstderr:\n${stderr}`);
+        throw new Error(`Failed to parse melvec-face output: ${error.message}`);
     }
 
     if (response?.status !== 'success') {
@@ -129,10 +179,12 @@ const extractFaces = async (mediaPath, mediaType, mediaId, options = {}) => {
 
     const rawFaces = [];
     for (const face of response?.data?.faces || []) {
+        const safeFacePath = await assertFaceFilePath(face.imagePath);
+
         rawFaces.push({
             id: face.id,
-            mediaId: await generateMediaId(face.imagePath),
-            imagePath: face.imagePath,
+            mediaId: await generateMediaId(safeFacePath),
+            imagePath: safeFacePath,
             embedding: face.embedding,
             confidence: face.confidence,
             quality: face.quality,

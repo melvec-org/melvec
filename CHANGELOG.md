@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
---
+### Added
+
+- Added the subjects module for face extraction and subject identification workflows. This includes subject candidate clusters, retained face records, representative face handling, and media-to-subject associations for image and video details.
+- Added the timeline view for browsing the media library chronologically. The view loads short media info across video, image, and audio, groups media by month, provides a year/month timeline scale, supports virtualized thumbnail browsing, and restores the last viewed timeline date.
+
+### Changed
+
+- Updated dev docs for the common media IPC flow, including handler-level validation and video/image/audio service dispatch.
+- Fixed minor documentation typos in command-flow and TODO docs.
 
 ## [0.3.0] - 2026-08-27
 
