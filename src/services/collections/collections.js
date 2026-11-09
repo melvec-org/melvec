@@ -18,6 +18,7 @@ const { getLibDir } = require('../servicePathConfig');
 const { renameDirectory, removeEmptyDirectories } = require('../service-utils/fileUtils');
 const indexingEvents = require('../../events/indexingEvents');
 const mediaTypes = require('../../constants/mediaTypes');
+const { DEFAULT_COLLECTION_YEAR } = require('../../configs/systemConfig');
 
 const getMediaByCollection = (collectionId) => {
     const collection = getCollectionDetailsById(collectionId);
@@ -87,7 +88,9 @@ const getCollectionsList = () => {
             return item;
         })
         .sort((a, b) => {
-            return a.year - b.year;
+            if (a.year !== DEFAULT_COLLECTION_YEAR) {
+                return b.year - a.year;
+            }
         });
 
     return transformedCollections;

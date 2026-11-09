@@ -2,4 +2,7 @@
     display: flex;
     margin-top: 15px;
     column-gap: 5px;
+    flex-wrap: wrap;
+    max-height: calc(50vh);
+    overflow-y: auto;
 }

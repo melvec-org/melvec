@@ -88,7 +88,12 @@ const useTimeline = () => {
 
         window.api.getAllMediaShortInfo().then((response) => {
             if (response.status === responseStatus.SUCCESS) {
-                setMediaShortInfoList(response.data || []);
+                if (response.data.length > 0 && applicationContext?.userPreferences?.hideHiddenCollections === true) {
+                    const filteredMediaList = response.data.filter((item) => !item.isHidden);
+                    setMediaShortInfoList(filteredMediaList);
+                } else {
+                    setMediaShortInfoList(response.data || []);
+                }
             } else {
                 setError(response.message);
             }
@@ -207,6 +212,10 @@ const useTimeline = () => {
             }
         };
     }, []);
+
+    useEffect(() => {
+        getAllMediaShortInfo();
+    }, [applicationContext?.userPreferences?.hideHiddenCollections]);
 
     return {
         mediaShortInfoList,

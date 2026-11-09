@@ -2,6 +2,7 @@ const { runCmdCapture } = require('./process');
 const { getFfprobePath } = require('./binaryPaths');
 const mediaTypes = require('../../constants/mediaTypes');
 const exifr = require('exifr');
+const path = require('path');
 
 const parseCoordinate = (value) => {
     if (typeof value === 'number' && Number.isFinite(value)) {
@@ -128,8 +129,12 @@ const extractGPSData = async (mediaPath, mediaType) => {
         return null;
     }
     if (mediaType === mediaTypes.IMAGE) {
-        const gpsData = await exifr.parse(mediaPath, ['GPSLatitude', 'GPSLongitude']);
-        return gpsData;
+        const fileExtension = path.extname(mediaPath).toLowerCase();
+        if (['.jpg', '.jpeg', '.png'].includes(fileExtension)) {
+            const gpsData = await exifr.parse(mediaPath, ['GPSLatitude', 'GPSLongitude']);
+            return gpsData;
+        }
+        return null;
     }
 };
 

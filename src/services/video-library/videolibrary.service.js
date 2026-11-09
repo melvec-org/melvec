@@ -71,6 +71,7 @@ const _getBasicVideoDetailsById = (videoId) => {
 
 const _getVideoShortInfoById = (videoId) => {
     const videoDetails = getVideoDetailsById(videoId);
+    const hiddenCollections = getHiddenCollectionIds();
 
     if (!videoDetails) {
         console.error('null data is persisting, clean call please', videoId);
@@ -83,6 +84,7 @@ const _getVideoShortInfoById = (videoId) => {
         thumbnailURL: path.join(getThumbnailsDir(), `${videoId}.jpg`),
         birthtimeMs: videoDetails.birthtimeMs,
         isNsfw: videoDetails.is_nsfw,
+        isHidden: hiddenCollections.has(videoDetails.collection_id),
     };
 };
 

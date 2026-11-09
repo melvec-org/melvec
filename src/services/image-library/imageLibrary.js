@@ -346,6 +346,7 @@ const _getImageDetailsById = (imageId = '') => {
 
 const getImageShortInfoById = (imageId = '') => {
     const imageDetails = getImageDetailsById(imageId);
+    const hiddenCollections = getHiddenCollectionIds();
 
     if (!imageDetails) {
         console.error('null data is persisting, clean call please', imageId);
@@ -358,6 +359,7 @@ const getImageShortInfoById = (imageId = '') => {
         thumbnailURL: path.join(getThumbnailsDir(), `${imageId}.jpg`),
         birthtimeMs: imageDetails.birthtimeMs,
         isNsfw: imageDetails.is_nsfw,
+        isHidden: hiddenCollections.has(imageDetails.collection_id),
     };
 };
 

@@ -327,6 +327,7 @@ const _getAudioDetailsById = (audioId = '') => {
 
 const getAudioShortInfoById = (audioId = '') => {
     const audioDetails = getAudioDetailsById(audioId);
+    const hiddenCollections = getHiddenCollectionIds();
 
     if (!audioDetails) {
         console.error('null data is persisting, clean call please', audioId);
@@ -339,6 +340,7 @@ const getAudioShortInfoById = (audioId = '') => {
         thumbnailURL: null,
         birthtimeMs: audioDetails.birthtimeMs,
         isNsfw: audioDetails.is_nsfw,
+        isHidden: hiddenCollections.has(audioDetails.collection_id),
     };
 };
 

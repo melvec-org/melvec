@@ -1,5 +1,6 @@
 const mediaTypes = require('../../constants/mediaTypes');
 const exifr = require('exifr');
+const path = require('path');
 
 const { runCmdCapture } = require('./process');
 const { getFfprobePath } = require('./binaryPaths');
@@ -33,15 +34,18 @@ const getVideoCreationTime = async (filePath) => {
     }
 };
 
-const getContentCreationTime = async (path, mediaType) => {
+const getContentCreationTime = async (mediaPath, mediaType) => {
     if (mediaType === mediaTypes.IMAGE) {
-        const exif = await exifr.parse(path, ['DateTimeOriginal']);
-
-        return toUnixTimestamp(exif?.DateTimeOriginal);
+        const fileExtension = path.extname(mediaPath).toLowerCase();
+        if (['.jpg', '.jpeg', '.png'].includes(fileExtension)) {
+            const exif = await exifr.parse(mediaPath, ['DateTimeOriginal']);
+            return toUnixTimestamp(exif?.DateTimeOriginal);
+        }
+        return null;
     }
 
     if (mediaType === mediaTypes.VIDEO) {
-        return getVideoCreationTime(path);
+        return getVideoCreationTime(mediaPath);
     }
 
     return null;

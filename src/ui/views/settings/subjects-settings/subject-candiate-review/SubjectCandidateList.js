@@ -56,7 +56,7 @@ const SubjectCandidateList = ({
                         <option value="pending">Unknown faces</option>
                         <option value="identified">Known faces</option>
                     </select>
-                    <Button onClick={fetchSubjectCandidateClusters}>Refresh</Button>
+                    <Button onClick={() => fetchSubjectCandidateClusters()}>Refresh</Button>
                 </HeaderControlBarRight>
             </HeaderControlBar>
 

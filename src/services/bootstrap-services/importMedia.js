@@ -399,6 +399,7 @@ const importAudioToLibrary = async (mediaStats = {}, targetLibrary = '') => {
 
 const enrichMediaStatsWithContentCreationTime = async (mediaStats = {}) => {
     const contentCreationTime = await getContentCreationTime(mediaStats.path, mediaStats.mediaType);
+
     const preferredTimestamp = getPreferredMediaTimestamp(contentCreationTime, mediaStats.birthtimeMs);
 
     return {
@@ -414,6 +415,16 @@ const importMediaToLibrary = async (mediaStats = {}, targetLibrary = '') => {
             fileStats: mediaStats,
             errorDetails: 'Media type is missing',
             mediaType: 'unknown',
+        };
+    }
+
+    // before importing check if the file already exists in the target library
+    if (!doesFileExist(path.join(mediaStats.path))) {
+        return {
+            status: 'failure',
+            fileStats: mediaStats,
+            errorDetails: `File path not found`,
+            mediaType: mediaStats.mediaType,
         };
     }
 
@@ -498,7 +509,6 @@ const importMedia = async (mediaList, libraryPath = '') => {
         }
 
         const operationData = await importMediaToLibrary(mediaList[i], libraryPath);
-
         if (operationData.status === responseStatus.SUCCESS) {
             if (operationData.mediaType === mediaTypes.VIDEO) {
                 try {
@@ -519,7 +529,6 @@ const importMedia = async (mediaList, libraryPath = '') => {
                     });
                 } catch (e) {}
             }
-
             let gpsData = await extractGPSData(operationData?.fullPath, operationData.mediaType);
 
             if (gpsData) {
