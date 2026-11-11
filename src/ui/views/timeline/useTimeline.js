@@ -88,11 +88,13 @@ const useTimeline = () => {
 
         window.api.getAllMediaShortInfo().then((response) => {
             if (response.status === responseStatus.SUCCESS) {
-                if (response.data.length > 0 && applicationContext?.userPreferences?.hideHiddenCollections === true) {
-                    const filteredMediaList = response.data.filter((item) => !item.isHidden);
+                const mediaShortInfo = response.data ? JSON.parse(response.data) : [];
+
+                if (mediaShortInfo.length > 0 && applicationContext?.userPreferences?.hideHiddenCollections === true) {
+                    const filteredMediaList = mediaShortInfo.filter((item) => !item.isHidden);
                     setMediaShortInfoList(filteredMediaList);
                 } else {
-                    setMediaShortInfoList(response.data || []);
+                    setMediaShortInfoList(mediaShortInfo);
                 }
             } else {
                 setError(response.message);
@@ -214,7 +216,9 @@ const useTimeline = () => {
     }, []);
 
     useEffect(() => {
-        getAllMediaShortInfo();
+        if (applicationContext?.userPreferences?.hideHiddenCollections) {
+            getAllMediaShortInfo();
+        }
     }, [applicationContext?.userPreferences?.hideHiddenCollections]);
 
     return {

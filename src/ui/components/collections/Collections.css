@@ -89,12 +89,6 @@
     overflow: hidden;
 }
 
-@media (min-width: 1050px) {
-    .collectionListItem {
-        width: 205px;
-    }
-}
-
 .collectionListItem:hover {
     color: var(--input-text-focus-color);
 }

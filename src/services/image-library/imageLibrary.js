@@ -17,6 +17,7 @@ const {
     updateDescriptionAndEmbedding,
     getImageDescriptionById,
     resetImagesMetaData,
+    getAllImageShortInfoFromDb,
 } = require('./imageLibraryDbService');
 const { getHiddenCollectionIds } = require('../collections/collections');
 const mediaTypes = require('../../constants/mediaTypes');
@@ -344,23 +345,18 @@ const _getImageDetailsById = (imageId = '') => {
     }
 };
 
-const getImageShortInfoById = (imageId = '') => {
-    const imageDetails = getImageDetailsById(imageId);
+const getAllImageShortInfo = () => {
+    const imageDetailsList = getAllImageShortInfoFromDb();
     const hiddenCollections = getHiddenCollectionIds();
 
-    if (!imageDetails) {
-        console.error('null data is persisting, clean call please', imageId);
-        return null;
-    }
-
-    return {
+    return imageDetailsList.map((imageDetails) => ({
         mediaId: imageDetails.id,
         mediaType: mediaTypes.IMAGE,
-        thumbnailURL: path.join(getThumbnailsDir(), `${imageId}.jpg`),
+        thumbnailURL: path.join(getThumbnailsDir(), `${imageDetails.id}.jpg`),
         birthtimeMs: imageDetails.birthtimeMs,
         isNsfw: imageDetails.is_nsfw,
         isHidden: hiddenCollections.has(imageDetails.collection_id),
-    };
+    }));
 };
 
 const getFullImageDetailsById = (imageId = '') => {
@@ -410,7 +406,7 @@ const initImageLibraryService = () => {
 module.exports = {
     initImageLibraryService,
     getBasicImageDetailsById: _getImageDetailsById,
-    getImageShortInfoById,
+    getAllImageShortInfo,
     getFullImageDetailsById,
     getAllImageIds,
     addImage,

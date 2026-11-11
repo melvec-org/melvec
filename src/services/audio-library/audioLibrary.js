@@ -17,6 +17,7 @@ const {
     getAudioDescriptionById,
     resetAudiosMetaData,
     deleteAudioFromDb,
+    getAllAudioShortInfoFromDb,
 } = require('./audioLibraryDbService');
 const { getHiddenCollectionIds } = require('../collections/collections');
 const mediaTypes = require('../../constants/mediaTypes');
@@ -325,23 +326,18 @@ const _getAudioDetailsById = (audioId = '') => {
     }
 };
 
-const getAudioShortInfoById = (audioId = '') => {
-    const audioDetails = getAudioDetailsById(audioId);
+const getAllAudioShortInfo = () => {
+    const audioDetailsList = getAllAudioShortInfoFromDb();
     const hiddenCollections = getHiddenCollectionIds();
 
-    if (!audioDetails) {
-        console.error('null data is persisting, clean call please', audioId);
-        return null;
-    }
-
-    return {
+    return audioDetailsList.map((audioDetails) => ({
         mediaId: audioDetails.id,
         mediaType: mediaTypes.AUDIO,
         thumbnailURL: null,
         birthtimeMs: audioDetails.birthtimeMs,
         isNsfw: audioDetails.is_nsfw,
         isHidden: hiddenCollections.has(audioDetails.collection_id),
-    };
+    }));
 };
 
 const getFullAudioDetailsById = (audioId = '') => {
@@ -385,7 +381,7 @@ const initAudioLibraryService = () => {
 module.exports = {
     initAudioLibraryService,
     getBasicAudioDetailsById: _getAudioDetailsById,
-    getAudioShortInfoById,
+    getAllAudioShortInfo,
     getFullAudioDetailsById,
     getAllAudioIds,
     addAudio,

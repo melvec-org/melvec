@@ -41,7 +41,16 @@ const useCollectionDetailsAction = (currentCollection, currentVideoId = null) =>
     };
 
     const fetchFreshDetailsAndSetState = (currentCollection) => {
-        window.api.getCollectionDetails(currentCollection.id, currentCollection.isExternal).then((mediaArr) => {
+        window.api.getCollectionDetails(currentCollection.id, currentCollection.isExternal).then((response) => {
+            if (response.status !== responseStatus.SUCCESS) {
+                setMediaList({ listName: currentCollection.label, list: [] });
+                setCurrentMediaDetails(null);
+                showGlobalError(response.message || 'Failed to get collection details', true);
+                return;
+            }
+
+            let mediaArr = response.data ? JSON.parse(response.data) : [];
+
             if (mediaArr[0]) {
                 mediaArr = mediaArr.map((item) => {
                     item.isExternal = currentCollection.isExternal;

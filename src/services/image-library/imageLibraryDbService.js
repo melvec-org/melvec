@@ -25,6 +25,26 @@ const ensureDbInitialized = () => {
     }
 };
 
+const getAllImageShortInfoFromDb = () => {
+    ensureDbInitialized();
+
+    try {
+        const stmt = db.prepare(`
+            SELECT
+                i.id,
+                i.collection_id,
+                i.birthtimeMs,
+                i.is_nsfw
+            FROM images i
+            LEFT JOIN collections c ON c.id = i.collection_id
+        `);
+
+        return stmt.all() || [];
+    } catch (err) {
+        throw new Error(`Failed to get image short info: ${err.message}`);
+    }
+};
+
 // this should not return description as the response size would be heavy to deal with.
 const getImageDetailsById = (id, skipCache = false) => {
     ensureDbInitialized();
@@ -806,6 +826,7 @@ module.exports = {
     getImageDetailsById,
     getImageDescriptionById,
     getAllImageIds,
+    getAllImageShortInfoFromDb,
     getImagesByFileNameSearch,
     getImagesByTitleDbSearch,
     getImageListWithoutDescription,

@@ -4,7 +4,7 @@ const {
     updateNsfwStatusService: updateVideoNsfwStatusService,
     renameVideoFile,
     removeVideoFromLibraryService,
-    getVideoShortInfoById,
+    getAllVideoShortInfo,
     getBasicVideoDetailsById,
 } = require('./video-library/videoLibrary.service');
 const {
@@ -21,7 +21,7 @@ const {
     updateImageNsfwStatus,
     resetImagesMetaData,
 } = require('./image-library/imageLibrary.service');
-const { getAllImageIds, getImageShortInfoById, getBasicImageDetailsById } = require('./image-library/imageLibrary');
+const { getAllImageShortInfo, getBasicImageDetailsById } = require('./image-library/imageLibrary');
 const {
     moveVideoFromOneCollectionToAnother,
     moveImageFromOneCollectionToAnother,
@@ -53,7 +53,7 @@ const {
     resetAudiosMetaData,
     removeAudioFromLibraryService,
 } = require('./audio-library/audioLibrary.service');
-const { getAllAudioIds, getAudioShortInfoById, getBasicAudioDetailsById } = require('./audio-library/audioLibrary');
+const { getAllAudioIds, getAllAudioShortInfo, getBasicAudioDetailsById } = require('./audio-library/audioLibrary');
 const responseStatus = require('../constants/responseStatus');
 
 const validateMediaServiceArgs = (mediaType, mediaId) => {
@@ -684,15 +684,15 @@ const getMediaBasicDetailsService = (mediaType, mediaId) => {
 
 const getAllMediaShortInfoService = () => {
     try {
-        const videoShortInfoList = getAllVideoIds().map((videoId) => getVideoShortInfoById(videoId));
-        const imageShortInfoList = getAllImageIds().map((imageId) => getImageShortInfoById(imageId));
-        const audioShortInfoList = getAllAudioIds().map((audioId) => getAudioShortInfoById(audioId));
+        const videoShortInfoList = getAllVideoShortInfo();
+        const imageShortInfoList = getAllImageShortInfo();
+        const audioShortInfoList = getAllAudioShortInfo();
 
         const mediaShortInfoList = [...videoShortInfoList, ...imageShortInfoList, ...audioShortInfoList]
             .filter((mediaShortInfo) => mediaShortInfo !== null)
             .sort((a, b) => b.birthtimeMs - a.birthtimeMs);
 
-        return respondSuccess('Media short info fetched successfully', mediaShortInfoList);
+        return respondSuccess('Media short info fetched successfully', JSON.stringify(mediaShortInfoList));
     } catch (error) {
         return respondError(`Failed to fetch media short info: ${error.message}`);
     }

@@ -38,8 +38,14 @@ const getContentCreationTime = async (mediaPath, mediaType) => {
     if (mediaType === mediaTypes.IMAGE) {
         const fileExtension = path.extname(mediaPath).toLowerCase();
         if (['.jpg', '.jpeg', '.png'].includes(fileExtension)) {
-            const exif = await exifr.parse(mediaPath, ['DateTimeOriginal']);
-            return toUnixTimestamp(exif?.DateTimeOriginal);
+            try {
+                const exif = await exifr.parse(mediaPath, ['DateTimeOriginal']);
+                return toUnixTimestamp(exif?.DateTimeOriginal);
+            } catch (err) {
+                // supress this error, we dont need it.
+            } finally {
+                return null;
+            }
         }
         return null;
     }

@@ -131,8 +131,14 @@ const extractGPSData = async (mediaPath, mediaType) => {
     if (mediaType === mediaTypes.IMAGE) {
         const fileExtension = path.extname(mediaPath).toLowerCase();
         if (['.jpg', '.jpeg', '.png'].includes(fileExtension)) {
-            const gpsData = await exifr.parse(mediaPath, ['GPSLatitude', 'GPSLongitude']);
-            return gpsData;
+            try {
+                const gpsData = await exifr.parse(mediaPath, ['GPSLatitude', 'GPSLongitude']);
+                return gpsData;
+            } catch (err) {
+                // Supress the error. We dont need it.
+            } finally {
+                return null;
+            }
         }
         return null;
     }

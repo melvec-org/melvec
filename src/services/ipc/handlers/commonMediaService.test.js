@@ -32,7 +32,7 @@ jest.mock('../../audio-library/audioLibrary.service', () => ({
 
 jest.mock('../../audio-library/audioLibrary', () => ({
     getAllAudioIds: jest.fn(),
-    getAudioShortInfoById: jest.fn(),
+    getAllAudioShortInfo: jest.fn(),
     getBasicAudioDetailsById: jest.fn(),
 }));
 

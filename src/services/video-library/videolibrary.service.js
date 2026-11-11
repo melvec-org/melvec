@@ -22,7 +22,7 @@ const serviceEventBus = require('../service-utils/serviceEventBus');
 const interServiceEvents = require('../../events/interServiceEvents');
 
 const { respondSuccess, respondError, respondFailure } = require('../service-utils/sendToUI');
-const { updateSource, deleteVideo } = require('./videoLibraryDbService');
+const { updateSource, deleteVideo, getAllVideoShortInfoFromDb } = require('./videoLibraryDbService');
 const mediaTypes = require('../../constants/mediaTypes');
 const faceExtractionStatus = require('../../constants/faceExtractionStatus');
 const indexingEvents = require('../../events/indexingEvents');
@@ -69,23 +69,18 @@ const _getBasicVideoDetailsById = (videoId) => {
     return null;
 };
 
-const _getVideoShortInfoById = (videoId) => {
-    const videoDetails = getVideoDetailsById(videoId);
+const _getAllVideoShortInfo = () => {
+    const videoDetailsList = getAllVideoShortInfoFromDb();
     const hiddenCollections = getHiddenCollectionIds();
 
-    if (!videoDetails) {
-        console.error('null data is persisting, clean call please', videoId);
-        return null;
-    }
-
-    return {
+    return videoDetailsList.map((videoDetails) => ({
         mediaId: videoDetails.id,
         mediaType: mediaTypes.VIDEO,
-        thumbnailURL: path.join(getThumbnailsDir(), `${videoId}.jpg`),
+        thumbnailURL: path.join(getThumbnailsDir(), `${videoDetails.id}.jpg`),
         birthtimeMs: videoDetails.birthtimeMs,
         isNsfw: videoDetails.is_nsfw,
         isHidden: hiddenCollections.has(videoDetails.collection_id),
-    };
+    }));
 };
 
 const _getFullVideoDetailsById = (videoId) => {
@@ -217,7 +212,7 @@ module.exports = {
     initVideoLibraryService,
     getFullVideoDetailsById: _getFullVideoDetailsById,
     getBasicVideoDetailsById: _getBasicVideoDetailsById,
-    getVideoShortInfoById: _getVideoShortInfoById,
+    getAllVideoShortInfo: _getAllVideoShortInfo,
     removeVideoFromLibrary,
     removeVideoFromLibraryService,
     updateVideoTitleService,

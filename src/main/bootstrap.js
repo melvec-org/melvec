@@ -78,7 +78,7 @@ const validateLibraryData = async (webContents) => {
 
         return { importStatus: libraryImportStatus.COMPLETE, errorDetails: '' };
     } finally {
-        cleanupImportSourceFolders();
+        await cleanupImportSourceFolders();
     }
 };
 

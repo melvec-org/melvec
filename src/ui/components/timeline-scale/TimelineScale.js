@@ -49,11 +49,12 @@ const getYearScale = (items = []) => {
             mediaCount: 0,
             monthlyCount: Array(MONTH_COUNT).fill(0),
         };
-
-        scale.push({
-            ...yearData,
-            percentage: totalMediaCount ? (yearData.mediaCount / totalMediaCount) * 100 : 0,
-        });
+        if (yearData.mediaCount > 0) {
+            scale.push({
+                ...yearData,
+                percentage: totalMediaCount ? (yearData.mediaCount / totalMediaCount) * 100 : 0,
+            });
+        }
     }
 
     return scale;

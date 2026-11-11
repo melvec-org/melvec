@@ -37,6 +37,26 @@ const getAllVideos = () => {
     }
 };
 
+const getAllVideoShortInfoFromDb = () => {
+    ensureDbInitialized();
+
+    try {
+        const stmt = db.prepare(`
+            SELECT
+                v.id,
+                v.collection_id,
+                v.birthtimeMs,
+                v.is_nsfw
+            FROM videos v
+            LEFT JOIN collections c ON c.id = v.collection_id
+        `);
+
+        return stmt.all() || [];
+    } catch (err) {
+        throw new Error(`Error fetching video short info: ${err.message}`);
+    }
+};
+
 const getVideoDetailsById = (id, skipCache = false) => {
     ensureDbInitialized();
 
@@ -535,6 +555,7 @@ const initializeDb = () => {
 module.exports = {
     // get operations
     getAllVideoIds,
+    getAllVideoShortInfoFromDb,
     getAllVideos,
     getVideoDetailsById,
     getVideoByTitleSearch,

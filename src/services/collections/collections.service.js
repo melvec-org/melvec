@@ -50,38 +50,38 @@ const moveAudioFromOneCollectionToAnother = async (newCollection, mediaId) => {
 };
 
 const getCollectionDetailsService = (collectionId, isExternalCollection = false) => {
-    if (!isExternalCollection) {
-        const mediaItemsByCollection = getMediaByCollection(collectionId);
+    if (!collectionId) {
+        return respondFailure('Invalid collectionId');
+    }
 
-        if (!mediaItemsByCollection[0]) {
-            return [];
+    try {
+        if (!isExternalCollection) {
+            const mediaItemsByCollection = getMediaByCollection(collectionId);
+
+            const collectionDetails = mediaItemsByCollection
+                .map((item) => {
+                    if (item.mediaType === mediaTypes.VIDEO) {
+                        return getBasicVideoDetailsById(item.id);
+                    }
+
+                    if (item.mediaType === mediaTypes.IMAGE) {
+                        return getBasicImageDetailsById(item.id);
+                    }
+
+                    if (item.mediaType === mediaTypes.AUDIO) {
+                        return getBasicAudioDetailsById(item.id);
+                    }
+
+                    return null;
+                })
+                .filter((item) => item !== null);
+
+            return respondSuccess('Collection details', JSON.stringify(collectionDetails));
         }
 
-        return mediaItemsByCollection
-            .map((item) => {
-                if (item.mediaType === mediaTypes.VIDEO) {
-                    return getBasicVideoDetailsById(item.id);
-                }
-
-                if (item.mediaType === mediaTypes.IMAGE) {
-                    return getBasicImageDetailsById(item.id);
-                }
-
-                if (item.mediaType === mediaTypes.AUDIO) {
-                    return getBasicAudioDetailsById(item.id);
-                }
-
-                return null;
-            })
-            .filter((item) => item !== null);
-    } else {
         const mediaByWatchFolder = getMediaByWatchFolder(collectionId);
 
-        if (!mediaByWatchFolder[0]) {
-            return [];
-        }
-
-        return mediaByWatchFolder
+        const collectionDetails = mediaByWatchFolder
             .map((media) => {
                 return {
                     name: media.name,
@@ -99,6 +99,10 @@ const getCollectionDetailsService = (collectionId, isExternalCollection = false)
                 };
             })
             .filter((item) => item !== null);
+
+        return respondSuccess('Collection details', JSON.stringify(collectionDetails));
+    } catch (error) {
+        return respondError(`Failed to get collection details: ${error.message}`);
     }
 };
 

@@ -23,6 +23,27 @@ const ensureDbInitialized = () => {
     }
 };
 
+const getAllAudioShortInfoFromDb = () => {
+    ensureDbInitialized();
+    try {
+        const stmt = db.prepare(`
+            SELECT
+                a.id,
+                a.collection_id,
+                a.birthtimeMs,
+                a.is_nsfw
+            FROM audios a
+            LEFT JOIN collections c ON c.id = a.collection_id
+        `);
+
+        const audioDetails = stmt.all() || [];
+
+        return audioDetails;
+    } catch (err) {
+        throw new Error(`Failed to get audio ${normalizedId}: ${err.message}`);
+    }
+};
+
 const getAudioDetailsById = (id, skipCache = false) => {
     ensureDbInitialized();
 
@@ -722,6 +743,7 @@ module.exports = {
     getAudioDetailsById,
     getAudioDescriptionById,
     getAllAudioIds,
+    getAllAudioShortInfoFromDb,
     checkForDuplicateAudio,
     addAudio,
     updateAudioDetails,
