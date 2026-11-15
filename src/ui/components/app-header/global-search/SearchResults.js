@@ -79,7 +79,7 @@ const SearchResults = ({ searchResults, onSearchResultItemClick, createPlaylist,
             if (searchResults.byFileNames.length > 0)
                 tabs.push({ label: filterLabels.FILE_NAMES, count: searchResults.byFileNames.length });
 
-            if (searchResults.byContent.length > 0) tabs.push({ label: filterLabels.META_DATA, count: searchResults.byContent.length });
+            if (searchResults.byContent.length > 0) tabs.push({ label: filterLabels.CONTENT, count: searchResults.byContent.length });
 
             setMatchFields(tabs);
             setSelectedMatchField(tabs[0]?.label ?? null);

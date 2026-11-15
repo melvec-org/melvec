@@ -101,6 +101,7 @@ const getVideosByMetaData = async (keywords, isQuickSearch = true) => {
         searchCandidates = dedupeCandidates(strictCandidates, looseCandidates);
     }
     const matches = await rerankWithSemantic(normalizedKeywords, searchCandidates);
+
     return normalizeMatches(matches);
 };
 

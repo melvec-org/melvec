@@ -13,6 +13,7 @@ const { useEffect, useState } = require('react');
 
 const useCollectionDetailsAction = (currentCollection, currentVideoId = null) => {
     const [currentMediaDetails, setCurrentMediaDetails] = useState(null);
+    const [searchSelectedItem, setSearchSelectedItem] = useState(null);
     const [mediaList, setMediaList] = useState({ listName: '', list: [] });
     const [bulkSelectedIds, setBulkSelectedIds] = useState([]);
     const isBulkMode = bulkSelectedIds.length > 0;
@@ -65,7 +66,7 @@ const useCollectionDetailsAction = (currentCollection, currentVideoId = null) =>
             if (stateContext?.currentBrowserState?.selectedVideoId) {
                 const selectedMedia = mediaArr.find((item) => item.id === stateContext?.currentBrowserState?.selectedVideoId);
                 if (selectedMedia) {
-                    onMediaFileSelection(selectedMedia);
+                    onMediaFileSelection(selectedMedia, true);
                 }
             }
             // check from the last saved state
@@ -90,14 +91,24 @@ const useCollectionDetailsAction = (currentCollection, currentVideoId = null) =>
             fetchFreshDetailsAndSetState(currentCollection);
         }
         // kill the currentBrowserState once you achive the state
+        let clearCurrentBrowserStateTimeoutId = null;
+
         if (stateContext.currentBrowserState) {
             if (stateContext.currentBrowserState.selectedCollection !== currentCollection) {
-                dispatchContext({
-                    type: applicationEvents.GOTO_COLLECTION,
-                    payload: null,
-                });
+                clearCurrentBrowserStateTimeoutId = setTimeout(() => {
+                    dispatchContext({
+                        type: applicationEvents.GOTO_COLLECTION,
+                        payload: null,
+                    });
+                }, 1);
             }
         }
+
+        return () => {
+            if (clearCurrentBrowserStateTimeoutId) {
+                clearTimeout(clearCurrentBrowserStateTimeoutId);
+            }
+        };
     }, [currentCollection, currentVideoId]);
 
     useEffect(() => {
@@ -120,8 +131,9 @@ const useCollectionDetailsAction = (currentCollection, currentVideoId = null) =>
         }
     };
 
-    const onMediaFileSelection = (selectedVideoItem) => {
+    const onMediaFileSelection = (selectedVideoItem, bringIntoView = false) => {
         setCurrentMediaDetails(selectedVideoItem);
+        setSearchSelectedItem(bringIntoView ? selectedVideoItem : null);
         window.api.setApplicationSettings('lastBrowserState', {
             selectedCollection: currentCollection,
             selectedVideoId: selectedVideoItem.id,
@@ -542,6 +554,7 @@ const useCollectionDetailsAction = (currentCollection, currentVideoId = null) =>
 
     return {
         currentMediaDetails,
+        searchSelectedItem,
         mediaList,
         // bulk
         bulkSelectedIds,

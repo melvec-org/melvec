@@ -168,6 +168,9 @@ input.globalSearchInput {
     height: calc(100vh - 50px);
     display: flex;
     flex-direction: column;
+    &[data-processing='true'] {
+        cursor: progress;
+    }
 }
 
 .searchResultsContent {

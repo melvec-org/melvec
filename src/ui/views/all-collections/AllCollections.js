@@ -2,24 +2,26 @@ import React, { useEffect, useState } from 'react';
 import AllCollectionsLayout from '__components/layouts/AllCollectionsLayout';
 import Sidebar from '__components/layouts/Sidebar';
 import MainPanel from '__components/layouts/MainPanel';
-import Collections from '__components/collections/Collections';
+
 import CollectionDetails from './video-list-browser/CollectionDetails';
 import { useApplicationContext } from '../../contexts/app.context';
 import LibraryCollection from './LibraryCollection';
 import ResizableSidePanel from '__components/resizable-panel/ResizableSidePanel';
+import FileCollectionList from '__components/collections/FileCollectionList';
 
 const AllCollections = () => {
     const [stateContext] = useApplicationContext();
 
     const [selectedCollectionAndVideo, setSelectedCollectionAndVideo] = useState(null);
     const [currentVisibleCollections, setCurrentVisibleCollections] = useState([]);
+    const [collectionToReveal, setCollectionToReveal] = useState(null);
 
     const watchFolders = stateContext.watchFolders;
-
     // const [filteredCollections, setFilteredCollections] = useState([stateContext.collections]);
 
     const onCollectionItemClick = (item, isExternal) => {
         item.isExternal = isExternal;
+        setCollectionToReveal(null);
         setSelectedCollectionAndVideo({
             selectedCollection: item,
             selectedVideoId: null,
@@ -48,8 +50,11 @@ const AllCollections = () => {
                     selectedVideoId: stateContext?.currentBrowserState?.selectedVideoId || null,
                 };
                 window.api.setApplicationSettings('lastBrowserState', newCollectionAndVideo);
+                setCollectionToReveal(selectedCollection);
                 setSelectedCollectionAndVideo(newCollectionAndVideo);
             }
+        } else if (collectionToReveal !== null) {
+            setCollectionToReveal(null);
         }
     }, [stateContext?.currentBrowserState?.selectedCollection, stateContext?.currentBrowserState?.selectedVideoId]);
 
@@ -122,16 +127,18 @@ const AllCollections = () => {
                                     onCollectionItemClick={(item) => onCollectionItemClick(item, false)}
 
                                     selectedItemId={selectedCollectionAndVideo.selectedCollection.id}
+                                    collectionToReveal={collectionToReveal}
                                 />
                             )}
 
                             {watchFolders.length > 0 && (
-                                <Collections
+                                <FileCollectionList
                                     collection={watchFolders}
                                     collectionHeader="Watch folders"
                                     onCollectionItemClick={(item) => onCollectionItemClick(item, true)}
 
                                     selectedItemId={selectedCollectionAndVideo.selectedCollection.id}
+                                    collectionToReveal={collectionToReveal}
                                 />
                             )}
                         </Sidebar>

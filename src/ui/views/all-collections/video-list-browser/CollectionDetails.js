@@ -22,6 +22,7 @@ const CollectionDetails = ({ selectedCollection = null, selectedVideoId = null }
     const [pressEnterCount, setPressEnterPreview] = useState(0);
     const {
         currentMediaDetails,
+        searchSelectedItem,
         mediaList,
         viewType,
         changeViewType,
@@ -35,7 +36,6 @@ const CollectionDetails = ({ selectedCollection = null, selectedVideoId = null }
         onAnyAudioDetailsChange,
         isRefreshInProgress,
         // bulk mode
-        bulkSelectedIds,
         setBulkSelectedIds,
         isBulkMode,
         bulkSelectedItems,
@@ -110,7 +110,8 @@ const CollectionDetails = ({ selectedCollection = null, selectedVideoId = null }
                         onListItemClick={(videoDetails) => onMediaFileSelection(videoDetails)}
                         onMediaDelete={(mediaId) => onMediaDelete(null, mediaId)}
                         isExternal={selectedCollection.isExternal}
-                        preSelectedItem={currentMediaDetails}
+                        selectedItem={searchSelectedItem ? null : currentMediaDetails}
+                        searchSelectedItem={searchSelectedItem}
                         onBulkSelectionChange={(ids) => setBulkSelectedIds(ids)}
                     />
                 )}

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import Collections from '__components/collections/Collections';
+
 import contextMenuEvents from '__events/contextMenuEvents';
 import ipcChannels from '__constants/ipcChannels';
 import AddNewCollection from '__components/add-collection/AddNewCollection';
 import IconButton from '__components/core-components/icon-button/IconButton';
 import useCollectionActions from '__actions/useCollectionActions';
 import CollectionEditor from '__components/collection-editor/CollectionEditor';
+import FileCollectionList from '__components/collections/FileCollectionList';
 
 const CollectionControlButton = ({ onControlClick }) => {
     return (
@@ -13,7 +14,7 @@ const CollectionControlButton = ({ onControlClick }) => {
     );
 };
 
-const LibraryCollection = ({ collections, onCollectionItemClick, selectedItemId }) => {
+const LibraryCollection = ({ collections, onCollectionItemClick, selectedItemId, collectionToReveal = null }) => {
     const [openNewCollection, setIsOpenNewCollection] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [collectionToEdit, setCollectionToEdit] = useState(null);
@@ -79,13 +80,14 @@ const LibraryCollection = ({ collections, onCollectionItemClick, selectedItemId 
 
     return (
         <>
-            <Collections
+            <FileCollectionList
                 collection={collections}
                 collectionHeader="Library"
                 onCollectionItemClick={(item) => onCollectionItemClick(item, false)}
                 onCollectionDoubleClick={(item) => editCollectionName(item)}
                 contextMenuClick={(event, item) => collectionContextMenuClick(event, item)}
                 selectedItemId={selectedItemId}
+                collectionToReveal={collectionToReveal}
                 collectionItemContextMenuClick={collectionItemContextMenuClick}
                 headerControls={<CollectionControlButton onControlClick={() => setIsOpenNewCollection(true)} />}
                 isCollapsed={isCollapsed}

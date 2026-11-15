@@ -9,31 +9,31 @@ const {
     deleteSearchHistoryItem,
 } = require('./searchHistory');
 const { getSearchedVideoHistory } = require('../history/actionHistory');
-const { respondFailure, respondSuccess } = require('../service-utils/sendToUI');
-const mediaTypes = require('../../constants/mediaTypes');
-const { getBasicImageDetailsById } = require('../image-library/imageLibrary');
-const { getBasicAudioDetailsById } = require('../audio-library/audioLibrary');
+const { respondFailure, respondSuccess, respondError } = require('../service-utils/sendToUI');
 const { populateMediaDetails } = require('./helpers/populateMediaDetails');
 
-const getSearchResults = async (searchString, isQuickSearch, filters) => {
-    const searchResults = await search(searchString, isQuickSearch, filters);
+const getSearchResultsService = async (searchString, isQuickSearch, filters) => {
+    try {
+        const searchResults = await search(searchString, isQuickSearch, filters);
 
-    if (!searchResults.isCached) {
-        if (searchResults.byTags.length > 0) {
-            searchResults.byTags = populateMediaDetails(searchResults.byTags);
+        if (!searchResults.isCached) {
+            if (searchResults.byTags.length > 0) {
+                searchResults.byTags = populateMediaDetails(searchResults.byTags);
+            }
+            if (searchResults.byTitles.length > 0) {
+                searchResults.byTitles = populateMediaDetails(searchResults.byTitles);
+            }
+            if (searchResults.byFileNames.length > 0) {
+                searchResults.byFileNames = populateMediaDetails(searchResults.byFileNames);
+            }
+            if (searchResults.byContent.length > 0) {
+                searchResults.byContent = populateMediaDetails(searchResults.byContent);
+            }
         }
-        if (searchResults.byTitles.length > 0) {
-            searchResults.byTitles = populateMediaDetails(searchResults.byTitles);
-        }
-        if (searchResults.byFileNames.length > 0) {
-            searchResults.byFileNames = populateMediaDetails(searchResults.byFileNames);
-        }
-        if (searchResults.byContent.length > 0) {
-            searchResults.byContent = populateMediaDetails(searchResults.byContent);
-        }
+        return respondSuccess('Successful Search', searchResults);
+    } catch (e) {
+        return respondError('Failed to search', e);
     }
-
-    return searchResults;
 };
 
 const addToSearchHistoryService = (arg) => {
@@ -74,7 +74,7 @@ const initSearchService = () => {
 };
 
 module.exports = {
-    getSearchResults,
+    getSearchResultsService,
     addToSearchHistoryService,
     deleteSearchHistoryItemService,
     clearSearchHistoryService,

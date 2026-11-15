@@ -6,19 +6,15 @@ import VirtualList from '__components/virtual-list/VirtualList';
 import useTimeline from './useTimeline';
 
 const Timeline = () => {
-    const {
-        mediaShortInfoList,
-        error,
-        currentDate,
-        scrollToDate,
-        onMediaThumbnailClick,
-        onScaleDateChange,
-        onListVisibleDateChange,
-    } = useTimeline();
+    const { mediaShortInfoList, error, currentDate, scrollToDate, onMediaThumbnailClick, onScaleDateChange, onListVisibleDateChange } =
+        useTimeline();
 
     return (
         <DashboardLayout>
-            <TimelineScale items={mediaShortInfoList} currentDate={currentDate} onDateChange={onScaleDateChange} />
+            {mediaShortInfoList.length > 0 && (
+                <TimelineScale items={mediaShortInfoList} currentDate={currentDate} onDateChange={onScaleDateChange} />
+            )}
+
             <MainPanel>
                 {error ? (
                     <div>{error}</div>

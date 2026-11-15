@@ -167,35 +167,37 @@ const TimelineScaleCanvas = ({ yearScale, currentDate = null, onDateChange = nul
     };
 
     return (
-        <div ref={containerRef} className={style.timelineScaleCanvasWrapper}>
-            <canvas
-                ref={canvasRef}
-                className={style.timelineScaleCanvas}
-                style={{ cursor: isDragging || isHoveringActivePointer ? 'move' : 'crosshair' }}
-                width={canvasSize.width}
-                height={layout.height}
-                onPointerMove={handlePointerMove}
-                onPointerDown={handlePointerDown}
-                onPointerUp={handlePointerUp}
-                onPointerCancel={handlePointerUp}
-                onPointerLeave={handlePointerLeave}
-                onClick={handleClick}
-            />
-            {hoverPointer ? (
-                <div className={style.timelineScaleHoverPointer} style={{ transform: `translate3d(0, ${hoverPointer.y}px, 0)` }} />
-            ) : null}
-            {activePointer ? (
-                <div
-                    className={`${style.timelineScaleCurrentPointer} ${isDragging ? style.timelineScaleCurrentPointerDragging : ''}`}
-                    style={{ transform: `translate3d(0, ${activePointer.y}px, 0)` }}
+        <>
+            <div ref={containerRef} className={style.timelineScaleCanvasWrapper}>
+                <canvas
+                    ref={canvasRef}
+                    className={style.timelineScaleCanvas}
+                    style={{ cursor: isDragging || isHoveringActivePointer ? 'move' : 'crosshair' }}
+                    width={canvasSize.width}
+                    height={layout.height}
+                    onPointerMove={handlePointerMove}
+                    onPointerDown={handlePointerDown}
+                    onPointerUp={handlePointerUp}
+                    onPointerCancel={handlePointerUp}
+                    onPointerLeave={handlePointerLeave}
+                    onClick={handleClick}
                 />
-            ) : null}
+                {hoverPointer ? (
+                    <div className={style.timelineScaleHoverPointer} style={{ transform: `translate3d(0, ${hoverPointer.y}px, 0)` }} />
+                ) : null}
+                {activePointer ? (
+                    <div
+                        className={`${style.timelineScaleCurrentPointer} ${isDragging ? style.timelineScaleCurrentPointerDragging : ''}`}
+                        style={{ transform: `translate3d(0, ${activePointer.y}px, 0)` }}
+                    />
+                ) : null}
+            </div>
             {pointerTimeInfo ? (
                 <div className={style.timelineScalePointerInfo}>
                     {pointerTimeInfo.monthLabel} {pointerTimeInfo.year} · {pointerTimeInfo.monthlyCount} media
                 </div>
             ) : null}
-        </div>
+        </>
     );
 };
 

@@ -257,7 +257,6 @@ const useGlobalSearchAction = () => {
     const [applicationContext, dispatchContext] = useApplicationContext();
     const [searchHistory, setSearchHistory] = useState(null);
     const [indexedSearchHistory, setIndexedSearchHistory] = useState([]);
-    const [isAiSearchEnabled, setIsAiSearchEnabled] = useState([false]);
 
     // search suggestion is formed locally - not hitting any service
     const [searchSuggestions, setSearchSuggestions] = useState([]);
@@ -269,6 +268,8 @@ const useGlobalSearchAction = () => {
     const [correctedSearchText, setCorrectedSearchText] = useState('');
 
     const [currentFocusPointer, setCurrentFocusPointer] = useState(defaultFocusPointer);
+
+    const [isSearchInProgress, setIsSearchInProgress] = useState(false);
 
     useEffect(() => {
         window.api.getSearchHistory().then((data) => {
@@ -324,13 +325,21 @@ const useGlobalSearchAction = () => {
                 // check for tags, titles, filenames form search service
                 // note this would return video files
                 if (searchText.length >= 2) {
-                    window.api.getSearchResults(searchText, true).then((results) => {
-                        if (results) {
-                            quickSuggestions = enrichSearchSuggestions(quickSuggestions, results, applicationContext.hideHiddenCollections);
-                            quickSuggestions['focusKeys'] = getQuickSuggestionsFocusKeys(quickSuggestions, true);
-                            setSearchSuggestions(quickSuggestions);
+                    window.api.getSearchResults(searchText, true).then((response) => {
+                        if (response.status === responseStatus.SUCCESS) {
+                            const results = response.data;
 
-                            setCorrectedSearchText(results.correctedText);
+                            if (results) {
+                                quickSuggestions = enrichSearchSuggestions(
+                                    quickSuggestions,
+                                    results,
+                                    applicationContext.hideHiddenCollections,
+                                );
+                                quickSuggestions['focusKeys'] = getQuickSuggestionsFocusKeys(quickSuggestions, true);
+                                setSearchSuggestions(quickSuggestions);
+
+                                setCorrectedSearchText(results.correctedText);
+                            }
                         }
                     });
                 } else {
@@ -356,16 +365,21 @@ const useGlobalSearchAction = () => {
                 if (searchFilter === 'filenames') {
                     let quickSuggestions = getSearchSuggestionByFileNames();
                     if (searchText.length >= 2) {
-                        window.api.getSearchResults(searchText, true, { fileNames: true }).then((results) => {
-                            if (results) {
-                                quickSuggestions = enrichSearchSuggestions(
-                                    quickSuggestions,
-                                    results,
-                                    applicationContext.hideHiddenCollections,
-                                );
+                        window.api.getSearchResults(searchText, true, { fileNames: true }).then((response) => {
+                            if (response.status === responseStatus.SUCCESS) {
+                                const results = response.data;
+                                if (results) {
+                                    quickSuggestions = enrichSearchSuggestions(
+                                        quickSuggestions,
+                                        results,
+                                        applicationContext.hideHiddenCollections,
+                                    );
 
-                                quickSuggestions['focusKeys'] = getQuickSuggestionsFocusKeys(quickSuggestions, true);
-                                setSearchSuggestions(quickSuggestions);
+                                    quickSuggestions['focusKeys'] = getQuickSuggestionsFocusKeys(quickSuggestions, true);
+                                    setSearchSuggestions(quickSuggestions);
+                                }
+                            } else {
+                                alert('There is some problem in search.');
                             }
                         });
                     }
@@ -384,39 +398,51 @@ const useGlobalSearchAction = () => {
     };
 
     const checkForHiddenCollection = (fullSearchResults) => {
-        if (applicationContext.hideHiddenCollections) {
-            if (fullSearchResults.byFileNames.length > 0) {
-                fullSearchResults.byFileNames = fullSearchResults.byFileNames.filter((item) => !item.isHidden);
-            }
-            if (fullSearchResults.byTitles.length > 0) {
-                fullSearchResults.byTitles = fullSearchResults.byTitles.filter((item) => !item.isHidden);
-            }
-            if (fullSearchResults.byTags.length > 0) {
-                fullSearchResults.byTags = fullSearchResults.byTags.filter((item) => !item.isHidden);
-            }
-            fullSearchResults.totalCount =
-                fullSearchResults.byFileNames.length + fullSearchResults.byTitles.length + fullSearchResults.byTags.length;
+        if (!applicationContext.hideHiddenCollections) return fullSearchResults;
 
-            return fullSearchResults;
-        } else {
-            return fullSearchResults;
+        if (fullSearchResults.byFileNames.length > 0) {
+            fullSearchResults.byFileNames = fullSearchResults.byFileNames.filter((item) => !item.isHidden);
         }
+        if (fullSearchResults.byTitles.length > 0) {
+            fullSearchResults.byTitles = fullSearchResults.byTitles.filter((item) => !item.isHidden);
+        }
+        if (fullSearchResults.byTags.length > 0) {
+            fullSearchResults.byTags = fullSearchResults.byTags.filter((item) => !item.isHidden);
+        }
+        if (fullSearchResults.byContent.length > 0) {
+            fullSearchResults.byContent = fullSearchResults.byContent.filter((item) => !item.isHidden);
+        }
+
+        fullSearchResults.totalCount =
+            fullSearchResults.byFileNames.length +
+            fullSearchResults.byTitles.length +
+            fullSearchResults.byTags.length +
+            fullSearchResults.byContent.length;
+
+        return fullSearchResults;
     };
 
     const fullSearch = (searchText) => {
         if (searchText !== '') {
             resetFocusPointer(defaultFocusPointer);
+            setIsSearchInProgress(true);
 
-            window.api.getSearchResults(searchText, false).then((results) => {
-                if (results) {
-                    window.api.send(ipcChannels.NOTIFY_MAIN_PROCESS, {
-                        event: rendererEvents.SEARCH_HISTORY_ADD,
-                        searchText: searchText,
-                    });
-                    cacheHistoryItems();
+            window.api.getSearchResults(searchText, false).then((response) => {
+                if (response.status === responseStatus.SUCCESS) {
+                    const results = response.data;
+                    if (results) {
+                        window.api.send(ipcChannels.NOTIFY_MAIN_PROCESS, {
+                            event: rendererEvents.SEARCH_HISTORY_ADD,
+                            searchText: searchText,
+                        });
+                        cacheHistoryItems();
 
-                    setFullSearchResults(checkForHiddenCollection(results));
+                        setFullSearchResults(checkForHiddenCollection(results));
+                    } else {
+                        setIsSearchInProgress(false);
+                    }
                 }
+                setIsSearchInProgress(false);
             });
         }
     };
@@ -593,6 +619,7 @@ const useGlobalSearchAction = () => {
         currentFocusPointer,
         setCurrentFocusPointer,
         correctedSearchText,
+        isSearchInProgress,
     };
 };
 export default useGlobalSearchAction;

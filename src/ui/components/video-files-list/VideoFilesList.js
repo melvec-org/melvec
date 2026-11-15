@@ -129,7 +129,8 @@ const getPreviousGridSelectionId = (list, selectedItemId, itemsPerRow) => {
  * @param {Function} props.onListItemEnterPress - Called when Enter is pressed on an item.
  * @param {string} [props.listName=''] - Cache key used to remember last selected item for the list.
  * @param {boolean} [props.isExternal=false] - Whether items come from an external source path.
- * @param {Object} [props.preSelectedItem] - Optional item to force as selected.
+ * @param {Object} [props.selectedItem] - Optional currently selected item.
+ * @param {Object} [props.searchSelectedItem] - Optional item selected from search/navigation and should be scrolled into view.
  * @param {Function} props.onMediaDelete - Called when Delete/Backspace is pressed. Receives a single id or array of ids in bulk mode.
  * @param {Function} [props.onBulkSelectionChange] - Called with an array of selected ids whenever bulk selection changes. Called with [] when bulk mode exits.
  * @returns {JSX.Element} Video files list UI.
@@ -141,7 +142,8 @@ const VideoFilesList = ({
     onListItemEnterPress,
     listName = '',
     isExternal = false,
-    preSelectedItem,
+    selectedItem,
+    searchSelectedItem,
     onMediaDelete,
     onBulkSelectionChange,
 }) => {
@@ -251,12 +253,44 @@ const VideoFilesList = ({
             setSelectedItemId(list[0]?.id);
         }
     }, [listName]);
+    /**
+     * Scrolls a rendered media list item into view.
+     *
+     * The lookup uses the item's `data-id` instead of the selected CSS class because
+     * search/navigation selection can happen before React has applied the selected
+     * class to the DOM.
+     *
+     * @param {string|number} itemId - Media item id to locate in the rendered list.
+     */
+    const scrollItemIntoView = (itemId) => {
+        const selectedElement = Array.from(listRef.current?.children || []).find((item) => item.dataset.id === String(itemId));
+
+        selectedElement?.scrollIntoView({
+            block: 'center',
+            inline: 'nearest',
+            behavior: 'smooth',
+        });
+    };
 
     useEffect(() => {
-        if (preSelectedItem) {
-            setSelectedItemId(preSelectedItem.id);
+        if (selectedItem) {
+            setSelectedItemId(selectedItem.id);
         }
-    }, [preSelectedItem]);
+    }, [selectedItem]);
+
+    useEffect(() => {
+        if (!searchSelectedItem) return;
+
+        setSelectedItemId(searchSelectedItem.id);
+
+        // Defer the scroll by one macrotask so collection/list layout changes can settle
+        // after navigation from search or another screen.
+        const scrollTimeoutId = setTimeout(() => {
+            scrollItemIntoView(searchSelectedItem.id);
+        }, 1);
+
+        return () => clearTimeout(scrollTimeoutId);
+    }, [searchSelectedItem]);
 
     const onImageLoadError = (item) => {
         if (!isExternal) {

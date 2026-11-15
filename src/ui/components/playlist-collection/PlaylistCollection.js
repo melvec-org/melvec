@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import Collections from '../collections/Collections';
 
 import UserPlaylist from './UserPlaylist';
+import PlaylistCollectionList from '__components/collections/PlaylistCollectionList';
 
 const smartPlaylist = [
     {
@@ -74,7 +74,7 @@ const PlaylistCollection = ({ onPlaylistCollectionSelect = null, selectedPlaylis
 
     return (
         <>
-            <Collections
+            <PlaylistCollectionList
                 collection={smartPlaylistsList}
                 collectionType="play"
                 collectionsName={'smartPlaylist'}
@@ -84,7 +84,7 @@ const PlaylistCollection = ({ onPlaylistCollectionSelect = null, selectedPlaylis
             />
             <UserPlaylist selectedItemId={selectedItemId} onCollectionItemClick={onCollectionItemClick}></UserPlaylist>
             {topTagsList.length > 0 && (
-                <Collections
+                <PlaylistCollectionList
                     collection={topTagsList}
                     collectionType="play"
                     collectionsName={'tagsPlaylist'}

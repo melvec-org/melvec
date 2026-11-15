@@ -1,6 +1,6 @@
 export const CANVAS_PADDING = 0;
 
-const MIN_YEAR_SEGMENT_HEIGHT = 32;
+const MIN_YEAR_SEGMENT_HEIGHT = 50;
 const MONTH_STICK_GAP = 3;
 
 /**
@@ -30,9 +30,17 @@ export const getVisibleMonthlyCounts = (yearData) => {
  */
 export const getTimelineLayout = (yearScale = [], availableHeight = 0) => {
     const minimumRequiredHeight = yearScale.length * MIN_YEAR_SEGMENT_HEIGHT;
+
     const drawableHeight = Math.max(minimumRequiredHeight, availableHeight - CANVAS_PADDING * 2);
     const totalMediaCount = yearScale.reduce((sum, yearData) => sum + yearData.mediaCount, 0);
-    const weightedHeight = Math.max(0, drawableHeight - minimumRequiredHeight);
+    let weightedHeight = 0;
+
+    if (minimumRequiredHeight > availableHeight - CANVAS_PADDING * 2) {
+        weightedHeight = minimumRequiredHeight * 0.3;
+    } else {
+        weightedHeight = Math.max(0, drawableHeight - minimumRequiredHeight);
+    }
+
     let y = CANVAS_PADDING;
 
     const yearSegments = yearScale.map((yearData) => {

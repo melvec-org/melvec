@@ -1,6 +1,10 @@
 const { runStoppable, createKillHandle } = require('./process');
 const { getModelPath } = require('../ai-models/models');
 const { getLlamaEmbeddingBinaryPath } = require('./binaryPaths');
+const LRUCache = require('./LRUCache');
+
+const KEYWORD_EMBEDDING_CACHE_SIZE = 10;
+const keywordEmbeddingCache = new LRUCache(KEYWORD_EMBEDDING_CACHE_SIZE);
 
 const llamaEmbeddingBinaryPath = getLlamaEmbeddingBinaryPath();
 
@@ -76,7 +80,29 @@ const generateEmbedding = async (input, options = {}) => {
 };
 
 const generateEmbeddingFromKeywords = async (keywords, options = {}) => {
-    return generateEmbedding(keywords, options);
+    const normalizedKeywords = typeof keywords === 'string' ? keywords.trim() : '';
+
+    if (normalizedKeywords.length === 0) {
+        return [];
+    }
+
+    const modelPath = getModelPath('embeddingModel');
+
+    if (!modelPath) {
+        throw new Error('Embedding model path not found');
+    }
+
+    const cacheKey = `${modelPath}:${normalizedKeywords.toLowerCase()}`;
+    const cachedEmbedding = keywordEmbeddingCache.get(cacheKey);
+
+    if (cachedEmbedding) {
+        return cachedEmbedding;
+    }
+
+    const embedding = await generateEmbedding(normalizedKeywords, options);
+    keywordEmbeddingCache.set(cacheKey, embedding);
+
+    return embedding;
 };
 
 module.exports = {

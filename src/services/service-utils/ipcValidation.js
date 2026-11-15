@@ -25,6 +25,7 @@ const APPLICATION_SETTINGS_VALIDATORS = {
     playlistsSidebar_width: (value) => typeof value === 'number' && Number.isInteger(value),
     currentSelectedPlaylist: (value) => typeof value === 'object' && value !== null && !Array.isArray(value),
     currentSettingsTabIndex: (value) => typeof value === 'number' && Number.isInteger(value),
+    fileCollectionExpandedYears: (value) => typeof value === 'object' && value !== null && !Array.isArray(value),
     isPlaylistAutoPlay: (value) => typeof value === 'boolean',
     isPlaylistShuffle: (value) => typeof value === 'boolean',
     isPlaylistRepeatPlay: (value) => typeof value === 'boolean',

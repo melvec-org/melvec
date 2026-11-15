@@ -1,18 +1,11 @@
 import AddNewPlaylist from '__components/add-playlist/AddNewPlaylist';
-import Collections from '__components/collections/Collections';
+import PlaylistCollectionList from '__components/collections/PlaylistCollectionList';
 import IconButton from '__components/core-components/icon-button/IconButton';
 import { useApplicationContext } from '__contexts/app.context';
 import React, { useState } from 'react';
 
 const CollectionControlButton = ({ onControlClick }) => {
-    return (
-        <IconButton
-            icon="add"
-            title={'Add a new playlist'}
-            onClick={() => onControlClick()}
-            className="collection-header"
-        ></IconButton>
-    );
+    return <IconButton icon="add" title={'Add a new playlist'} onClick={() => onControlClick()} className="collection-header"></IconButton>;
 };
 const UserPlaylist = ({ onCollectionItemClick, selectedItemId }) => {
     const [stateContext] = useApplicationContext();
@@ -26,7 +19,7 @@ const UserPlaylist = ({ onCollectionItemClick, selectedItemId }) => {
 
     return (
         <>
-            <Collections
+            <PlaylistCollectionList
                 collection={stateContext.playlists}
                 collectionType="play"
                 collectionsName={'userPlaylist'}
@@ -35,9 +28,7 @@ const UserPlaylist = ({ onCollectionItemClick, selectedItemId }) => {
                 selectedItemId={selectedItemId}
                 headerControls={<CollectionControlButton onControlClick={() => setIsOpenNewPlaylist(true)} />}
             />
-            {openNewPlaylist && (
-                <AddNewPlaylist onPlaylistAdd={onNewPlaylistAdded} playlists={stateContext.playlists} />
-            )}
+            {openNewPlaylist && <AddNewPlaylist onPlaylistAdd={onNewPlaylistAdded} playlists={stateContext.playlists} />}
         </>
     );
 };
