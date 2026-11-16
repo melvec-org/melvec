@@ -19,7 +19,7 @@ const {
 const { getWatchHistory, getSearchedVideos } = require('../history/actionHistory.service');
 const { getMostViewedVideos } = require('../video-metrics/videoMetrics.service');
 const { getTopRatedVideosList } = require('../video-metrics/videoMetrics.service');
-const { respondSuccess } = require('../service-utils/sendToUI');
+const { respondSuccess, respondError } = require('../service-utils/sendToUI');
 
 const smartListGetMap = {
     mostSearched: getMostSearchedVideos,
@@ -50,15 +50,26 @@ const getNewlyAddedVideosSmartList = () => _getSmartPlaylist('newlyAdded');
 const getRecentlyPlayedVideosSmartList = () => _getSmartPlaylist('recentlyPlayed');
 const getTopRatedVideosSmartList = () => _getSmartPlaylist('topRated');
 
-const getEchoesSmartList = () => {
-    const echoes = getEchoes();
-    const echoesVideoList = echoes.map((item) => {
-        return {
-            year: item.year,
-            videos: item.videos.map((videoId) => getBasicVideoDetailsById(videoId)),
+const getEchoesSmartListService = () => {
+    try {
+        const echoes = getEchoes();
+        if (!echoes) {
+            return respondSuccess('Echoes', null);
+        }
+
+        const echoesVideoList = {
+            period: echoes.period,
+            mediaList: echoes.mediaList.map((item) => {
+                return {
+                    year: item.year,
+                    videos: item.videos.map((videoId) => getBasicVideoDetailsById(videoId)),
+                };
+            }),
         };
-    });
-    return respondSuccess('Echoes', echoesVideoList);
+        return respondSuccess('Echoes', echoesVideoList);
+    } catch (e) {
+        return respondError('Failed to get the echoes');
+    }
 };
 
 /**
@@ -99,7 +110,7 @@ module.exports = {
     getLeastPlayedVideosSmartList,
     getMostSearchedVideosSmartList,
     getTopRatedVideosSmartList,
-    getEchoesSmartList,
+    getEchoesSmartListService,
     forceUpdateSmartLists,
     initSmartPlaylistsService,
 };

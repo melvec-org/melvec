@@ -6,7 +6,7 @@ import PlaylistCollectionList from '__components/collections/PlaylistCollectionL
 const smartPlaylist = [
     {
         id: 'newlyAdded',
-        label: 'Newly added',
+        label: 'Newly Added',
     },
     {
         id: 'topRated',
@@ -18,15 +18,15 @@ const smartPlaylist = [
     },
     {
         id: 'recentlyPlayed',
-        label: 'Recently played',
+        label: 'Recently Played',
     },
     {
         id: 'leastPlayed',
-        label: 'Least played',
+        label: 'Least Played',
     },
     {
         id: 'mostSearched',
-        label: 'Most searched',
+        label: 'Most Searched',
     },
 ];
 
@@ -53,13 +53,14 @@ const PlaylistCollection = ({ onPlaylistCollectionSelect = null, selectedPlaylis
             setTopTagsList(tagsArr);
         });
 
-        window.api.getEchoesSmartList().then((echoes) => {
-            if (echoes[0]) {
+        window.api.getEchoesSmartList().then((response) => {
+            console.log(response);
+            if (response?.data?.mediaList.length > 0) {
                 setSmartPlaylistsList([
                     ...smartPlaylist,
                     {
                         id: 'echoes',
-                        label: 'Echoes',
+                        label: `Echoes of ${response.data.period}`,
                     },
                 ]);
             }

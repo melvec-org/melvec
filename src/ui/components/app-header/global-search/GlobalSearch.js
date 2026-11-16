@@ -451,11 +451,11 @@ const GlobalSearch = () => {
 
             {showResultsPanel && (
                 <div className={style.searchResultsPanel} data-processing={isSearchInProgress ? 'true' : 'false'}>
-                    {searchSuggestions.length > 0 && (
+                    {searchSuggestions?.suggestedKeywords?.length > 0 && (
                         <div className={style.relatedSearch}>
-                            <div className={style.label}>Related Search</div>
+                            <div className={style.label}>Related Search: </div>
                             <div className={style.searchSuggestionList}>
-                                {searchSuggestions.map((item) => (
+                                {searchSuggestions.suggestedKeywords.map((item) => (
                                     <Chip
                                         className={style.suggestedKeywords}
                                         key={item.id}

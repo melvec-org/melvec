@@ -171,43 +171,61 @@ const getTopNMostViewedVideos = (videos, n = 20) => {
 
     return videosWithMeta.slice(0, n);
 };
-// this scanns all videos that were created last year or previous year on the same week as today
-const populateEchoes = (videos = []) => {
-    if (videos.length === 0) {
-        smartPlaylistData.echoes = [];
-        return [];
-    }
-
-    const currentDate = new Date();
-    const currentWeekNumber = getWeekNumber(currentDate);
-    const currentYear = currentDate.getFullYear();
-
+const getEchoesMediaList = (videos, matchesPeriod) => {
     const echoesMap = new Map();
 
     for (const v of videos) {
         const videoYear = parseInt(v.year);
-        if (!videoYear || videoYear >= currentYear) continue;
+        if (!videoYear) continue;
 
         const birthDate = v.birthtimeMs ? new Date(v.birthtimeMs) : null;
-        if (!birthDate) continue;
+        if (!birthDate || !matchesPeriod(birthDate, videoYear)) continue;
 
-        const videoWeekNumber = getWeekNumber(birthDate);
-        if (videoWeekNumber === currentWeekNumber) {
-            if (!echoesMap.has(videoYear)) {
-                echoesMap.set(videoYear, []);
-            }
-            echoesMap.get(videoYear).push(v.id);
+        if (!echoesMap.has(videoYear)) {
+            echoesMap.set(videoYear, []);
         }
+        echoesMap.get(videoYear).push(v.id);
     }
 
-    // Step 2: Convert the map to a sorted array of objects (descending year)
-    const echoes = Array.from(echoesMap.entries())
+    return Array.from(echoesMap.entries())
         .sort((a, b) => b[0] - a[0])
-        .map(([year, vids]) => ({ year, videos: getTopNMostViewedVideos(vids) }));
+        .map(([year, vids]) => ({ year, videos: getTopNMostViewedVideos(vids) }))
+        .filter((item) => item.videos.length > 0);
+};
 
-    smartPlaylistData.echoes = echoes;
+const getEchoesMediaCount = (mediaList) => mediaList.reduce((count, item) => count + item.videos.length, 0);
 
-    return echoes;
+// this scans videos from previous years matching the current week, falling back to the current month
+const populateEchoes = (videos = []) => {
+    if (videos.length === 0) {
+        smartPlaylistData.echoes = null;
+        return null;
+    }
+
+    const currentDate = new Date();
+    const currentWeekNumber = getWeekNumber(currentDate);
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+
+    const weekMediaList = getEchoesMediaList(
+        videos,
+        (birthDate, videoYear) => videoYear < currentYear && getWeekNumber(birthDate) === currentWeekNumber,
+    );
+
+    const echoes =
+        getEchoesMediaCount(weekMediaList) >= 5
+            ? { period: 'This Week', mediaList: weekMediaList }
+            : {
+                  period: 'This Month',
+                  mediaList: getEchoesMediaList(
+                      videos,
+                      (birthDate, videoYear) => videoYear < currentYear && birthDate.getMonth() === currentMonth,
+                  ),
+              };
+
+    smartPlaylistData.echoes = echoes.mediaList.length > 0 ? echoes : null;
+
+    return smartPlaylistData.echoes;
 };
 
 const onVideoDelete = ({ videoId }) => {

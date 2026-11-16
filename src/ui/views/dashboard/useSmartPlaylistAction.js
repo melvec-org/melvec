@@ -65,7 +65,7 @@ const useSmartPlaylistAction = () => {
     const getEchoesVideos = () => {
         window.api.getEchoesSmartList().then((response) => {
             if (response.status === responseStatus.SUCCESS) {
-                setEchoesVideos(response.data);
+                setEchoesVideos(response.data.mediaList);
             }
         });
     };
