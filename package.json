@@ -44,7 +44,16 @@
         "extraResources": [
             {
                 "from": "bin",
-                "to": "bin"
+                "to": "bin",
+                "filter": [
+                    "**/*",
+                    "!mac/x64/**",
+                    "!mac/arm64/**"
+                ]
+            },
+            {
+                "from": "bin/mac/${arch}",
+                "to": "bin/mac/${arch}"
             }
         ],
         "mac": {

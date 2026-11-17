@@ -10,49 +10,61 @@ import BackupSettings from './backup-settings/BackupSettings';
 import Extras from './extras/Extras';
 import DisplaySettings from './display-settings/DisplaySettings';
 import SubjectsSettings from './subjects-settings/SubjectsSettings';
+import { useApplicationContext } from '__contexts/app.context';
 
-let tabsSettings = [
-    {
-        header: 'General',
-        component: <GeneralSettings />,
-    },
-    {
-        header: 'Display',
-        component: <DisplaySettings />,
-    },
-    {
-        header: 'Collections',
-        component: <CollectionSettings />,
-    },
-    {
-        header: 'Tags',
-        component: <TagSettings />,
-    },
-    {
-        header: 'Subjects',
-        component: <SubjectsSettings />,
-    },
-    {
-        header: 'Playlists',
-        component: <PlaylistSettings />,
-    },
-    {
-        header: 'Backup',
-        component: <BackupSettings />,
-    },
-    {
-        header: 'Advanced',
-        component: <AdvancedSettings />,
-    },
+const getTabsSettings = (isAISupported) => {
+    const tabsSettings = [
+        {
+            header: 'General',
+            component: <GeneralSettings />,
+        },
+        {
+            header: 'Display',
+            component: <DisplaySettings />,
+        },
+        {
+            header: 'Collections',
+            component: <CollectionSettings />,
+        },
+        {
+            header: 'Tags',
+            component: <TagSettings />,
+        },
+        {
+            header: 'Playlists',
+            component: <PlaylistSettings />,
+        },
+        {
+            header: 'Backup',
+            component: <BackupSettings />,
+        },
+        {
+            header: 'Advanced',
+            component: <AdvancedSettings />,
+        },
+        {
+            header: 'Extras',
+            component: <Extras />,
+        },
+    ];
 
-    {
-        header: 'Extras',
-        component: <Extras />,
-    },
-];
+    if (isAISupported) {
+        tabsSettings.splice(4, 0, {
+            header: 'Subjects',
+            component: <SubjectsSettings />,
+        });
+    }
+
+    return tabsSettings;
+};
 
 const Settings = () => {
     const [tabIndex, setTabIndex] = useState(0);
+    const [applicationStateContext] = useApplicationContext();
+
+    const userPreferences = applicationStateContext?.userPreferences || null;
+    const isAISupported = Boolean(userPreferences?.isAISupported);
+    const tabsSettings = getTabsSettings(isAISupported);
 
     const onSettingsTabChange = (index) => {
         window.api.setApplicationSettings('currentSettingsTabIndex', index);
@@ -60,7 +72,8 @@ const Settings = () => {
 
     useEffect(() => {
         window.api.getApplicationSettings('currentSettingsTabIndex').then((data) => {
-            setTabIndex(data || 0);
+            const savedTabIndex = data || 0;
+            setTabIndex(savedTabIndex < tabsSettings.length ? savedTabIndex : 0);
         });
     }, []);
     return (

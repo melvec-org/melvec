@@ -17,7 +17,7 @@ const { isProd } = require('./env');
  *
  * Main helpers:
  *
- * - getBundledBinPath(name, checkForArch = false)
+ * - getBundledBinPath(name, checkForArch = true)
  *   Returns a binary path from Electron's packaged resources directory.
  *
  * - getFfmpegPath()
@@ -29,7 +29,7 @@ const { isProd } = require('./env');
  * - getWhisperCliPath()
  *   Returns the whisper-cli executable path.
  *
- * - getAiBinaryPath(binaryName, checkForArch = false)
+ * - getAiBinaryPath(binaryName, checkForArch = true)
  *   Returns a development or production path for app-bundled AI binaries.
  *
  * - getLlamaCompletionBinaryPath()
@@ -60,7 +60,7 @@ function getBundledBinPath(name, checkForArch = false) {
 }
 
 function getFfmpegPath() {
-    if (isProd()) return getBundledBinPath('ffmpeg');
+    if (isProd()) return getBundledBinPath('ffmpeg', true);
 
     const ffmpegStatic = safeRequire('ffmpeg-static');
 
@@ -77,15 +77,16 @@ function getFfprobePath() {
 function getWhisperCliPath() {
     const exeName = process.platform === 'win32' ? 'whisper-cli.exe' : 'whisper-cli';
     const platformDir = process.platform === 'darwin' ? 'mac' : process.platform;
+    const archDir = process.arch;
 
     if (isProd()) {
-        return path.join(process.resourcesPath, 'bin', platformDir, exeName);
+        return path.join(process.resourcesPath, 'bin', platformDir, archDir, exeName);
     }
 
-    return path.join(__dirname, '../../../bin', platformDir, exeName);
+    return path.join(__dirname, '../../../bin', platformDir, archDir, exeName);
 }
 
-function getAiBinaryPath(binaryName, checkForArch = false) {
+function getAiBinaryPath(binaryName, checkForArch = true) {
     if (isProd()) {
         return getBundledBinPath(binaryName, checkForArch);
     }
