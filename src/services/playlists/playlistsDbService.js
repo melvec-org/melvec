@@ -172,62 +172,6 @@ const getVideoIdsByPlaylist = (playlistId) => {
     }
 };
 
-// Get videos by playlist
-const getVideosByPlaylist = (playlistId) => {
-    ensureDbInitialized();
-    validateId(playlistId, 'playlistId');
-
-    try {
-        if (!checkPlaylistExists(playlistId)) {
-            throw new Error(`Playlist ${playlistId} does not exist`);
-        }
-
-        let videoIds = playlistsCache.get(playlistId);
-        if (!videoIds) {
-            const stmt = db.prepare(`
-                SELECT video_id FROM playlists_videos
-                WHERE playlist_id = ?
-                ORDER BY order_index ASC
-            `);
-            videoIds = stmt.all(playlistId).map((row) => row.video_id);
-            playlistsCache.set(playlistId, videoIds);
-        }
-
-        if (videoIds.length === 0) {
-            return [];
-        }
-
-        const placeholders = videoIds.map(() => '?').join(',');
-        const stmt = db.prepare(`
-            SELECT v.id, v.name, v.birthtimeMs, v.collection_id, v.year, v.title, v.path, v.size, v.duration,
-                   c.label AS coll
-            FROM videos v
-            LEFT JOIN collections c ON v.collection_id = c.id
-            WHERE v.id IN (${placeholders})
-        `);
-        const videos = stmt.all(...videoIds);
-        // Maintain order based on videoIds
-        const videoMap = new Map(videos.map((v) => [v.id, v]));
-        const orderedVideos = videoIds
-            .map((id) => videoMap.get(id))
-            .filter((v) => v)
-            .map((video) => ({
-                id: video.id,
-                name: video.name,
-                birthtimeMs: video.birthtimeMs,
-                collection_id: video.collection_id,
-                coll: video.coll || null,
-                year: video.year,
-                title: video.title,
-                path: video.path,
-                size: video.size,
-                duration: video.duration,
-            }));
-        return orderedVideos;
-    } catch (err) {
-        throw new Error(`Failed to fetch videos for playlist ${playlistId}: ${err.message}`);
-    }
-};
 
 const addVideoToPlaylist = (playlistId, videoId) => {
     ensureDbInitialized();
@@ -543,7 +487,6 @@ module.exports = {
     addPlaylist,
     removePlaylistById,
     renamePlaylistById,
-    getVideosByPlaylist,
     getVideoIdsByPlaylist,
     addVideoToPlaylist,
     addMultipleVideosToPlaylist,

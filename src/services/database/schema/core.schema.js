@@ -37,7 +37,6 @@ const createTables = (db) => {
                 birthtimeMs INTEGER NOT NULL,
                 collection_id TEXT NOT NULL REFERENCES collections(id) ON DELETE RESTRICT,
                 category_id TEXT REFERENCES video_categories(id) ON DELETE SET NULL,
-                year INTEGER NOT NULL,
                 title TEXT NOT NULL,
                 size INTEGER NOT NULL,
                 duration REAL NOT NULL,

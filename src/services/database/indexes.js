@@ -56,8 +56,8 @@ const createIndexes = (db) => {
         CREATE INDEX IF NOT EXISTS idx_video_location_clusters_video
             ON video_location_clusters(video_id);
         
-        CREATE INDEX IF NOT EXISTS idx_videos_year 
-            ON videos(year DESC, birthtimeMs DESC);
+        CREATE INDEX IF NOT EXISTS idx_videos_birthtime
+            ON videos(birthtimeMs DESC);
     `);
 };
 

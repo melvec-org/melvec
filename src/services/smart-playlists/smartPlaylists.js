@@ -175,11 +175,11 @@ const getEchoesMediaList = (videos, matchesPeriod) => {
     const echoesMap = new Map();
 
     for (const v of videos) {
-        const videoYear = parseInt(v.year);
-        if (!videoYear) continue;
-
         const birthDate = v.birthtimeMs ? new Date(v.birthtimeMs) : null;
-        if (!birthDate || !matchesPeriod(birthDate, videoYear)) continue;
+        if (!birthDate) continue;
+
+        const videoYear = birthDate.getFullYear();
+        if (!matchesPeriod(birthDate, videoYear)) continue;
 
         if (!echoesMap.has(videoYear)) {
             echoesMap.set(videoYear, []);
@@ -195,6 +195,22 @@ const getEchoesMediaList = (videos, matchesPeriod) => {
 
 const getEchoesMediaCount = (mediaList) => mediaList.reduce((count, item) => count + item.videos.length, 0);
 
+const isPastYearEcho = (videoYear, currentYear) => videoYear < currentYear;
+
+const isSameWeekEcho = (birthDate, videoYear, currentDate) => {
+    const currentYear = currentDate.getFullYear();
+    const currentWeekNumber = getWeekNumber(currentDate);
+
+    return isPastYearEcho(videoYear, currentYear) && getWeekNumber(birthDate) === currentWeekNumber;
+};
+
+const isSameMonthEcho = (birthDate, videoYear, currentDate) => {
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+
+    return isPastYearEcho(videoYear, currentYear) && birthDate.getMonth() === currentMonth;
+};
+
 // this scans videos from previous years matching the current week, falling back to the current month
 const populateEchoes = (videos = []) => {
     if (videos.length === 0) {
@@ -203,24 +219,17 @@ const populateEchoes = (videos = []) => {
     }
 
     const currentDate = new Date();
-    const currentWeekNumber = getWeekNumber(currentDate);
-    const currentMonth = currentDate.getMonth();
-    const currentYear = currentDate.getFullYear();
-
-    const weekMediaList = getEchoesMediaList(
-        videos,
-        (birthDate, videoYear) => videoYear < currentYear && getWeekNumber(birthDate) === currentWeekNumber,
-    );
+    performance.mark('task-start');
+    const weekMediaList = getEchoesMediaList(videos, (birthDate, videoYear) => isSameWeekEcho(birthDate, videoYear, currentDate));
+    performance.mark('task-end');
+    performance.measure('Custom Task', 'task-start', 'task-end');
 
     const echoes =
         getEchoesMediaCount(weekMediaList) >= 5
             ? { period: 'This Week', mediaList: weekMediaList }
             : {
                   period: 'This Month',
-                  mediaList: getEchoesMediaList(
-                      videos,
-                      (birthDate, videoYear) => videoYear < currentYear && birthDate.getMonth() === currentMonth,
-                  ),
+                  mediaList: getEchoesMediaList(videos, (birthDate, videoYear) => isSameMonthEcho(birthDate, videoYear, currentDate)),
               };
 
     smartPlaylistData.echoes = echoes.mediaList.length > 0 ? echoes : null;

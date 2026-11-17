@@ -25,6 +25,7 @@ const {
 } = require('./videoLibraryDbService');
 const { addCollection, doesCollectionExists } = require('../collections/collectionsDbService');
 const { getRelativeMediaPath, getAbsoluteMediaPath } = require('../service-utils/mediaPath');
+const { getYearFromTime } = require('../service-utils/timeUtils');
 
 const { resetMetaData } = require('../video-metadata/metaDataDbService');
 const responseStatus = require('../../constants/responseStatus');
@@ -35,11 +36,12 @@ const { extractGPSData } = require('../service-utils/extractGPSData');
 const onImportFileSuccess = (data) => {
     if (data.mediaType !== mediaTypes.VIDEO) return;
     const videoStats = Object.assign({}, data.completedMediaStats);
+    const collectionYear = getYearFromTime(videoStats.birthtimeMs);
 
     const collectionExists = doesCollectionExists(videoStats.collection_id);
 
     if (!collectionExists) {
-        addCollection(videoStats.collection_id, videoStats.coll, videoStats.year);
+        addCollection(videoStats.collection_id, videoStats.coll, collectionYear);
     }
 
     const doesVideoExist = checkForDuplicate(videoStats.id);

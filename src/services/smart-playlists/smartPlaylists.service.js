@@ -1,4 +1,4 @@
-const { getBasicVideoDetailsById, getAllVideos } = require('../video-library/videoLibrary.service');
+const { getBasicVideoDetailsById } = require('../video-library/videoLibrary.service');
 const {
     getMostSearchedVideos,
     getLeastPlayedVideos,
@@ -20,6 +20,8 @@ const { getWatchHistory, getSearchedVideos } = require('../history/actionHistory
 const { getMostViewedVideos } = require('../video-metrics/videoMetrics.service');
 const { getTopRatedVideosList } = require('../video-metrics/videoMetrics.service');
 const { respondSuccess, respondError } = require('../service-utils/sendToUI');
+
+const { getAllVideoShortInfoFromDb } = require('../video-library/videoLibraryDbService');
 
 const smartListGetMap = {
     mostSearched: getMostSearchedVideos,
@@ -50,11 +52,13 @@ const getNewlyAddedVideosSmartList = () => _getSmartPlaylist('newlyAdded');
 const getRecentlyPlayedVideosSmartList = () => _getSmartPlaylist('recentlyPlayed');
 const getTopRatedVideosSmartList = () => _getSmartPlaylist('topRated');
 
+const EMPTY_ECHOES_SMART_LIST = { period: null, mediaList: [] };
+
 const getEchoesSmartListService = () => {
     try {
         const echoes = getEchoes();
         if (!echoes) {
-            return respondSuccess('Echoes', null);
+            return respondSuccess('Echoes', EMPTY_ECHOES_SMART_LIST);
         }
 
         const echoesVideoList = {
@@ -77,10 +81,12 @@ const getEchoesSmartListService = () => {
  */
 const forceUpdateSmartLists = () => {
     // updateNewlyAdded videos
-    const allVideos = getAllVideos();
+
+    const allVideos = getAllVideoShortInfoFromDb();
     updateNewlyAddedVideos(allVideos);
 
     // update echoes
+
     populateEchoes(allVideos);
 
     // update recently played videos

@@ -242,66 +242,6 @@ const getImageIdsByTag = (tagId) => {
 };
 
 /**
- * Returns ordered video records associated with a tag.
- *
- * @param {string} tagId - Tag id.
- * @throws {Error} When the tag does not exist or the query fails.
- * @returns {Array<{id: string, name: string, birthtimeMs: number, collection_id: string|null, coll: string|null, year: number|null, title: string|null, path: string, size: number, duration: number|null}>}
- * Ordered list of video summaries for the tag.
- */
-const getVideosByTag = (tagId) => {
-    ensureDbInitialized();
-    validateId(tagId, 'tagId');
-
-    try {
-        if (!checkTagExists(tagId)) {
-            throw new Error(`Tag ${tagId} does not exist`);
-        }
-
-        const stmt1 = db.prepare(`
-                SELECT video_id FROM tags_videos
-                WHERE tag_id =?
-                ORDER BY added_at ASC
-            `);
-        let videoIds = stmt1.all(tagId).map((row) => row.video_id);
-
-        if (videoIds.length === 0) {
-            return [];
-        }
-
-        const placeholders = videoIds.map(() => '?').join(',');
-        const stmt = db.prepare(`
-            SELECT v.id, v.name, v.birthtimeMs, v.collection_id, v.year, v.title, v.path, v.size, v.duration,
-                   c.label AS coll
-            FROM videos v
-            LEFT JOIN collections c ON v.collection_id = c.id
-            WHERE v.id IN (${placeholders})
-        `);
-        const videos = stmt.all(...videoIds);
-        const videoMap = new Map(videos.map((v) => [v.id, v]));
-        const orderedVideos = videoIds
-            .map((id) => videoMap.get(id))
-            .filter((v) => v)
-            .map((video) => ({
-                id: video.id,
-                name: video.name,
-                birthtimeMs: video.birthtimeMs,
-                collection_id: video.collection_id,
-                coll: video.coll || null,
-                year: video.year,
-                title: video.title,
-                path: video.path,
-                size: video.size,
-                duration: video.duration,
-            }));
-
-        return orderedVideos;
-    } catch (err) {
-        throw new Error(`Failed to fetch videos for tag ${tagId}: ${err.message}`);
-    }
-};
-
-/**
  * Associates a video with a tag.
  *
  * @param {string} tagId - Tag id.
@@ -864,7 +804,6 @@ module.exports = {
     renameTagById,
     addVideoToTag,
     getVideoIdsByTag,
-    getVideosByTag,
     removeVideoFromTag,
     getTagsByVideoId,
     getTags,

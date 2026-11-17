@@ -5,7 +5,6 @@ const {
     initializeDb,
     getPlaylists,
     getPlaylistById,
-    getVideosByPlaylist,
     getVideoIdsByPlaylist,
     getPlaylistsByVideoId,
     addVideoToPlaylist,
@@ -65,7 +64,6 @@ const initPlaylistsService = () => {
 module.exports = {
     initPlaylistsService,
     getPlaylists,
-    getVideosByPlaylist,
     getPlaylistsByVideoId,
     getMostUsedPlaylists,
     getVideoIdsByPlaylist,

@@ -156,7 +156,6 @@ const importVideoToLibrary = async (mediaStats = {}, targetLibrary = '') => {
         size: mediaStats.size,
         coll: collectionName,
         collection_id: collection_id,
-        year: collectionYear,
         duration: videoDuration,
         has_preview: false,
     };
@@ -220,10 +219,14 @@ const importImageToLibrary = async (mediaStats = {}, targetLibrary = '') => {
 
     const isDuplicateImage = checkForDuplicateImage(imageId);
     if (isDuplicateImage) {
+        const { getImageDetailsById } = require('../image-library/imageLibraryDbService');
+        const originalImage = getImageDetailsById(imageId);
+        const originalImagePath = originalImage?.path ? path.join(getLibDir(), originalImage.path) : 'unknown';
+
         return {
             status: 'na',
             fileStats: mediaStats,
-            errorDetails: `Image ${mediaStats.path} already exists in the library`,
+            errorDetails: `Image ${mediaStats.path} already exists in the library. Original media: ${originalImagePath}`,
             mediaType: mediaTypes.IMAGE,
         };
     }
@@ -316,10 +319,14 @@ const importAudioToLibrary = async (mediaStats = {}, targetLibrary = '') => {
 
     const isDuplicateAudio = checkForDuplicateAudio(audioId);
     if (isDuplicateAudio) {
+        const { getAudioDetailsById } = require('../audio-library/audioLibraryDbService');
+        const originalAudio = getAudioDetailsById(audioId);
+        const originalAudioPath = originalAudio?.path ? path.join(getLibDir(), originalAudio.path) : 'unknown';
+
         return {
             status: 'na',
             fileStats: mediaStats,
-            errorDetails: `Audio ${mediaStats.path} already exists in the library`,
+            errorDetails: `Audio ${mediaStats.path} already exists in the library. Original media: ${originalAudioPath}`,
             mediaType: mediaTypes.AUDIO,
         };
     }

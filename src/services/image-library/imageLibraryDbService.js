@@ -154,6 +154,7 @@ const checkForDuplicateImage = (imageId) => {
         `);
 
         const result = stmt.get(normalizedImageId);
+
         return !!result;
     } catch (err) {
         throw new Error(`Failed to check duplicate image ${normalizedImageId}: ${err.message}`);
