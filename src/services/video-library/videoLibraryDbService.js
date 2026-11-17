@@ -3,6 +3,7 @@ const serviceEventBus = require('../service-utils/serviceEventBus');
 const interServiceEvents = require('../../events/interServiceEvents');
 const { getDb } = require('../database/database');
 const { getRelativeMediaPath } = require('../service-utils/mediaPath');
+const { getYearFromTime } = require('../service-utils/timeUtils');
 const faceExtractionStatus = require('../../constants/faceExtractionStatus');
 
 const CACHE_SIZE = 2000;
@@ -22,13 +23,14 @@ const getAllVideos = () => {
 
     try {
         const stmt = db.prepare(`
-            SELECT v.id, v.name, v.birthtimeMs, v.collection_id, v.category_id, v.year, v.title, v.size, v.duration, v.source, v.is_nsfw, v.has_preview,
+            SELECT v.id, v.name, v.birthtimeMs, v.collection_id, v.category_id, v.title, v.size, v.duration, v.source, v.is_nsfw, v.has_preview,
                    c.label AS coll
             FROM videos v
             LEFT JOIN collections c ON v.collection_id = c.id`);
 
         return stmt.all().map((video) => {
-            const relPath = getRelativeMediaPath(video.year, video.coll, video.name, video.id);
+            const year = getYearFromTime(video.birthtimeMs);
+            const relPath = getRelativeMediaPath(year, video.coll, video.name, video.id);
             video.path = relPath;
             return video;
         });
@@ -69,7 +71,7 @@ const getVideoDetailsById = (id, skipCache = false) => {
     // Query database
     try {
         const stmt = db.prepare(`
-            SELECT v.id, v.name, v.birthtimeMs, v.collection_id, v.category_id, v.year, v.title, v.size, v.duration, v.source, v.is_nsfw, v.has_preview,
+            SELECT v.id, v.name, v.birthtimeMs, v.collection_id, v.category_id, v.title, v.size, v.duration, v.source, v.is_nsfw, v.has_preview,
                    v.latitude, v.longitude, v.face_extraction_status,
                    c.label AS coll
             FROM videos v
@@ -80,6 +82,7 @@ const getVideoDetailsById = (id, skipCache = false) => {
         const video = stmt.get(id);
 
         if (video) {
+            video.year = getYearFromTime(video.birthtimeMs);
             video.path = getRelativeMediaPath(video.year, video.coll, video.name, video.id);
             videoCache.set(id, video);
         }
@@ -114,10 +117,10 @@ const checkForDuplicate = (id) => {
  */
 const addVideo = (video) => {
     ensureDbInitialized();
-    const { id, name, birthtimeMs, collection_id, year, title = '', size, duration = 0, source = 'local' } = video;
+    const { id, name, birthtimeMs, collection_id, title = '', size, duration = 0, source = 'local' } = video;
 
     // Validate required fields
-    const requiredFields = { id, name, birthtimeMs, collection_id, year, title, size, duration };
+    const requiredFields = { id, name, birthtimeMs, collection_id, title, size, duration };
     for (const [key, value] of Object.entries(requiredFields)) {
         if (value === null || value === undefined) {
             throw new Error(`Field ${key} cannot be null or undefined`);
@@ -134,14 +137,13 @@ const addVideo = (video) => {
     }
 
     // Validate INTEGER fields
-    const integerFields = { birthtimeMs, year, size };
+    const integerFields = { birthtimeMs, size };
     for (const [key, value] of Object.entries(integerFields)) {
         if (!Number.isInteger(value)) {
             throw new Error(`Field ${key} must be an integer`);
         }
     }
 
-    if (year < 0) throw new Error('Year must be non-negative');
     if (size < 0) throw new Error('Size must be non-negative');
     if (duration < 0) throw new Error('Duration must be 0 or positive');
     if (birthtimeMs < 0) throw new Error('birthtimeMs must be non-negative');
@@ -150,13 +152,13 @@ const addVideo = (video) => {
         throw new Error(`Duplicate ID: ${id} already exists`);
     }
     const stmt = db.prepare(`
-    INSERT INTO videos (id, name, birthtimeMs, collection_id, year, title,  size, duration, source,  is_nsfw)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO videos (id, name, birthtimeMs, collection_id, title,  size, duration, source,  is_nsfw)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
     try {
         db.transaction(() => {
-            stmt.run(id, name, birthtimeMs, collection_id, year, title, size, duration, source, 0);
+            stmt.run(id, name, birthtimeMs, collection_id, title, size, duration, source, 0);
         })();
         return id;
     } catch (err) {
@@ -166,10 +168,10 @@ const addVideo = (video) => {
 
 const updateVideoDetails = (video) => {
     ensureDbInitialized();
-    const { id, name, birthtimeMs, collection_id, year, title, size, duration, source, is_nsfw } = video;
+    const { id, name, birthtimeMs, collection_id, title, size, duration, source, is_nsfw } = video;
 
     // Validate required fields
-    const requiredFields = { id, name, birthtimeMs, collection_id, year, title, size, duration, source, is_nsfw };
+    const requiredFields = { id, name, birthtimeMs, collection_id, title, size, duration, source, is_nsfw };
     for (const [key, value] of Object.entries(requiredFields)) {
         if (value === null || value === undefined) {
             throw new Error(`Field ${key} cannot be null or undefined`);
@@ -183,20 +185,18 @@ const updateVideoDetails = (video) => {
         }
     }
 
-    const integerFields = { birthtimeMs, year, size };
+    const integerFields = { birthtimeMs, size };
     for (const [key, value] of Object.entries(integerFields)) {
         if (!Number.isInteger(value) || value < 0) {
             throw new Error(`Field ${key} must be a non-negative integer`);
         }
     }
-
     const stmt = db.prepare(`
         UPDATE videos
         SET 
             name = ?, 
             birthtimeMs = ?, 
             collection_id=?, 
-            year = ?, 
             title = ?, 
             size = ?, 
             duration = ?,
@@ -208,7 +208,7 @@ const updateVideoDetails = (video) => {
 
     try {
         const info = db.transaction(() => {
-            const result = stmt.run(name, birthtimeMs, collection_id, year, title, size, duration, source, is_nsfw, id);
+            const result = stmt.run(name, birthtimeMs, collection_id, title, size, duration, source, is_nsfw, id);
             return result;
         })();
 
