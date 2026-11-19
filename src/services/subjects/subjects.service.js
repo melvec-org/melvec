@@ -173,11 +173,11 @@ const deleteSubjectCandidatesService = async (...args) => {
  * Re-extracts faces for a single media item, regardless of whether faces
  * have already been extracted for it.
  *
- * @param {string} mediaId   - ID of the video or image to process.
  * @param {string} mediaType - mediaTypes.VIDEO or mediaTypes.IMAGE.
+ * @param {string} mediaId   - ID of the video or image to process.
  * @returns {object} respondSuccess with face count, or respondError on failure.
  */
-const extractFacesFromMediaService = async (mediaId, mediaType) => {
+const extractFacesFromMediaService = async (mediaType, mediaId) => {
     try {
         const result = await extractFacesFromMedia(mediaId, mediaType);
         return respondSuccess(`Face extraction complete. ${result.faceCount} face(s) found.`, {

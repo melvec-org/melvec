@@ -52,7 +52,6 @@ module.exports = {
     pauseExportingVideosService: pauseExportingVideos,
     resumeExportingVideosService: resumeExportingVideos,
     stopExportingVideosService: stopExportingVideos,
-    stopExportingVideosService: stopExportingVideos,
 
     // metadata
     importAllMetaDataService,

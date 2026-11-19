@@ -31,20 +31,28 @@ const responseStatus = require('../../constants/responseStatus');
 const { extractGPSData } = require('../service-utils/extractGPSData');
 
 /**
- * Minimum gap in ms between consecutive file imports.
- * Acts as a yield point to keep the event loop responsive during bulk imports.
- * The actual per-file cost is dominated by generateMediaId, getVideoDuration,
- * and thumbnail generation — not this delay.
+ * Small per-file yield to keep the event loop responsive during bulk imports.
+ * Real thermal control is handled by the batch cooldown below.
  */
-const TIME_BETWEEN_IMPORTS = 5; // ms
+const TIME_BETWEEN_IMPORTS = 2; // ms
+
+/**
+ * Number of attempted media imports before pausing the import loop.
+ * This throttles continuous hashing, file movement, metadata extraction, and thumbnail generation.
+ */
+const IMPORT_COOLDOWN_BATCH_SIZE = 100;
+
+/**
+ * Cooldown duration after each import batch.
+ */
+const IMPORT_COOLDOWN_MS = 2000;
 
 /**
  * Number of files processed before flushing the non-imported list to disk.
- * Writing on every file is expensive at scale; this batches writes while still
- * preserving crash-recovery safety (worst case: up to N-1 files re-imported on restart,
- * which is safe because duplicate checks handle re-imports gracefully).
+ * For video-heavy imports, 100 keeps crash-recovery loss bounded while avoiding
+ * a full pending-import JSON rewrite after every few files.
  */
-const NON_IMPORTED_LIST_FLUSH_INTERVAL = 5; // write to disk every N files
+const NON_IMPORTED_LIST_FLUSH_INTERVAL = 100; // write to disk every N files
 
 /**
  * Imports a single video file into the target library.
@@ -497,6 +505,7 @@ const importMedia = async (mediaList, libraryPath = '') => {
 
     let importErrorCount = 0;
     let importedMediaCount = 0;
+    let attemptedMediaCount = 0;
     let filesSinceLastFlush = 0;
     let hasEmittedStart = false;
 
@@ -516,6 +525,8 @@ const importMedia = async (mediaList, libraryPath = '') => {
         }
 
         const operationData = await importMediaToLibrary(mediaList[i], libraryPath);
+        attemptedMediaCount++;
+
         if (operationData.status === responseStatus.SUCCESS) {
             if (operationData.mediaType === mediaTypes.VIDEO) {
                 try {
@@ -590,6 +601,18 @@ const importMedia = async (mediaList, libraryPath = '') => {
                 updateNonImportedList(mediaList);
                 filesSinceLastFlush = 0;
             }
+        }
+
+        if (attemptedMediaCount % IMPORT_COOLDOWN_BATCH_SIZE === 0 && i < mediaList.length - 1) {
+            emitToUI(mainThreadEvents.ON_IMPORT_PROGRESS, {
+                data: {
+                    totalCount: mediaList.length,
+                    currentIndex: i + 1,
+                },
+                message: `Cooling down imports for ${IMPORT_COOLDOWN_MS / 1000} seconds...`,
+            });
+
+            await timeout(IMPORT_COOLDOWN_MS);
         }
     }
 

@@ -54,7 +54,6 @@ const PlaylistCollection = ({ onPlaylistCollectionSelect = null, selectedPlaylis
         });
 
         window.api.getEchoesSmartList().then((response) => {
-            console.log(response);
             if (response?.data?.mediaList.length > 0) {
                 setSmartPlaylistsList([
                     ...smartPlaylist,

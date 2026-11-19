@@ -1,15 +1,6 @@
 const serviceMethods = require('../../../constants/serviceMethods');
 const { validateSubjectCandidateType } = require('../../service-utils/ipcValidation');
 
-const getSubjectCandidateClustersHandler = async (candidateType) => {
-    const validationError = validateSubjectCandidateType(candidateType);
-    if (validationError) {
-        return validationError;
-    }
-
-    return getSubjectCandidateClustersService(candidateType);
-};
-
 const {
     startFaceExtractionService,
     stopFaceExtractionService,
@@ -28,11 +19,20 @@ const {
     getSubjectCandidateClustersService,
 } = require('../../subjects/subjects.service');
 
+const getSubjectCandidateClustersHandler = async (candidateType) => {
+    const validationError = validateSubjectCandidateType(candidateType);
+    if (validationError) {
+        return validationError;
+    }
+
+    return getSubjectCandidateClustersService(candidateType);
+};
+
 const subjectsServiceHandlers = [
     [serviceMethods.SUBJECTS_START_FACE_EXTRACTION, async () => startFaceExtractionService()],
     [serviceMethods.SUBJECTS_STOP_FACE_EXTRACTION, async () => stopFaceExtractionService()],
     [serviceMethods.SUBJECTS_GET_PENDING_FACE_EXTRACTION_COUNT, async () => getPendingFaceExtractionCountService()],
-    [serviceMethods.SUBJECTS_EXTRACT_FACES_FROM_MEDIA, async (mediaId, mediaType) => extractFacesFromMediaService(mediaId, mediaType)],
+    [serviceMethods.SUBJECTS_EXTRACT_FACES_FROM_MEDIA, async (mediaType, mediaId) => extractFacesFromMediaService(mediaType, mediaId)],
     [serviceMethods.SUBJECTS_DELETE_FACE, async (faceId) => deleteFaceService(faceId)],
     [serviceMethods.SUBJECTS_DELETE_CANDIDATE_CLUSTER, async (candidateIds) => deleteSubjectCandidateClusterService(candidateIds)],
     [

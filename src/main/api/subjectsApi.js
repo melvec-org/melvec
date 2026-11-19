@@ -5,7 +5,7 @@ const subjectsApi = (ipcRenderer) => ({
     startFaceExtraction: () => ipcRenderer.invoke(serviceMethods.SUBJECTS_START_FACE_EXTRACTION),
     stopFaceExtraction: () => ipcRenderer.invoke(serviceMethods.SUBJECTS_STOP_FACE_EXTRACTION),
     getPendingFaceExtractionCount: () => ipcRenderer.invoke(serviceMethods.SUBJECTS_GET_PENDING_FACE_EXTRACTION_COUNT),
-    extractFacesFromMedia: (mediaId, mediaType) => ipcRenderer.invoke(serviceMethods.SUBJECTS_EXTRACT_FACES_FROM_MEDIA, mediaId, mediaType),
+    extractFacesFromMedia: (mediaType, mediaId) => ipcRenderer.invoke(serviceMethods.SUBJECTS_EXTRACT_FACES_FROM_MEDIA, mediaType, mediaId),
     // Face management : delete operations
     deleteFace: (faceId) => ipcRenderer.invoke(serviceMethods.SUBJECTS_DELETE_FACE, faceId),
     deleteSubjectCandidateCluster: (candidateIds) => ipcRenderer.invoke(serviceMethods.SUBJECTS_DELETE_CANDIDATE_CLUSTER, candidateIds),

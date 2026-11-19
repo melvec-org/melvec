@@ -51,7 +51,7 @@ const useEditableSubjects = (subjects, mediaId, mediaType, onSubjectsChange) => 
         setIsExtractingSubjects(true);
 
         try {
-            const response = await window.api.extractFacesFromMedia(mediaId, mediaType);
+            const response = await window.api.extractFacesFromMedia(mediaType, mediaId);
 
             if (response.status !== responseStatus.SUCCESS) {
                 alert(response.message);

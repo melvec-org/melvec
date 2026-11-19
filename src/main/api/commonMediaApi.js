@@ -2,9 +2,9 @@ const serviceMethods = require('../../constants/serviceMethods');
 const commonMediaApi = (ipcRenderer) => ({
     renameMediaFile: (mediaType, mediaId, oldFileName, newFileName) =>
         ipcRenderer.invoke(serviceMethods.MEDIA_RENAME_FILE, mediaType, mediaId, oldFileName, newFileName),
-    updateMediaTitle: (mediaType, videoId, title) => ipcRenderer.invoke(serviceMethods.MEDIA_UPDATE_TITLE, mediaType, videoId, title),
-    updateMediaNsfwStatus: (mediaType, videoId, isNsfw) =>
-        ipcRenderer.invoke(serviceMethods.MEDIA_UPDATE_NSFW_STATUS, mediaType, videoId, isNsfw),
+    updateMediaTitle: (mediaType, mediaId, title) => ipcRenderer.invoke(serviceMethods.MEDIA_UPDATE_TITLE, mediaType, mediaId, title),
+    updateMediaNsfwStatus: (mediaType, mediaId, isNsfw) =>
+        ipcRenderer.invoke(serviceMethods.MEDIA_UPDATE_NSFW_STATUS, mediaType, mediaId, isNsfw),
     bulkRemoveMedia: (mediaList, collectionId, isExternal) =>
         ipcRenderer.invoke(serviceMethods.MEDIA_BULK_REMOVE, mediaList, collectionId, isExternal),
     changeBulkMediaNsfwStatus: (mediaList, isNsfw) => ipcRenderer.invoke(serviceMethods.MEDIA_BULK_UPDATE_NSFW_STATUS, mediaList, isNsfw),

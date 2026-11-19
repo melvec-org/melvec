@@ -21,7 +21,7 @@ const {
 } = require('../../commonMediaService');
 
 const commonMediaServiceHandlers = [
-    [serviceMethods.MEDIA_UPDATE_TITLE, async (mediaType, videoId, title) => updateMediaTitleService(mediaType, videoId, title)],
+    [serviceMethods.MEDIA_UPDATE_TITLE, async (mediaType, mediaId, title) => updateMediaTitleService(mediaType, mediaId, title)],
     [
         serviceMethods.MEDIA_RENAME_FILE,
         async (mediaType, mediaId, oldFileName, newFileName) => {
